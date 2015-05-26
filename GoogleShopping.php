@@ -24,18 +24,6 @@ class GoogleShopping extends BaseModule
     /** @var string */
     const DOMAIN_NAME = 'googleshopping';
 
-    /*
-     * You may now override BaseModuleInterface methods, such as:
-     * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation
-     *
-     * Have fun !
-     */
-
-    public function preActivation(ConnectionInterface $con)
-    {
-
-    }
-
     public static function getModuleId()
     {
         return ModuleQuery::create()->findOneByCode("GoogleShopping")->getId();
