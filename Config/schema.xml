@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<database defaultIdMethod="native" name="thelia"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="../../../../core/vendor/propel/propel/resources/xsd/database.xsd" >
+<database defaultIdMethod="native" name="thelia" namespace="GoogleShopping\Model">
     <!--
     See propel documentation on http://propelorm.org for all information about schema file
 
@@ -26,5 +24,15 @@
         </behavior>
     </table>
     -->
+
+    <table name="googleshopping_associated_category">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="thelia_category_id" type="INTEGER" required="true"/>
+        <column name="google_category" type="VARCHAR" size="255" required="true" />
+        <foreign-key foreignTable="category" name="fk_googleshopping_thelia_category_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="thelia_category_id" />
+        </foreign-key>
+    </table>
+
     <external-schema filename="local/config/schema.xml" referenceOnly="true" />
 </database>

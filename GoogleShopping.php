@@ -12,6 +12,9 @@
 
 namespace GoogleShopping;
 
+use Propel\Runtime\Connection\ConnectionInterface;
+use Thelia\Model\ModuleConfigQuery;
+use Thelia\Model\ModuleQuery;
 use Thelia\Module\BaseModule;
 
 set_include_path(get_include_path() . PATH_SEPARATOR . '/Google/src');
@@ -27,4 +30,23 @@ class GoogleShopping extends BaseModule
      *
      * Have fun !
      */
+
+    public function preActivation(ConnectionInterface $con)
+    {
+
+    }
+
+    public static function getModuleId()
+    {
+        return ModuleQuery::create()->findOneByCode("GoogleShopping")->getId();
+    }
+/*
+    public static function getConfigValue($name)
+    {
+        return ModuleConfigQuery::create()
+            ->filterByModuleId(self::getModuleId())
+            ->findOneByName($name)
+            ->getValue();
+    }
+*/
 }

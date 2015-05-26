@@ -1,0 +1,53 @@
+<div class="row">
+    {default_translation_domain domain='googleshopping.ai'}
+    <div class="col-md-12 general-block-decorator">
+        <div class="col-md-12 title title-without-tabs">
+            {intl l='googleshopping.configuration'}
+        </div>
+        {form name="googleshopping.configuration"}
+            <form method="post" action='{url path="/admin/module/googleshopping/configuration"}'>
+                {form_hidden_fields form=$form}
+                <div class="col-md-12">
+                    <div class="row">
+                        {form_field form=$form field="client_id"}
+                            <div class="form-group {if $error}has-error{/if}">
+                                <label for="{$label_attr.for}">{$label}</label>
+                                <input id="{$label_attr.for}" class="form-control" type="text" name="{$name}" value="{$value}" required/>
+                            </div>
+                        {/form_field}
+
+                        {form_field form=$form field="client_secret"}
+                            <div class="form-group {if $error}has-error{/if}">
+                                <label for="{$label_attr.for}">{$label}</label>
+                                <input id="{$label_attr.for}" class="form-control"  type="text" name="{$name}" value="{$value}" required/>
+                            </div>
+                        {/form_field}
+
+                        {form_field form=$form field="merchant_id"}
+                            <div class="form-group {if $error}has-error{/if}">
+                                <label for="{$label_attr.for}">{$label}</label>
+                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
+                            </div>
+                        {/form_field}
+
+                        {form_field form=$form field="application_name"}
+                            <div class="form-group {if $error}has-error{/if}">
+                                <label for="{$label_attr.for}">{$label}</label>
+                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
+                            </div>
+                        {/form_field}
+
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <button class="btn btn-default btn-primary form-control" type="submit">
+                                <span class="glyphicon glyphicon-check"></span>
+                                {intl l="Save"}
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        {/form}
+    </div>
+</div>
