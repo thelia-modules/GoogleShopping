@@ -29,6 +29,9 @@ class ProductController extends BaseGoogleShoppingController
         $product->setLink('http://gshopping.openstudio-lab.com/?view=product&locale=en_US&product_id=22');
         $product->setTitle('test');
         $product->setAvailability('in stock');
+        $product->setDescription('My desc');
+        $product->setImageLink('http://gshopping.openstudio-lab.com/cache/images/product/6d1696bee7835dd96f75f90fc20b01bf-prod022-1.jpg');
+        $product->setProductType('My category');
 
         $price = new \Google_Service_ShoppingContent_Price();
         $price->setValue('3');
@@ -47,5 +50,7 @@ class ProductController extends BaseGoogleShoppingController
         $product->setShipping(array($shipping));
 
         $result = $this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
+        var_dump($result);
+        die();
     }
 }
