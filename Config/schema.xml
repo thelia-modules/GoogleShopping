@@ -25,7 +25,7 @@
     </table>
     -->
 
-    <table name="googleshopping_associated_category">
+    <table name="googleshopping_taxonomy">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
         <column name="thelia_category_id" type="INTEGER" required="true"/>
         <column name="google_category" type="VARCHAR" size="255" required="true" />

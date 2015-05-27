@@ -1,0 +1,23 @@
+<script>
+
+    $(function() {
+        $("#search-taxonomy").keyup(function(){
+            search = $(this).val();
+            if (search.length > 2) {
+                $.get('{url path="/admin/module/googleshopping/taxonomy"}', function(data) {
+                    var lines = data.split("\n");
+                    var res = "";
+                    for (var i = 0, len = lines.length; i < len; i++) {
+                        var searchUp = search.toUpperCase();
+                        var linesUp = lines[i].toUpperCase();
+                        if (-1 !== linesUp.search(searchUp)) {
+                            res += "<option value='"+lines[i]+"'>"+lines[i]+"</option>";
+                        }
+
+                    }
+                    $("#google-taxonomy").html(res);
+                })
+            }
+        })
+    })
+</script>

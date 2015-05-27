@@ -10,55 +10,55 @@
                 <div class="col-md-12">
                     <div class="row">
                         {form_field form=$form field="client_id"}
-                            <div class="form-group {if $error}has-error{/if}">
+                            <div class="form-group col-md-6 {if $error}has-error{/if}">
                                 <label for="{$label_attr.for}">{$label}</label>
                                 <input id="{$label_attr.for}" class="form-control" type="text" name="{$name}" value="{$value}" required/>
                             </div>
                         {/form_field}
 
                         {form_field form=$form field="client_secret"}
-                            <div class="form-group {if $error}has-error{/if}">
+                            <div class="form-group col-md-6 {if $error}has-error{/if}">
                                 <label for="{$label_attr.for}">{$label}</label>
                                 <input id="{$label_attr.for}" class="form-control"  type="text" name="{$name}" value="{$value}" required/>
                             </div>
                         {/form_field}
 
                         {form_field form=$form field="merchant_id"}
-                            <div class="form-group {if $error}has-error{/if}">
+                            <div class="form-group col-md-6 {if $error}has-error{/if}">
                                 <label for="{$label_attr.for}">{$label}</label>
                                 <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
                             </div>
                         {/form_field}
 
                         {form_field form=$form field="application_name"}
-                            <div class="form-group {if $error}has-error{/if}">
+                            <div class="form-group col-md-6 {if $error}has-error{/if}">
                                 <label for="{$label_attr.for}">{$label}</label>
                                 <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
                             </div>
                         {/form_field}
 
                         {form_field form=$form field="attribute_color"}
-                            <div class="form-group {if $error}has-error{/if}">
+                            <div class="form-group col-md-6 {if $error}has-error{/if}">
                                 <label for="{$label_attr.for}">{$label}</label>
                                 <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
                             </div>
                         {/form_field}
 
                         {form_field form=$form field="attribute_size"}
-                            <div class="form-group {if $error}has-error{/if}">
+                            <div class="form-group col-md-6 {if $error}has-error{/if}">
                                 <label for="{$label_attr.for}">{$label}</label>
                                 <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
                             </div>
                         {/form_field}
 
                         {form_field form=$form field="shipping_price"}
-                            <div class="form-group {if $error}has-error{/if}">
+                            <div class="form-group col-md-6 {if $error}has-error{/if}">
                                 <label for="{$label_attr.for}">{$label}</label>
                                 <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
                             </div>
                         {/form_field}
 
-                        <div class="form-group">
+                        <div class="form-group col-md-6">
                             <label class="control-label">&nbsp;</label>
                             <button class="btn btn-default btn-primary form-control" type="submit">
                                 <span class="glyphicon glyphicon-check"></span>
@@ -69,5 +69,73 @@
                 </div>
             </form>
         {/form}
+
+        <div class="col-md-12 title title-without-tabs">
+            {intl l='googleshopping.taxonomy'}
+        </div>
+        {form name="googleshopping.taxonomy"}
+            <form action="{url path="/admin/modules/googleshopping/taxonomy/associate"}" method="post">
+                {form_hidden_fields form=$form}
+
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {form_field form=$form field="thelia_category_id"}
+                                <select class="form-control" name="{$name}">
+                                    {loop type="category" name="thelia-category"}
+                                        <option value="{$ID}">{$TITLE}</option>
+                                    {/loop}
+                                </select>
+                            {/form_field}
+                        </div>
+                        <div class="form-group col-md-3">
+                            <input class="form-control" type="text" id="search-taxonomy"/>
+                        </div>
+                        <div class="form-group col-md-3">
+                            {form_field form=$form field="google_category"}
+                                <select class="form-control" name="{$name}" id="google-taxonomy">
+
+                                </select>
+                            {/form_field}
+                        </div>
+                        <div class="form-group col-md-3">
+                            <button class="btn btn-default btn-primary form-control" type="submit">
+                                <span class="glyphicon glyphicon-check"></span>
+                                {intl l="Save"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        {/form}
+        <div class="table-responsive col-md-12">
+            <table class="table table-striped table-condensed table-left-aligned">
+                <caption class="clearfix">
+                    {intl l="googleshopping.associated.category"}
+                </caption>
+                <thead>
+                    <tr>
+                        <th>{intl l="Thelia category Id"}</th>
+                        <th>{intl l="Thelia category Title"}</th>
+                        <th>{intl l="Associated Google category"}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop type="googleshopping.category.associated" name="googleshopping_category_associated"}
+                        <tr>
+                            <td>
+                                {$THELIA_CATEGORY_ID}
+                            </td>
+                            <td>
+                                {$THELIA_CATEGORY_TITLE}
+                            </td>
+                            <td>
+                                {$GOOGLE_CATEGORY}
+                            </td>
+                        </tr>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

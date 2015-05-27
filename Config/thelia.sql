@@ -4,12 +4,12 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ---------------------------------------------------------------------
--- googleshopping_associated_category
+-- googleshopping_taxonomy
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `googleshopping_associated_category`;
+DROP TABLE IF EXISTS `googleshopping_taxonomy`;
 
-CREATE TABLE `googleshopping_associated_category`
+CREATE TABLE `googleshopping_taxonomy`
 (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `thelia_category_id` INTEGER NOT NULL,

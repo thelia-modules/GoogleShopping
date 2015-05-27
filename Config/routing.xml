@@ -40,6 +40,12 @@
         <requirement key="id">\d+</requirement>
     </route>
 
+    <route id="googleshopping.taxonomy.get" path="/admin/module/googleshopping/taxonomy" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::getTaxonomy</default>
+    </route>
 
+    <route id="googleshopping.taxonomy.associate" path="/admin/modules/googleshopping/taxonomy/associate" methods="POST">
+        <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::associateTaxonomy</default>
+    </route>
 
 </routes>

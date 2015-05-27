@@ -8,7 +8,7 @@
         <!-- sample definition
         <loop name="MySuperLoop" class="GoogleShopping\Loop\MySuperLoop" />
         -->
-        <loop name="googleshopping.category.unassociated" class="GoogleShopping\Loop\UnAssociatedCategory" />
+        <loop name="googleshopping.category.associated" class="GoogleShopping\Loop\AssociatedCategory" />
     </loops>
 
     <forms>
@@ -16,6 +16,7 @@
         <form name="MyFormName" class="GoogleShopping\Form\MySuperForm" />
         -->
         <form name="googleshopping.configuration" class="GoogleShopping\Form\ConfigurationForm" />
+        <form name="googleshopping.taxonomy" class="GoogleShopping\Form\TaxonomyForm" />
     </forms>
 
     <commands>

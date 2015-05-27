@@ -3,6 +3,7 @@
 namespace GoogleShopping\Controller\Admin;
 
 use GoogleShopping\GoogleShopping;
+use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\Collection\ObjectCollection;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -174,6 +175,9 @@ class ProductController extends BaseGoogleShoppingController
         $category =  CategoryQuery::create()
             ->findOneById($theliaProduct->getDefaultCategoryId());
 
+        $googleCategory = GoogleshoppingTaxonomyQuery::create()
+            ->findOneByTheliaCategoryId($category->getId());
+
         $availability = $pse->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
         $product->setChannel('online');
@@ -182,7 +186,7 @@ class ProductController extends BaseGoogleShoppingController
         $product->setTargetCountry('FR');
         $product->setGtin($pse->getEanCode());
         $product->setBrand($brand->getTitle());
-        $product->setGoogleProductCategory('Animals & Pet Supplies > Live Animals');
+        $product->setGoogleProductCategory($googleCategory->getGoogleCategory());
         $product->setCondition('new');
         $product->setLink($theliaProduct->getUrl());
         $product->setTitle($theliaProduct->getTitle());
