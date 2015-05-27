@@ -18,7 +18,7 @@ class ProductController extends BaseGoogleShoppingController
         $this->authorization();
 
         $product = new \Google_Service_ShoppingContent_Product();
-        $product->setChannel('local');
+        $product->setChannel('online');
         $product->setContentLanguage('fr');
         $product->setOfferId('123');
         $product->setTargetCountry('FR');
@@ -46,6 +46,6 @@ class ProductController extends BaseGoogleShoppingController
         $product->setPrice($price);
         $product->setShipping(array($shipping));
 
-        $result = $this->service->products->insert(GoogleShopping::getConfigValue('client_id'), $product);
+        $result = $this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
     }
 }
