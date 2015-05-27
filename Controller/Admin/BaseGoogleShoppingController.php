@@ -5,12 +5,6 @@ namespace GoogleShopping\Controller\Admin;
 use GoogleShopping\GoogleShopping;
 use Thelia\Controller\Admin\BaseAdminController;
 
-set_include_path(get_include_path() . PATH_SEPARATOR . '/Users/vincent/Sites/thelia-dev/local/modules/GoogleShopping/Google/src');
-require_once '/Users/vincent/Sites/thelia-dev/local/modules/GoogleShopping/Google/src/Google/autoload.php';
-require_once '/Users/vincent/Sites/thelia-dev/local/modules/GoogleShopping/Google/src/Google/Client.php';
-require_once '/Users/vincent/Sites/thelia-dev/local/modules/GoogleShopping/Google/src/Google/Service/ShoppingContent.php';
-
-
 class BaseGoogleShoppingController extends BaseAdminController
 {
     protected $merchant_id;

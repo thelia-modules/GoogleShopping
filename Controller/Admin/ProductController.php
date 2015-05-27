@@ -7,12 +7,6 @@ use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 
-set_include_path(get_include_path() . PATH_SEPARATOR . '/Users/vincent/Sites/thelia-dev/local/modules/GoogleShopping/Google/src');
-require_once '/Users/vincent/Sites/thelia-dev/local/modules/GoogleShopping/Google/src/Google/autoload.php';
-require_once '/Users/vincent/Sites/thelia-dev/local/modules/GoogleShopping/Google/src/Google/Client.php';
-
-use Google_Client;
-
 class ProductController extends BaseGoogleShoppingController
 {
     public function addProduct($id)
