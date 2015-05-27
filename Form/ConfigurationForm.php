@@ -83,6 +83,43 @@ class ConfigurationForm extends BaseForm
                 "constraints" => array(
                     new Constraints\NotBlank(),
                 )
+            ))
+            ->add("attribute_color", "number", array(
+                'label' => Translator::getInstance()->trans(
+                    'googleshopping.configuration.attribute.color',
+                    array(),
+                    GoogleShopping::DOMAIN_NAME
+                ),
+                'data' => GoogleShopping::getConfigValue('attribute_color'),
+                'label_attr' => array(
+                    'for' => 'attribute_color'
+                )
+            ))
+            ->add("attribute_size", "number", array(
+                'label' => Translator::getInstance()->trans(
+                    'googleshopping.configuration.attribute.size',
+                    array(),
+                    GoogleShopping::DOMAIN_NAME
+                ),
+                'data' => GoogleShopping::getConfigValue('attribute_size'),
+                'label_attr' => array(
+                    'for' => 'attribute_size'
+                )
+            ))
+            ->add("shipping_price", "text", array(
+                'required' => true,
+                'label' => Translator::getInstance()->trans(
+                    'googleshopping.configuration.shippingprice',
+                    array(),
+                    GoogleShopping::DOMAIN_NAME
+                ),
+                'data' => GoogleShopping::getConfigValue('shipping_price'),
+                'label_attr' => array(
+                    'for' => 'shipping_price'
+                ),
+                "constraints" => array(
+                    new Constraints\NotBlank(),
+                )
             ));
     }
 

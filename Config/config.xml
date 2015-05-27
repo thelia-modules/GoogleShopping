@@ -8,6 +8,7 @@
         <!-- sample definition
         <loop name="MySuperLoop" class="GoogleShopping\Loop\MySuperLoop" />
         -->
+        <loop name="googleshopping.category.unassociated" class="GoogleShopping\Loop\UnAssociatedCategory" />
     </loops>
 
     <forms>

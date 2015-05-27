@@ -13,6 +13,7 @@
 namespace GoogleShopping;
 
 use Propel\Runtime\Connection\ConnectionInterface;
+use Thelia\Install\Database;
 use Thelia\Model\ModuleConfigQuery;
 use Thelia\Model\ModuleQuery;
 use Thelia\Module\BaseModule;
@@ -28,13 +29,10 @@ class GoogleShopping extends BaseModule
     {
         return ModuleQuery::create()->findOneByCode("GoogleShopping")->getId();
     }
-/*
-    public static function getConfigValue($name)
+
+    public function postActivation(ConnectionInterface $con = null)
     {
-        return ModuleConfigQuery::create()
-            ->filterByModuleId(self::getModuleId())
-            ->findOneByName($name)
-            ->getValue();
+        $database = new Database($con);
+        $database->insertSql(null, [__DIR__ . "/Config/thelia.sql", __DIR__ . "/Config/insert.sql"]);
     }
-*/
 }

@@ -37,13 +37,33 @@
                             </div>
                         {/form_field}
 
+                        {form_field form=$form field="attribute_color"}
+                            <div class="form-group {if $error}has-error{/if}">
+                                <label for="{$label_attr.for}">{$label}</label>
+                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
+                            </div>
+                        {/form_field}
+
+                        {form_field form=$form field="attribute_size"}
+                            <div class="form-group {if $error}has-error{/if}">
+                                <label for="{$label_attr.for}">{$label}</label>
+                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
+                            </div>
+                        {/form_field}
+
+                        {form_field form=$form field="shipping_price"}
+                            <div class="form-group {if $error}has-error{/if}">
+                                <label for="{$label_attr.for}">{$label}</label>
+                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
+                            </div>
+                        {/form_field}
+
                         <div class="form-group">
                             <label class="control-label">&nbsp;</label>
                             <button class="btn btn-default btn-primary form-control" type="submit">
                                 <span class="glyphicon glyphicon-check"></span>
                                 {intl l="Save"}
                             </button>
-                        </div>
                         </div>
                     </div>
                 </div>
