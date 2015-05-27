@@ -4,6 +4,8 @@ namespace GoogleShopping\Controller\Admin;
 
 use GoogleShopping\GoogleShopping;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Model\ConfigQuery;
+use Thelia\Tools\URL;
 
 class BaseGoogleShoppingController extends BaseAdminController
 {
@@ -16,7 +18,7 @@ class BaseGoogleShoppingController extends BaseAdminController
         $client->setApplicationName(GoogleShopping::getConfigValue('application_name'));
         $client->setClientId(GoogleShopping::getConfigValue('client_id'));
         $client->setClientSecret(GoogleShopping::getConfigValue('client_secret'));
-        $client->setRedirectUri("http://gshopping.openstudio-lab.com/googleshopping/oauth2callback");
+        $client->setRedirectUri(URL::getInstance()->absoluteUrl('/googleshopping/oauth2callback'));
         $client->setScopes('https://www.googleapis.com/auth/content');
 
         if (isset($_SESSION['oauth_access_token'])) {
