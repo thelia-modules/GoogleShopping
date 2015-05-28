@@ -1,3 +1,4 @@
+{default_translation_domain domain='googleshopping.ai'}
 {loop type="googleshopping.product" name="googleshopping_product" product_id={$ID}}
     <div class="col-md-12 title title-without-tabs">
         {intl l='GoogleShopping product management'}
@@ -20,7 +21,7 @@
         </form>
     {else}
         <p class="alert alert-warning col-md-12">
-            {intl l="You have to associate the category of this product to the google's category <a href='{url path="/admin/module/GoogleShopping"}'>here</a> before send it to google."}
+            {intl l="You have to associate the category of this product to the google's category <a href='%link'>here</a> before send it to google." link={url path='/admin/module/GoogleShopping'}}
         </p>
     {/if}
 {else}

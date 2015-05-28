@@ -1,0 +1,28 @@
+<?php
+
+return array(
+    'A fix shipping price for notice to Google Shopping' => 'Un prix fix de livraison',
+    'Associate' => 'Associer',
+    'Associated Google category' => 'Categorie Google associée',
+    'Configuration GoogleShopping' => 'Configuration GoogleShopping',
+    'Everything is ok this product can be send to google :' => 'Ce produit peut être envoyé a google :',
+    'Google Category' => 'Catégorie Google',
+    'GoogleShopping associated categories' => 'Categories GoogleShopping Associées',
+    'GoogleShopping category association' => 'Association de categories GoogleShopping',
+    'GoogleShopping product management' => 'Gestion de produit pour GoogleShopping',
+    'No associated category' => 'Aucune catégorie associée',
+    'Save' => 'Enregistrer',
+    'Search category (English only)' => 'Recherche de catégorie (en anglais)',
+    'Send' => 'Envoyer',
+    'The ID of thelia color attributes if you have one' => 'L\'ID de la déclinaison couleur si vous en avez une',
+    'The ID of thelia size attributes if you have one' => 'L\'ID de la déclinaison taille si vous en avez une',
+    'The application name you have define when you have create the api apllication ' => 'Le nom de l\'application que vous avez définit à la création de l\'application api',
+    'The client ID of the api who can be found in https://console.developers.google.com at APIs & auth > Credentials' => 'L\'identifiant client de l\'api qui peut être trouvé sur https://console.developers.google.com dans api et authentification > identifiants',
+    'The client secret associate to client ID' => 'Le code client secret associé à l\'identifiant client',
+    'Thelia category' => 'Catégorie Thelia',
+    'Thelia category Id' => 'Id de la catégorie dans Thelia',
+    'Thelia category Title' => 'Nom de la catégorie dans Thelia',
+    'This product was already added to google shopping' => 'Ce produit a déjà était ajouté a Google Shopping',
+    'You have to associate the category of this product to the google\'s category <a href=\'%link\'>here</a> before send it to google.' => 'Vous devez d\'abord associer la catégorie de ce produit à une catégorie de Google <a href=\'%link\'>ici</a>.',
+    'Your google merchant ID, can be found in Google Merchant center' => 'Votre identifiant de GoogleMerchant',
+);
