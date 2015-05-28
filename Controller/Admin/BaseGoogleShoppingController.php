@@ -3,8 +3,8 @@
 namespace GoogleShopping\Controller\Admin;
 
 use GoogleShopping\GoogleShopping;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
-use Thelia\Model\ConfigQuery;
 use Thelia\Tools\URL;
 
 class BaseGoogleShoppingController extends BaseAdminController
@@ -27,7 +27,11 @@ class BaseGoogleShoppingController extends BaseAdminController
         } elseif (isset($_GET['code'])) {
             $token = $client->authenticate($_GET['code']);
             $_SESSION['oauth_access_token'] = $token;
+            if (isset($_SESSION['gshopping_from_url'])) {
+                return RedirectResponse::create(URL::getInstance()->absoluteUrl($_SESSION['gshopping_from_url']));
+            }
         } else {
+            $_SESSION['gshopping_from_url'] = $_SERVER['REQUEST_URI'];
             header('Location: ' . $client->createAuthUrl());
             exit;
         }

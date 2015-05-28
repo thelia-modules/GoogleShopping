@@ -172,6 +172,11 @@ class ProductController extends BaseGoogleShoppingController
         $brand = $theliaProduct->getBrand();
         $availability = $pse->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
+        //TODO : Add better check to verify validity of GTIN
+        if (null === $pse->getEanCode()) {
+            throw new \Exception("Invalid GTIN (EAN) code");
+        }
+
         $product->setChannel('online');
         $product->setContentLanguage($lang->getCode()); //Lang of product
         $product->setOfferId($pse->getRef()); //Unique identifier (one by pse)
@@ -197,7 +202,7 @@ class ProductController extends BaseGoogleShoppingController
 
         //Delivery shippings
         $googleShippings = array();
-        
+
         /**
          * @var string $shippingTitle
          * @var \Thelia\Model\OrderPostage $shippingCost
@@ -219,8 +224,8 @@ class ProductController extends BaseGoogleShoppingController
         $product->setShipping($googleShippings);
 
         var_dump($product);
-        //$result = $this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
-        //return $result;
+        $result = $this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
+        return $result;
     }
 
     protected function checkCombination(ObjectCollection $productSaleElements)
