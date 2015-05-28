@@ -35,5 +35,5 @@
     </required>
     -->
     <thelia>2.1.0</thelia>
-    <stability>other</stability>
+    <stability>beta</stability>
 </module>

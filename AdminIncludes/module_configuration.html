@@ -2,7 +2,7 @@
     {default_translation_domain domain='googleshopping.ai'}
     <div class="col-md-12 general-block-decorator">
         <div class="col-md-12 title title-without-tabs">
-            {intl l='googleshopping.configuration'}
+            {intl l='Configuration GoogleShopping'}
         </div>
         {form name="googleshopping.configuration"}
             <form method="post" action='{url path="/admin/module/googleshopping/configuration"}'>
@@ -71,7 +71,7 @@
         {/form}
 
         <div class="col-md-12 title title-without-tabs">
-            {intl l='googleshopping.taxonomy'}
+            {intl l='GoogleShopping category association'}
         </div>
         {form name="googleshopping.taxonomy"}
             <form action="{url path="/admin/modules/googleshopping/taxonomy/associate"}" method="post">
@@ -111,17 +111,20 @@
         <div class="table-responsive col-md-12">
             <table class="table table-striped table-condensed table-left-aligned">
                 <caption class="clearfix">
-                    {intl l="googleshopping.associated.category"}
+                    {intl l="GoogleShopping associated categories"}
                 </caption>
-                <thead>
-                    <tr>
-                        <th>{intl l="Thelia category Id"}</th>
-                        <th>{intl l="Thelia category Title"}</th>
-                        <th>{intl l="Associated Google category"}</th>
-                    </tr>
-                </thead>
+                {loop type="googleshopping.category.associated" name="googleshopping_category_associated"}
+                    {if $LOOP_COUNT === 1}
+                        <thead>
+                        <tr>
+                            <th>{intl l="Thelia category Id"}</th>
+                            <th>{intl l="Thelia category Title"}</th>
+                            <th>{intl l="Associated Google category"}</th>
+                        </tr>
+                        </thead>
+                    {/if}
                 <tbody>
-                    {loop type="googleshopping.category.associated" name="googleshopping_category_associated"}
+
                         <tr>
                             <td>
                                 {$THELIA_CATEGORY_ID}
@@ -133,8 +136,17 @@
                                 {$GOOGLE_CATEGORY}
                             </td>
                         </tr>
-                    {/loop}
                 </tbody>
+                {/loop}
+                {elseloop rel="googleshopping_category_associated"}
+                    <tbody>
+                    <tr><td>
+                            <p class="alert alert-info" role="alert">
+                                {intl l="No associated category"}
+                            </p>
+                        </td></tr>
+                    </tbody>
+                {/elseloop}
             </table>
         </div>
     </div>

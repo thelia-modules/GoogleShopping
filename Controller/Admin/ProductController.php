@@ -3,6 +3,9 @@
 namespace GoogleShopping\Controller\Admin;
 
 use GoogleShopping\GoogleShopping;
+use GoogleShopping\Model\GoogleshoppingProduct;
+use GoogleShopping\Model\GoogleshoppingProductQuery;
+use GoogleShopping\Model\GoogleshoppingTaxonomy;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\Collection\ObjectCollection;
 use Thelia\Core\Event\Image\ImageEvent;
@@ -10,6 +13,7 @@ use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Model\AttributeAvQuery;
+use Thelia\Model\Category;
 use Thelia\Model\CategoryQuery;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\CountryQuery;
@@ -44,6 +48,16 @@ class ProductController extends BaseGoogleShoppingController
             ->joinWithI18n($locale)
             ->findOneById($id);
 
+        $category =  CategoryQuery::create()
+            ->findOneById($theliaProduct->getDefaultCategoryId());
+
+        $googleCategory = GoogleshoppingTaxonomyQuery::create()
+            ->findOneByTheliaCategoryId($category->getId());
+
+        if (null === $googleCategory) {
+            throw new \Exception("Category of product is not associated with a Google category, please fix it in module configurartion");
+        }
+
         $productSaleElements = ProductSaleElementsQuery::create()
 
             ->filterByProductId($theliaProduct->getId())
@@ -67,14 +81,19 @@ class ProductController extends BaseGoogleShoppingController
 
         if ($itemGroupId === null) {
             $pse = $productSaleElements->getFirst();
-            $gprod[] = $this->insertPse($theliaProduct, $pse, $imageAbsolutePath, $lang);
+            $gprod[] = $this->insertPse($theliaProduct, $pse, $imageAbsolutePath, $lang, $category, $googleCategory);
         } else {
             /** @var ProductSaleElements $productSaleElement */
             foreach ($productSaleElements as $productSaleElement) {
-                $gprod[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $itemGroupId);
+                $gprod[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $itemGroupId);
             }
         }
         var_dump($gprod);
+
+        GoogleshoppingProductQuery::create()
+            ->filterByProductId($theliaProduct->getId())
+            ->findOneOrCreate()
+            ->save();
     }
 
     public function checkCombination(ObjectCollection $productSaleElements)
@@ -117,8 +136,15 @@ class ProductController extends BaseGoogleShoppingController
         return false;
     }
 
-    public function insertPse(Product $theliaProduct, ProductSaleElements $pse, $imageAbsolutePath, Lang $lang, $itemGroupId = null)
-    {
+    public function insertPse(
+        Product $theliaProduct,
+        ProductSaleElements $pse,
+        $imageAbsolutePath,
+        Lang $lang,
+        Category $theliaCategory,
+        GoogleshoppingTaxonomy $googleCategory,
+        $itemGroupId = null
+    ) {
         $product = new \Google_Service_ShoppingContent_Product();
 
         //If we have multiple pse for one product
@@ -172,11 +198,7 @@ class ProductController extends BaseGoogleShoppingController
         }
 
         $brand = $theliaProduct->getBrand();
-        $category =  CategoryQuery::create()
-            ->findOneById($theliaProduct->getDefaultCategoryId());
 
-        $googleCategory = GoogleshoppingTaxonomyQuery::create()
-            ->findOneByTheliaCategoryId($category->getId());
 
         $availability = $pse->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
@@ -193,7 +215,7 @@ class ProductController extends BaseGoogleShoppingController
         $product->setAvailability($availability);
         $product->setDescription($theliaProduct->getDescription());
         $product->setImageLink($imageAbsolutePath);
-        $product->setProductType($category->getTitle());
+        $product->setProductType($theliaCategory->getTitle());
 
 
         $country = CountryQuery::create()
@@ -217,8 +239,9 @@ class ProductController extends BaseGoogleShoppingController
         $product->setPrice($price);
         $product->setShipping(array($shipping));
 
-        $result = $this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
-        return $result;
+        var_dump($product);
+        //$result = $this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
+        //return $result;
     }
 
     /**

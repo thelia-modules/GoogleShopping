@@ -23,5 +23,26 @@ CREATE TABLE `googleshopping_taxonomy`
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- ---------------------------------------------------------------------
+-- googleshopping_product
+-- ---------------------------------------------------------------------
+
+DROP TABLE IF EXISTS `googleshopping_product`;
+
+CREATE TABLE `googleshopping_product`
+(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `product_id` INTEGER NOT NULL,
+    `created_at` DATETIME,
+    `updated_at` DATETIME,
+    PRIMARY KEY (`id`),
+    INDEX `FI_googleshopping_product_id` (`product_id`),
+    CONSTRAINT `fk_googleshopping_product_id`
+        FOREIGN KEY (`product_id`)
+        REFERENCES `product` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 # This restores the fkey checks, after having unset them earlier
 SET FOREIGN_KEY_CHECKS = 1;

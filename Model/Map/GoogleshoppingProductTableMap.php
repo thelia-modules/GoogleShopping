@@ -2,8 +2,8 @@
 
 namespace GoogleShopping\Model\Map;
 
-use GoogleShopping\Model\GoogleshoppingAssociatedCategory;
-use GoogleShopping\Model\GoogleshoppingAssociatedCategoryQuery;
+use GoogleShopping\Model\GoogleshoppingProduct;
+use GoogleShopping\Model\GoogleshoppingProductQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'googleshopping_associated_category' table.
+ * This class defines the structure of the 'googleshopping_product' table.
  *
  *
  *
@@ -26,14 +26,14 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class GoogleshoppingAssociatedCategoryTableMap extends TableMap
+class GoogleshoppingProductTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'GoogleShopping.Model.Map.GoogleshoppingAssociatedCategoryTableMap';
+    const CLASS_NAME = 'GoogleShopping.Model.Map.GoogleshoppingProductTableMap';
 
     /**
      * The default database name for this class
@@ -43,22 +43,22 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'googleshopping_associated_category';
+    const TABLE_NAME = 'googleshopping_product';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\GoogleShopping\\Model\\GoogleshoppingAssociatedCategory';
+    const OM_CLASS = '\\GoogleShopping\\Model\\GoogleshoppingProduct';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'GoogleShopping.Model.GoogleshoppingAssociatedCategory';
+    const CLASS_DEFAULT = 'GoogleShopping.Model.GoogleshoppingProduct';
 
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 3;
+    const NUM_COLUMNS = 4;
 
     /**
      * The number of lazy-loaded columns
@@ -68,22 +68,27 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 3;
+    const NUM_HYDRATE_COLUMNS = 4;
 
     /**
      * the column name for the ID field
      */
-    const ID = 'googleshopping_associated_category.ID';
+    const ID = 'googleshopping_product.ID';
 
     /**
-     * the column name for the THELIA_CATEGORY_ID field
+     * the column name for the PRODUCT_ID field
      */
-    const THELIA_CATEGORY_ID = 'googleshopping_associated_category.THELIA_CATEGORY_ID';
+    const PRODUCT_ID = 'googleshopping_product.PRODUCT_ID';
 
     /**
-     * the column name for the GOOGLE_CATEGORY field
+     * the column name for the CREATED_AT field
      */
-    const GOOGLE_CATEGORY = 'googleshopping_associated_category.GOOGLE_CATEGORY';
+    const CREATED_AT = 'googleshopping_product.CREATED_AT';
+
+    /**
+     * the column name for the UPDATED_AT field
+     */
+    const UPDATED_AT = 'googleshopping_product.UPDATED_AT';
 
     /**
      * The default string format for model objects of the related table
@@ -97,12 +102,12 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'TheliaCategoryId', 'GoogleCategory', ),
-        self::TYPE_STUDLYPHPNAME => array('id', 'theliaCategoryId', 'googleCategory', ),
-        self::TYPE_COLNAME       => array(GoogleshoppingAssociatedCategoryTableMap::ID, GoogleshoppingAssociatedCategoryTableMap::THELIA_CATEGORY_ID, GoogleshoppingAssociatedCategoryTableMap::GOOGLE_CATEGORY, ),
-        self::TYPE_RAW_COLNAME   => array('ID', 'THELIA_CATEGORY_ID', 'GOOGLE_CATEGORY', ),
-        self::TYPE_FIELDNAME     => array('id', 'thelia_category_id', 'google_category', ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id', 'ProductId', 'CreatedAt', 'UpdatedAt', ),
+        self::TYPE_STUDLYPHPNAME => array('id', 'productId', 'createdAt', 'updatedAt', ),
+        self::TYPE_COLNAME       => array(GoogleshoppingProductTableMap::ID, GoogleshoppingProductTableMap::PRODUCT_ID, GoogleshoppingProductTableMap::CREATED_AT, GoogleshoppingProductTableMap::UPDATED_AT, ),
+        self::TYPE_RAW_COLNAME   => array('ID', 'PRODUCT_ID', 'CREATED_AT', 'UPDATED_AT', ),
+        self::TYPE_FIELDNAME     => array('id', 'product_id', 'created_at', 'updated_at', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -112,12 +117,12 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'TheliaCategoryId' => 1, 'GoogleCategory' => 2, ),
-        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'theliaCategoryId' => 1, 'googleCategory' => 2, ),
-        self::TYPE_COLNAME       => array(GoogleshoppingAssociatedCategoryTableMap::ID => 0, GoogleshoppingAssociatedCategoryTableMap::THELIA_CATEGORY_ID => 1, GoogleshoppingAssociatedCategoryTableMap::GOOGLE_CATEGORY => 2, ),
-        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'THELIA_CATEGORY_ID' => 1, 'GOOGLE_CATEGORY' => 2, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'thelia_category_id' => 1, 'google_category' => 2, ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'ProductId' => 1, 'CreatedAt' => 2, 'UpdatedAt' => 3, ),
+        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'productId' => 1, 'createdAt' => 2, 'updatedAt' => 3, ),
+        self::TYPE_COLNAME       => array(GoogleshoppingProductTableMap::ID => 0, GoogleshoppingProductTableMap::PRODUCT_ID => 1, GoogleshoppingProductTableMap::CREATED_AT => 2, GoogleshoppingProductTableMap::UPDATED_AT => 3, ),
+        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'PRODUCT_ID' => 1, 'CREATED_AT' => 2, 'UPDATED_AT' => 3, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'product_id' => 1, 'created_at' => 2, 'updated_at' => 3, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -130,15 +135,16 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('googleshopping_associated_category');
-        $this->setPhpName('GoogleshoppingAssociatedCategory');
-        $this->setClassName('\\GoogleShopping\\Model\\GoogleshoppingAssociatedCategory');
+        $this->setName('googleshopping_product');
+        $this->setPhpName('GoogleshoppingProduct');
+        $this->setClassName('\\GoogleShopping\\Model\\GoogleshoppingProduct');
         $this->setPackage('GoogleShopping.Model');
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('ID', 'Id', 'INTEGER', true, null, null);
-        $this->addForeignKey('THELIA_CATEGORY_ID', 'TheliaCategoryId', 'INTEGER', 'category', 'ID', true, null, null);
-        $this->addColumn('GOOGLE_CATEGORY', 'GoogleCategory', 'VARCHAR', true, 255, null);
+        $this->addForeignKey('PRODUCT_ID', 'ProductId', 'INTEGER', 'product', 'ID', true, null, null);
+        $this->addColumn('CREATED_AT', 'CreatedAt', 'TIMESTAMP', false, null, null);
+        $this->addColumn('UPDATED_AT', 'UpdatedAt', 'TIMESTAMP', false, null, null);
     } // initialize()
 
     /**
@@ -146,8 +152,21 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('Category', '\\GoogleShopping\\Model\\Thelia\\Model\\Category', RelationMap::MANY_TO_ONE, array('thelia_category_id' => 'id', ), 'CASCADE', 'RESTRICT');
+        $this->addRelation('Product', '\\GoogleShopping\\Model\\Thelia\\Model\\Product', RelationMap::MANY_TO_ONE, array('product_id' => 'id', ), 'CASCADE', 'RESTRICT');
     } // buildRelations()
+
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'timestampable' => array('create_column' => 'created_at', 'update_column' => 'updated_at', ),
+        );
+    } // getBehaviors()
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -205,7 +224,7 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? GoogleshoppingAssociatedCategoryTableMap::CLASS_DEFAULT : GoogleshoppingAssociatedCategoryTableMap::OM_CLASS;
+        return $withPrefix ? GoogleshoppingProductTableMap::CLASS_DEFAULT : GoogleshoppingProductTableMap::OM_CLASS;
     }
 
     /**
@@ -219,21 +238,21 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
-     * @return array (GoogleshoppingAssociatedCategory object, last column rank)
+     * @return array (GoogleshoppingProduct object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = GoogleshoppingAssociatedCategoryTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = GoogleshoppingAssociatedCategoryTableMap::getInstanceFromPool($key))) {
+        $key = GoogleshoppingProductTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = GoogleshoppingProductTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + GoogleshoppingAssociatedCategoryTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + GoogleshoppingProductTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = GoogleshoppingAssociatedCategoryTableMap::OM_CLASS;
+            $cls = GoogleshoppingProductTableMap::OM_CLASS;
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            GoogleshoppingAssociatedCategoryTableMap::addInstanceToPool($obj, $key);
+            GoogleshoppingProductTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -256,8 +275,8 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = GoogleshoppingAssociatedCategoryTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = GoogleshoppingAssociatedCategoryTableMap::getInstanceFromPool($key))) {
+            $key = GoogleshoppingProductTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = GoogleshoppingProductTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
@@ -266,7 +285,7 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                GoogleshoppingAssociatedCategoryTableMap::addInstanceToPool($obj, $key);
+                GoogleshoppingProductTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -287,13 +306,15 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(GoogleshoppingAssociatedCategoryTableMap::ID);
-            $criteria->addSelectColumn(GoogleshoppingAssociatedCategoryTableMap::THELIA_CATEGORY_ID);
-            $criteria->addSelectColumn(GoogleshoppingAssociatedCategoryTableMap::GOOGLE_CATEGORY);
+            $criteria->addSelectColumn(GoogleshoppingProductTableMap::ID);
+            $criteria->addSelectColumn(GoogleshoppingProductTableMap::PRODUCT_ID);
+            $criteria->addSelectColumn(GoogleshoppingProductTableMap::CREATED_AT);
+            $criteria->addSelectColumn(GoogleshoppingProductTableMap::UPDATED_AT);
         } else {
             $criteria->addSelectColumn($alias . '.ID');
-            $criteria->addSelectColumn($alias . '.THELIA_CATEGORY_ID');
-            $criteria->addSelectColumn($alias . '.GOOGLE_CATEGORY');
+            $criteria->addSelectColumn($alias . '.PRODUCT_ID');
+            $criteria->addSelectColumn($alias . '.CREATED_AT');
+            $criteria->addSelectColumn($alias . '.UPDATED_AT');
         }
     }
 
@@ -306,7 +327,7 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME)->getTable(GoogleshoppingAssociatedCategoryTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingProductTableMap::DATABASE_NAME)->getTable(GoogleshoppingProductTableMap::TABLE_NAME);
     }
 
     /**
@@ -314,16 +335,16 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-      $dbMap = Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
-      if (!$dbMap->hasTable(GoogleshoppingAssociatedCategoryTableMap::TABLE_NAME)) {
-        $dbMap->addTableObject(new GoogleshoppingAssociatedCategoryTableMap());
+      $dbMap = Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingProductTableMap::DATABASE_NAME);
+      if (!$dbMap->hasTable(GoogleshoppingProductTableMap::TABLE_NAME)) {
+        $dbMap->addTableObject(new GoogleshoppingProductTableMap());
       }
     }
 
     /**
-     * Performs a DELETE on the database, given a GoogleshoppingAssociatedCategory or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a GoogleshoppingProduct or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or GoogleshoppingAssociatedCategory object or primary key or array of primary keys
+     * @param mixed               $values Criteria or GoogleshoppingProduct object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -334,25 +355,25 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \GoogleShopping\Model\GoogleshoppingAssociatedCategory) { // it's a model object
+        } elseif ($values instanceof \GoogleShopping\Model\GoogleshoppingProduct) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
-            $criteria->add(GoogleshoppingAssociatedCategoryTableMap::ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(GoogleshoppingProductTableMap::DATABASE_NAME);
+            $criteria->add(GoogleshoppingProductTableMap::ID, (array) $values, Criteria::IN);
         }
 
-        $query = GoogleshoppingAssociatedCategoryQuery::create()->mergeWith($criteria);
+        $query = GoogleshoppingProductQuery::create()->mergeWith($criteria);
 
-        if ($values instanceof Criteria) { GoogleshoppingAssociatedCategoryTableMap::clearInstancePool();
+        if ($values instanceof Criteria) { GoogleshoppingProductTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
-            foreach ((array) $values as $singleval) { GoogleshoppingAssociatedCategoryTableMap::removeInstanceFromPool($singleval);
+            foreach ((array) $values as $singleval) { GoogleshoppingProductTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -360,20 +381,20 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the googleshopping_associated_category table.
+     * Deletes all rows from the googleshopping_product table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return GoogleshoppingAssociatedCategoryQuery::create()->doDeleteAll($con);
+        return GoogleshoppingProductQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a GoogleshoppingAssociatedCategory or Criteria object.
+     * Performs an INSERT on the database, given a GoogleshoppingProduct or Criteria object.
      *
-     * @param mixed               $criteria Criteria or GoogleshoppingAssociatedCategory object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or GoogleshoppingProduct object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -382,22 +403,22 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from GoogleshoppingAssociatedCategory object
+            $criteria = $criteria->buildCriteria(); // build Criteria from GoogleshoppingProduct object
         }
 
-        if ($criteria->containsKey(GoogleshoppingAssociatedCategoryTableMap::ID) && $criteria->keyContainsValue(GoogleshoppingAssociatedCategoryTableMap::ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.GoogleshoppingAssociatedCategoryTableMap::ID.')');
+        if ($criteria->containsKey(GoogleshoppingProductTableMap::ID) && $criteria->keyContainsValue(GoogleshoppingProductTableMap::ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.GoogleshoppingProductTableMap::ID.')');
         }
 
 
         // Set the correct dbName
-        $query = GoogleshoppingAssociatedCategoryQuery::create()->mergeWith($criteria);
+        $query = GoogleshoppingProductQuery::create()->mergeWith($criteria);
 
         try {
             // use transaction because $criteria could contain info
@@ -413,7 +434,7 @@ class GoogleshoppingAssociatedCategoryTableMap extends TableMap
         return $pk;
     }
 
-} // GoogleshoppingAssociatedCategoryTableMap
+} // GoogleshoppingProductTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-GoogleshoppingAssociatedCategoryTableMap::buildTableMap();
+GoogleshoppingProductTableMap::buildTableMap();

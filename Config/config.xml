@@ -9,6 +9,7 @@
         <loop name="MySuperLoop" class="GoogleShopping\Loop\MySuperLoop" />
         -->
         <loop name="googleshopping.category.associated" class="GoogleShopping\Loop\AssociatedCategory" />
+        <loop name="googleshopping.product" class="GoogleShopping\Loop\GoogleShoppingProduct" />
     </loops>
 
     <forms>

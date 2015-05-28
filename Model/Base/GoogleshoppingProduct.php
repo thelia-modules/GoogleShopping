@@ -2,12 +2,14 @@
 
 namespace GoogleShopping\Model\Base;
 
+use \DateTime;
 use \Exception;
 use \PDO;
-use GoogleShopping\Model\GoogleshoppingAssociatedCategoryQuery as ChildGoogleshoppingAssociatedCategoryQuery;
-use GoogleShopping\Model\Map\GoogleshoppingAssociatedCategoryTableMap;
-use GoogleShopping\Model\Thelia\Model\CategoryQuery;
-use GoogleShopping\Model\Thelia\Model\Category as ChildCategory;
+use GoogleShopping\Model\GoogleshoppingProduct as ChildGoogleshoppingProduct;
+use GoogleShopping\Model\GoogleshoppingProductQuery as ChildGoogleshoppingProductQuery;
+use GoogleShopping\Model\Map\GoogleshoppingProductTableMap;
+use GoogleShopping\Model\Thelia\Model\Product as ChildProduct;
+use GoogleShopping\Model\Thelia\Model\ProductQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -18,13 +20,14 @@ use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Util\PropelDateTime;
 
-abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
+abstract class GoogleshoppingProduct implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\GoogleShopping\\Model\\Map\\GoogleshoppingAssociatedCategoryTableMap';
+    const TABLE_MAP = '\\GoogleShopping\\Model\\Map\\GoogleshoppingProductTableMap';
 
 
     /**
@@ -60,21 +63,27 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
     protected $id;
 
     /**
-     * The value for the thelia_category_id field.
+     * The value for the product_id field.
      * @var        int
      */
-    protected $thelia_category_id;
+    protected $product_id;
 
     /**
-     * The value for the google_category field.
+     * The value for the created_at field.
      * @var        string
      */
-    protected $google_category;
+    protected $created_at;
 
     /**
-     * @var        Category
+     * The value for the updated_at field.
+     * @var        string
      */
-    protected $aCategory;
+    protected $updated_at;
+
+    /**
+     * @var        Product
+     */
+    protected $aProduct;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -85,7 +94,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * Initializes internal state of GoogleShopping\Model\Base\GoogleshoppingAssociatedCategory object.
+     * Initializes internal state of GoogleShopping\Model\Base\GoogleshoppingProduct object.
      */
     public function __construct()
     {
@@ -180,9 +189,9 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>GoogleshoppingAssociatedCategory</code> instance.  If
-     * <code>obj</code> is an instance of <code>GoogleshoppingAssociatedCategory</code>, delegates to
-     * <code>equals(GoogleshoppingAssociatedCategory)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>GoogleshoppingProduct</code> instance.  If
+     * <code>obj</code> is an instance of <code>GoogleshoppingProduct</code>, delegates to
+     * <code>equals(GoogleshoppingProduct)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -265,7 +274,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return GoogleshoppingAssociatedCategory The current object, for fluid interface
+     * @return GoogleshoppingProduct The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -297,7 +306,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      *                       or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param string $data The source data to import from
      *
-     * @return GoogleshoppingAssociatedCategory The current object, for fluid interface
+     * @return GoogleshoppingProduct The current object, for fluid interface
      */
     public function importFrom($parser, $data)
     {
@@ -354,32 +363,61 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
     }
 
     /**
-     * Get the [thelia_category_id] column value.
+     * Get the [product_id] column value.
      *
      * @return   int
      */
-    public function getTheliaCategoryId()
+    public function getProductId()
     {
 
-        return $this->thelia_category_id;
+        return $this->product_id;
     }
 
     /**
-     * Get the [google_category] column value.
+     * Get the [optionally formatted] temporal [created_at] column value.
      *
-     * @return   string
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw \DateTime object will be returned.
+     *
+     * @return mixed Formatted date/time value as string or \DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getGoogleCategory()
+    public function getCreatedAt($format = NULL)
     {
+        if ($format === null) {
+            return $this->created_at;
+        } else {
+            return $this->created_at instanceof \DateTime ? $this->created_at->format($format) : null;
+        }
+    }
 
-        return $this->google_category;
+    /**
+     * Get the [optionally formatted] temporal [updated_at] column value.
+     *
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw \DateTime object will be returned.
+     *
+     * @return mixed Formatted date/time value as string or \DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getUpdatedAt($format = NULL)
+    {
+        if ($format === null) {
+            return $this->updated_at;
+        } else {
+            return $this->updated_at instanceof \DateTime ? $this->updated_at->format($format) : null;
+        }
     }
 
     /**
      * Set the value of [id] column.
      *
      * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAssociatedCategory The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingProduct The current object (for fluent API support)
      */
     public function setId($v)
     {
@@ -389,7 +427,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
 
         if ($this->id !== $v) {
             $this->id = $v;
-            $this->modifiedColumns[GoogleshoppingAssociatedCategoryTableMap::ID] = true;
+            $this->modifiedColumns[GoogleshoppingProductTableMap::ID] = true;
         }
 
 
@@ -397,50 +435,71 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
     } // setId()
 
     /**
-     * Set the value of [thelia_category_id] column.
+     * Set the value of [product_id] column.
      *
      * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAssociatedCategory The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingProduct The current object (for fluent API support)
      */
-    public function setTheliaCategoryId($v)
+    public function setProductId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->thelia_category_id !== $v) {
-            $this->thelia_category_id = $v;
-            $this->modifiedColumns[GoogleshoppingAssociatedCategoryTableMap::THELIA_CATEGORY_ID] = true;
+        if ($this->product_id !== $v) {
+            $this->product_id = $v;
+            $this->modifiedColumns[GoogleshoppingProductTableMap::PRODUCT_ID] = true;
         }
 
-        if ($this->aCategory !== null && $this->aCategory->getId() !== $v) {
-            $this->aCategory = null;
+        if ($this->aProduct !== null && $this->aProduct->getId() !== $v) {
+            $this->aProduct = null;
         }
 
 
         return $this;
-    } // setTheliaCategoryId()
+    } // setProductId()
 
     /**
-     * Set the value of [google_category] column.
+     * Sets the value of [created_at] column to a normalized version of the date/time value specified.
      *
-     * @param      string $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAssociatedCategory The current object (for fluent API support)
+     * @param      mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return   \GoogleShopping\Model\GoogleshoppingProduct The current object (for fluent API support)
      */
-    public function setGoogleCategory($v)
+    public function setCreatedAt($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->google_category !== $v) {
-            $this->google_category = $v;
-            $this->modifiedColumns[GoogleshoppingAssociatedCategoryTableMap::GOOGLE_CATEGORY] = true;
-        }
+        $dt = PropelDateTime::newInstance($v, null, '\DateTime');
+        if ($this->created_at !== null || $dt !== null) {
+            if ($dt !== $this->created_at) {
+                $this->created_at = $dt;
+                $this->modifiedColumns[GoogleshoppingProductTableMap::CREATED_AT] = true;
+            }
+        } // if either are not null
 
 
         return $this;
-    } // setGoogleCategory()
+    } // setCreatedAt()
+
+    /**
+     * Sets the value of [updated_at] column to a normalized version of the date/time value specified.
+     *
+     * @param      mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return   \GoogleShopping\Model\GoogleshoppingProduct The current object (for fluent API support)
+     */
+    public function setUpdatedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, '\DateTime');
+        if ($this->updated_at !== null || $dt !== null) {
+            if ($dt !== $this->updated_at) {
+                $this->updated_at = $dt;
+                $this->modifiedColumns[GoogleshoppingProductTableMap::UPDATED_AT] = true;
+            }
+        } // if either are not null
+
+
+        return $this;
+    } // setUpdatedAt()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -479,14 +538,23 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
         try {
 
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : GoogleshoppingAssociatedCategoryTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : GoogleshoppingProductTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
             $this->id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : GoogleshoppingAssociatedCategoryTableMap::translateFieldName('TheliaCategoryId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->thelia_category_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : GoogleshoppingProductTableMap::translateFieldName('ProductId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->product_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingAssociatedCategoryTableMap::translateFieldName('GoogleCategory', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->google_category = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingProductTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->created_at = (null !== $col) ? PropelDateTime::newInstance($col, null, '\DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : GoogleshoppingProductTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, '\DateTime') : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -495,10 +563,10 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 3; // 3 = GoogleshoppingAssociatedCategoryTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 4; // 4 = GoogleshoppingProductTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingAssociatedCategory object", 0, $e);
+            throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingProduct object", 0, $e);
         }
     }
 
@@ -517,8 +585,8 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aCategory !== null && $this->thelia_category_id !== $this->aCategory->getId()) {
-            $this->aCategory = null;
+        if ($this->aProduct !== null && $this->product_id !== $this->aProduct->getId()) {
+            $this->aProduct = null;
         }
     } // ensureConsistency
 
@@ -543,13 +611,13 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildGoogleshoppingAssociatedCategoryQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildGoogleshoppingProductQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -559,7 +627,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aCategory = null;
+            $this->aProduct = null;
         } // if (deep)
     }
 
@@ -569,8 +637,8 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see GoogleshoppingAssociatedCategory::setDeleted()
-     * @see GoogleshoppingAssociatedCategory::isDeleted()
+     * @see GoogleshoppingProduct::setDeleted()
+     * @see GoogleshoppingProduct::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -579,12 +647,12 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
         try {
-            $deleteQuery = ChildGoogleshoppingAssociatedCategoryQuery::create()
+            $deleteQuery = ChildGoogleshoppingProductQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -621,7 +689,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
@@ -630,8 +698,19 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
             $ret = $this->preSave($con);
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
+                // timestampable behavior
+                if (!$this->isColumnModified(GoogleshoppingProductTableMap::CREATED_AT)) {
+                    $this->setCreatedAt(time());
+                }
+                if (!$this->isColumnModified(GoogleshoppingProductTableMap::UPDATED_AT)) {
+                    $this->setUpdatedAt(time());
+                }
             } else {
                 $ret = $ret && $this->preUpdate($con);
+                // timestampable behavior
+                if ($this->isModified() && !$this->isColumnModified(GoogleshoppingProductTableMap::UPDATED_AT)) {
+                    $this->setUpdatedAt(time());
+                }
             }
             if ($ret) {
                 $affectedRows = $this->doSave($con);
@@ -641,7 +720,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                GoogleshoppingAssociatedCategoryTableMap::addInstanceToPool($this);
+                GoogleshoppingProductTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -676,11 +755,11 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aCategory !== null) {
-                if ($this->aCategory->isModified() || $this->aCategory->isNew()) {
-                    $affectedRows += $this->aCategory->save($con);
+            if ($this->aProduct !== null) {
+                if ($this->aProduct->isModified() || $this->aProduct->isNew()) {
+                    $affectedRows += $this->aProduct->save($con);
                 }
-                $this->setCategory($this->aCategory);
+                $this->setProduct($this->aProduct);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -714,24 +793,27 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[GoogleshoppingAssociatedCategoryTableMap::ID] = true;
+        $this->modifiedColumns[GoogleshoppingProductTableMap::ID] = true;
         if (null !== $this->id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . GoogleshoppingAssociatedCategoryTableMap::ID . ')');
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . GoogleshoppingProductTableMap::ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(GoogleshoppingAssociatedCategoryTableMap::ID)) {
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::ID)) {
             $modifiedColumns[':p' . $index++]  = 'ID';
         }
-        if ($this->isColumnModified(GoogleshoppingAssociatedCategoryTableMap::THELIA_CATEGORY_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'THELIA_CATEGORY_ID';
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::PRODUCT_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'PRODUCT_ID';
         }
-        if ($this->isColumnModified(GoogleshoppingAssociatedCategoryTableMap::GOOGLE_CATEGORY)) {
-            $modifiedColumns[':p' . $index++]  = 'GOOGLE_CATEGORY';
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::CREATED_AT)) {
+            $modifiedColumns[':p' . $index++]  = 'CREATED_AT';
+        }
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::UPDATED_AT)) {
+            $modifiedColumns[':p' . $index++]  = 'UPDATED_AT';
         }
 
         $sql = sprintf(
-            'INSERT INTO googleshopping_associated_category (%s) VALUES (%s)',
+            'INSERT INTO googleshopping_product (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -743,11 +825,14 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
                     case 'ID':
                         $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
                         break;
-                    case 'THELIA_CATEGORY_ID':
-                        $stmt->bindValue($identifier, $this->thelia_category_id, PDO::PARAM_INT);
+                    case 'PRODUCT_ID':
+                        $stmt->bindValue($identifier, $this->product_id, PDO::PARAM_INT);
                         break;
-                    case 'GOOGLE_CATEGORY':
-                        $stmt->bindValue($identifier, $this->google_category, PDO::PARAM_STR);
+                    case 'CREATED_AT':
+                        $stmt->bindValue($identifier, $this->created_at ? $this->created_at->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
+                        break;
+                    case 'UPDATED_AT':
+                        $stmt->bindValue($identifier, $this->updated_at ? $this->updated_at->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -795,7 +880,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = GoogleshoppingAssociatedCategoryTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GoogleshoppingProductTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -815,10 +900,13 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
                 return $this->getId();
                 break;
             case 1:
-                return $this->getTheliaCategoryId();
+                return $this->getProductId();
                 break;
             case 2:
-                return $this->getGoogleCategory();
+                return $this->getCreatedAt();
+                break;
+            case 3:
+                return $this->getUpdatedAt();
                 break;
             default:
                 return null;
@@ -843,15 +931,16 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
-        if (isset($alreadyDumpedObjects['GoogleshoppingAssociatedCategory'][$this->getPrimaryKey()])) {
+        if (isset($alreadyDumpedObjects['GoogleshoppingProduct'][$this->getPrimaryKey()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['GoogleshoppingAssociatedCategory'][$this->getPrimaryKey()] = true;
-        $keys = GoogleshoppingAssociatedCategoryTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['GoogleshoppingProduct'][$this->getPrimaryKey()] = true;
+        $keys = GoogleshoppingProductTableMap::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getId(),
-            $keys[1] => $this->getTheliaCategoryId(),
-            $keys[2] => $this->getGoogleCategory(),
+            $keys[1] => $this->getProductId(),
+            $keys[2] => $this->getCreatedAt(),
+            $keys[3] => $this->getUpdatedAt(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -859,8 +948,8 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aCategory) {
-                $result['Category'] = $this->aCategory->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            if (null !== $this->aProduct) {
+                $result['Product'] = $this->aProduct->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -880,7 +969,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = GoogleshoppingAssociatedCategoryTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GoogleshoppingProductTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -900,10 +989,13 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
                 $this->setId($value);
                 break;
             case 1:
-                $this->setTheliaCategoryId($value);
+                $this->setProductId($value);
                 break;
             case 2:
-                $this->setGoogleCategory($value);
+                $this->setCreatedAt($value);
+                break;
+            case 3:
+                $this->setUpdatedAt($value);
                 break;
         } // switch()
     }
@@ -927,11 +1019,12 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = GoogleshoppingAssociatedCategoryTableMap::getFieldNames($keyType);
+        $keys = GoogleshoppingProductTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setTheliaCategoryId($arr[$keys[1]]);
-        if (array_key_exists($keys[2], $arr)) $this->setGoogleCategory($arr[$keys[2]]);
+        if (array_key_exists($keys[1], $arr)) $this->setProductId($arr[$keys[1]]);
+        if (array_key_exists($keys[2], $arr)) $this->setCreatedAt($arr[$keys[2]]);
+        if (array_key_exists($keys[3], $arr)) $this->setUpdatedAt($arr[$keys[3]]);
     }
 
     /**
@@ -941,11 +1034,12 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
+        $criteria = new Criteria(GoogleshoppingProductTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(GoogleshoppingAssociatedCategoryTableMap::ID)) $criteria->add(GoogleshoppingAssociatedCategoryTableMap::ID, $this->id);
-        if ($this->isColumnModified(GoogleshoppingAssociatedCategoryTableMap::THELIA_CATEGORY_ID)) $criteria->add(GoogleshoppingAssociatedCategoryTableMap::THELIA_CATEGORY_ID, $this->thelia_category_id);
-        if ($this->isColumnModified(GoogleshoppingAssociatedCategoryTableMap::GOOGLE_CATEGORY)) $criteria->add(GoogleshoppingAssociatedCategoryTableMap::GOOGLE_CATEGORY, $this->google_category);
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::ID)) $criteria->add(GoogleshoppingProductTableMap::ID, $this->id);
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::PRODUCT_ID)) $criteria->add(GoogleshoppingProductTableMap::PRODUCT_ID, $this->product_id);
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::CREATED_AT)) $criteria->add(GoogleshoppingProductTableMap::CREATED_AT, $this->created_at);
+        if ($this->isColumnModified(GoogleshoppingProductTableMap::UPDATED_AT)) $criteria->add(GoogleshoppingProductTableMap::UPDATED_AT, $this->updated_at);
 
         return $criteria;
     }
@@ -960,8 +1054,8 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = new Criteria(GoogleshoppingAssociatedCategoryTableMap::DATABASE_NAME);
-        $criteria->add(GoogleshoppingAssociatedCategoryTableMap::ID, $this->id);
+        $criteria = new Criteria(GoogleshoppingProductTableMap::DATABASE_NAME);
+        $criteria->add(GoogleshoppingProductTableMap::ID, $this->id);
 
         return $criteria;
     }
@@ -1002,15 +1096,16 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \GoogleShopping\Model\GoogleshoppingAssociatedCategory (or compatible) type.
+     * @param      object $copyObj An object of \GoogleShopping\Model\GoogleshoppingProduct (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setTheliaCategoryId($this->getTheliaCategoryId());
-        $copyObj->setGoogleCategory($this->getGoogleCategory());
+        $copyObj->setProductId($this->getProductId());
+        $copyObj->setCreatedAt($this->getCreatedAt());
+        $copyObj->setUpdatedAt($this->getUpdatedAt());
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
@@ -1026,7 +1121,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      * objects.
      *
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return                 \GoogleShopping\Model\GoogleshoppingAssociatedCategory Clone of current object.
+     * @return                 \GoogleShopping\Model\GoogleshoppingProduct Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1040,26 +1135,26 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
     }
 
     /**
-     * Declares an association between this object and a ChildCategory object.
+     * Declares an association between this object and a ChildProduct object.
      *
-     * @param                  ChildCategory $v
-     * @return                 \GoogleShopping\Model\GoogleshoppingAssociatedCategory The current object (for fluent API support)
+     * @param                  ChildProduct $v
+     * @return                 \GoogleShopping\Model\GoogleshoppingProduct The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setCategory(ChildCategory $v = null)
+    public function setProduct(ChildProduct $v = null)
     {
         if ($v === null) {
-            $this->setTheliaCategoryId(NULL);
+            $this->setProductId(NULL);
         } else {
-            $this->setTheliaCategoryId($v->getId());
+            $this->setProductId($v->getId());
         }
 
-        $this->aCategory = $v;
+        $this->aProduct = $v;
 
         // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildCategory object, it will not be re-added.
+        // If this object has already been added to the ChildProduct object, it will not be re-added.
         if ($v !== null) {
-            $v->addGoogleshoppingAssociatedCategory($this);
+            $v->addGoogleshoppingProduct($this);
         }
 
 
@@ -1068,26 +1163,26 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
 
 
     /**
-     * Get the associated ChildCategory object
+     * Get the associated ChildProduct object
      *
      * @param      ConnectionInterface $con Optional Connection object.
-     * @return                 ChildCategory The associated ChildCategory object.
+     * @return                 ChildProduct The associated ChildProduct object.
      * @throws PropelException
      */
-    public function getCategory(ConnectionInterface $con = null)
+    public function getProduct(ConnectionInterface $con = null)
     {
-        if ($this->aCategory === null && ($this->thelia_category_id !== null)) {
-            $this->aCategory = CategoryQuery::create()->findPk($this->thelia_category_id, $con);
+        if ($this->aProduct === null && ($this->product_id !== null)) {
+            $this->aProduct = ProductQuery::create()->findPk($this->product_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aCategory->addGoogleshoppingAssociatedCategories($this);
+                $this->aProduct->addGoogleshoppingProducts($this);
              */
         }
 
-        return $this->aCategory;
+        return $this->aProduct;
     }
 
     /**
@@ -1096,8 +1191,9 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
     public function clear()
     {
         $this->id = null;
-        $this->thelia_category_id = null;
-        $this->google_category = null;
+        $this->product_id = null;
+        $this->created_at = null;
+        $this->updated_at = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1119,7 +1215,7 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
         if ($deep) {
         } // if ($deep)
 
-        $this->aCategory = null;
+        $this->aProduct = null;
     }
 
     /**
@@ -1129,7 +1225,21 @@ abstract class GoogleshoppingAssociatedCategory implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(GoogleshoppingAssociatedCategoryTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(GoogleshoppingProductTableMap::DEFAULT_STRING_FORMAT);
+    }
+
+    // timestampable behavior
+
+    /**
+     * Mark the current object so that the update date doesn't get updated during next save
+     *
+     * @return     ChildGoogleshoppingProduct The current object (for fluent API support)
+     */
+    public function keepUpdateDateUnchanged()
+    {
+        $this->modifiedColumns[GoogleshoppingProductTableMap::UPDATED_AT] = true;
+
+        return $this;
     }
 
     /**
