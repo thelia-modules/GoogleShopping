@@ -20,20 +20,12 @@
         <language>en_US</language>
         <language>fr_FR</language>
     </languages>
-    <version></version>
+    <version>0.1</version>
     <author>
-        <name></name>
-        <email></email>
+        <name>Vincent Lopes-Vicente</name>
+        <email>vlopes@openstudio.fr</email>
     </author>
     <type>classic</type>
-    <!--
-    module dependencies
-    <required>
-        <module version="&gt;=0.1">Front</module>
-        <module version="~1.0">HookCart</module>
-        <module version="&gt;0.2">HookSearch</module>
-    </required>
-    -->
     <thelia>2.1.0</thelia>
     <stability>beta</stability>
 </module>

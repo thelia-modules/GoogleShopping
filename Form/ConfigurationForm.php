@@ -84,6 +84,17 @@ class ConfigurationForm extends BaseForm
                     new Constraints\NotBlank(),
                 )
             ))
+            ->add("target_country_id", "text", array(
+                'label' => Translator::getInstance()->trans(
+                    'googleshopping.configuration.target.country',
+                    array(),
+                    GoogleShopping::DOMAIN_NAME
+                ),
+                'data' => GoogleShopping::getConfigValue('target_country_id'),
+                'label_attr' => array(
+                    'for' => 'target_country_id'
+                )
+            ))
             ->add("attribute_color", "number", array(
                 'label' => Translator::getInstance()->trans(
                     'googleshopping.configuration.attribute.color',
