@@ -8,10 +8,12 @@ use GoogleShopping\Model\GoogleshoppingTaxonomy;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
+use Thelia\Log\Tlog;
 use Thelia\Model\AreaDeliveryModuleQuery;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\Category;
@@ -77,7 +79,7 @@ class ProductController extends BaseGoogleShoppingController
         $this->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imageEvent);
         $imageAbsolutePath = $imageEvent->getFileUrl();
 
-        //If item don't have mutltiple pse he don't need an itemGroupId
+        //If item don't have multiple pse he don't need an itemGroupId
         $itemGroupId = null;
 
         //Manage multiple pse for one product
@@ -94,16 +96,46 @@ class ProductController extends BaseGoogleShoppingController
             $productSaleElements->getFirst();
         }
 
-        /** @var ProductSaleElements $productSaleElement */
-        foreach ($productSaleElements as $productSaleElement) {
-            $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $itemGroupId);
-        }
+        $googleProducts = array();
 
-        //Save in database for prevent multiple add of same item (Google don't like it)
-        GoogleshoppingProductQuery::create()
-            ->filterByProductId($theliaProduct->getId())
-            ->findOneOrCreate()
-            ->save();
+        try {
+            /** @var ProductSaleElements $productSaleElement */
+            foreach ($productSaleElements as $productSaleElement) {
+                $googleProducts[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $itemGroupId);
+            }
+
+            foreach ($googleProducts as $googleProduct) {
+                Tlog::getInstance()->info($this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $googleProduct));
+            }
+
+            //Save in database for prevent multiple add of same item (Google don't like it)
+            GoogleshoppingProductQuery::create()
+                ->filterByProductId($theliaProduct->getId())
+                ->findOneOrCreate()
+                ->save();
+
+            return $this->generateRedirectFromRoute(
+                "admin.products.update",
+                array(),
+                array(
+                    'product_id' => $theliaProduct->getId(),
+                    'google_alert' => "success",
+                    'error_message' => ""
+                )
+            );
+
+
+        } catch (\Exception $e) {
+            return $this->generateRedirectFromRoute(
+                "admin.products.update",
+                array(),
+                array(
+                    'product_id' => $theliaProduct->getId(),
+                    'google_alert' => "error",
+                    'error_message' => "Error on Google Shopping insertion : ".$e->getMessage()
+                )
+            );
+        }
     }
 
     //TODO : maybe manage this by event
@@ -230,8 +262,7 @@ class ProductController extends BaseGoogleShoppingController
         $product->setShipping($googleShippings);
 
         var_dump($product);
-        $result = $this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
-        return $result;
+        return $product;
     }
 
     protected function checkCombination(ObjectCollection $productSaleElements)
@@ -345,9 +376,10 @@ class ProductController extends BaseGoogleShoppingController
         return $this->isValidGtin($cleanedCode);
     }
 
-    protected function clean($gtin, $fill = 14){
+    protected function clean($gtin, $fill = 14)
+    {
         if (is_numeric($gtin)) {
-            return $this->zfill($gtin,$fill);
+            return $this->zfill($gtin, $fill);
         } elseif (is_string($gtin)) {
             return $this->zfill(trim(str_replace("-", "", $gtin)), $fill);
         }
@@ -367,9 +399,9 @@ class ProductController extends BaseGoogleShoppingController
 
     protected function isGtinChecksumValid($code)
     {
-        $firstPart = substr($code, -1);
-        $checkSum = $this->gtinCheckSum(substr(0, strlen($code)-1));
-        return $firstPart == $checkSum;
+        $lastPart = substr($code, -1);
+        $checkSum = $this->gtinCheckSum(substr($code, 0, strlen($code)-1));
+        return $lastPart == $checkSum;
     }
 
     protected function gtinCheckSum($code)
@@ -377,7 +409,7 @@ class ProductController extends BaseGoogleShoppingController
         $total = 0;
 
         $codeArray = str_split($code);
-        foreach ($codeArray as $i => $c) {
+        foreach (array_values($codeArray) as $i => $c) {
             if ($i % 2 == 1) {
                 $total = $total + $c;
             } else {
@@ -388,10 +420,11 @@ class ProductController extends BaseGoogleShoppingController
         return $checkDigit;
     }
 
-    protected function zfill($int,$cnt) {
+    protected function zfill($int, $cnt)
+    {
         $int = intval($int);
         $nulls = "";
-        for($i=0; $i<($cnt-strlen($int)); $i++) {
+        for ($i=0; $i<($cnt-strlen($int)); $i++) {
             $nulls .= '0';
         }
         return $nulls.$int;
