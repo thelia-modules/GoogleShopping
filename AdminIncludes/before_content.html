@@ -1,0 +1,9 @@
+<div class="container">
+<div class="row">
+    {if "error" === $smarty.get.google_alert && null !== $smarty.get.error_message}
+        <div class="alert alert-danger col-md-12" role="alert">{$smarty.get.error_message}</div>
+    {elseif "success" === $smarty.get.google_alert}
+        <div class="alert alert-info col-md-12" role="alert">{intl l="Product added to Google with succes"}</div>
+    {/if}
+</div>
+</div>

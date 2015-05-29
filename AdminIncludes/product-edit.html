@@ -3,11 +3,6 @@
     <div class="col-md-12 title title-without-tabs">
         {intl l='GoogleShopping product management'}
     </div>
-{if "error" === $smarty.get.google_alert && null !== $smarty.get.error_message}
-    <div class="alert alert-danger col-md-12" role="alert">{$smarty.get.error_message}</div>
-{elseif "success" === $smarty.get.google_alert}
-    <div class="alert alert-info col-md-12" role="alert">{intl l="Product added to Google with succes"}</div>
-{/if}
 {if {$EXIST} != 1}
     {if {$CATEGORY_ASSOCIATED} == 1}
         <form action="/admin/module/googleshopping/add/{$ID}" method="post">

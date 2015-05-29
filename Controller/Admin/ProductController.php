@@ -261,7 +261,6 @@ class ProductController extends BaseGoogleShoppingController
         $product->setPrice($price);
         $product->setShipping($googleShippings);
 
-        var_dump($product);
         return $product;
     }
 
