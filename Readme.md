@@ -1,55 +1,38 @@
-# Google Shopping
+Google Shopping
+===
 
-Add a short description here. You can also add a screenshot if needed.
+Summary
+---
 
-## Installation
+1. [Description](#description_en_US)
+2. [Install](#install_en_US)
+3. [Usage](#usage_en_US)
 
-### Manually
 
-* Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is GoogleShopping.
-* Activate it in your thelia administration panel
+1. Description <a name="#description_en_US"></a>
+---
 
-### Composer
+This module allow you to add product to your Google Shopping account through the api.
 
-Add it in your main thelia composer.json file
 
+2. Install <a name="install_en_US"></a>
+---
+
+You can install this module with composer:
+
+```sh
+$ php composer.phar require thelia/google-shopping-module:~1.0
 ```
-composer require your-vendor/google-shopping-module:~1.0
-```
 
-## Usage
+3. Usage <a name="usage_en_US"></a>
+---
 
-Explain here how to use your module, how to configure it, etc.
+Before install this module you need to create a project in your google account for that you can follow Google's guide [Here](https://developers.google.com/shopping-content/v2/quickstart)
+Until part 5. For the part 4 you have to choose "Web application".
 
-## Hook
+After that you will be able to get your credentials to set in Thelia BackOffice after module activation.
+Then you need to associate your own categories with Google's one.
 
-If your module use one or more hook, fill this part. Explain which hooks are used.
+When everything is configured you can go to a product edit page in backOffice, tab module and if everything is good you will see a button for send product to google.
 
-
-## Loop
-
-If your module declare one or more loop, describe them here like this :
-
-[loop name]
-
-### Input arguments
-
-|Argument |Description |
-|---      |--- |
-|**arg1** | describe arg1 with an exemple. |
-|**arg2** | describe arg2 with an exemple. |
-
-### Output arguments
-
-|Variable   |Description |
-|---        |--- |
-|$VAR1    | describe $VAR1 variable |
-|$VAR2    | describe $VAR2 variable |
-
-### Exemple
-
-Add a complete exemple of your loop
-
-## Other ?
-
-If you have other think to put, feel free to complete your readme as you want.
+For send a product to google he need a valid GTIN (EAN)
