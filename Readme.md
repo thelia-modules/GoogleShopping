@@ -1,6 +1,11 @@
 Google Shopping
 ===
 
+Beta
+__
+Becareful this module is in beta stage. 
+He need lot of improvements and can contains some issues. 
+
 Summary
 ---
 
