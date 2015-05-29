@@ -212,7 +212,7 @@ class ProductController extends BaseGoogleShoppingController
         $checkGtin = $this->checkGtin($pse->getEanCode());
 
         if (false === $checkGtin) {
-            throw new \Exception("Invalid GTIN (EAN) code");
+            throw new \Exception("Invalid GTIN (EAN) code : ".$pse->getEanCode());
         }
 
         $product->setChannel('online');

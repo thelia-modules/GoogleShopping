@@ -24,24 +24,17 @@ class BaseGoogleShoppingController extends BaseAdminController
         if (isset($_SESSION['oauth_access_token'])) {
             $client->setAccessToken($_SESSION['oauth_access_token']);
             $this->service = new \Google_Service_ShoppingContent($client);
-            if ($client->isAccessTokenExpired()) {
-                $this->authenticate($client);
-            }
         } elseif (isset($_GET['code'])) {
             $token = $client->authenticate($_GET['code']);
+
             $_SESSION['oauth_access_token'] = $token;
             if (isset($_SESSION['gshopping_from_url'])) {
                 return RedirectResponse::create(URL::getInstance()->absoluteUrl($_SESSION['gshopping_from_url']));
             }
         } else {
-            $this->authenticate($client);
+            $_SESSION['gshopping_from_url'] = $_SERVER['REQUEST_URI'];
+            header('Location: ' . $client->createAuthUrl());
+            exit;
         }
-    }
-
-    public function authenticate(\Google_Client $client)
-    {
-        $_SESSION['gshopping_from_url'] = $_SERVER['REQUEST_URI'];
-        header('Location: ' . $client->createAuthUrl());
-        exit;
     }
 }
