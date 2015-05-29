@@ -12,7 +12,7 @@ class BaseGoogleShoppingController extends BaseAdminController
     protected $merchant_id;
     protected $service;
 
-    public function authorization()
+    public function getAuthorization()
     {
         $client = new \Google_Client();
         $client->setApplicationName(GoogleShopping::getConfigValue('application_name'));
@@ -21,20 +21,36 @@ class BaseGoogleShoppingController extends BaseAdminController
         $client->setRedirectUri(URL::getInstance()->absoluteUrl('/googleshopping/oauth2callback'));
         $client->setScopes('https://www.googleapis.com/auth/content');
 
-        if (isset($_SESSION['oauth_access_token'])) {
-            $client->setAccessToken($_SESSION['oauth_access_token']);
-            $this->service = new \Google_Service_ShoppingContent($client);
-        } elseif (isset($_GET['code'])) {
-            $token = $client->authenticate($_GET['code']);
+        $oAuthToken = $this->getSession()->get('oauth_access_token');
+        $code = $this->getRequest()->query->get('code');
 
-            $_SESSION['oauth_access_token'] = $token;
-            if (isset($_SESSION['gshopping_from_url'])) {
-                return RedirectResponse::create(URL::getInstance()->absoluteUrl($_SESSION['gshopping_from_url']));
+        if (isset($oAuthToken)) {
+            $client->setAccessToken($oAuthToken);
+            $this->service = new \Google_Service_ShoppingContent($client);
+        } elseif (isset($code)) {
+            $token = $client->authenticate($code);
+            $this->getRequest()->getSession()->set('oauth_access_token', $token);
+            if ($this->getSession()->get('gshopping_from_url')) {
+                return RedirectResponse::create(URL::getInstance()
+                    ->absoluteUrl($this->getSession()->get('gshopping_from_url')));
             }
         } else {
-            $_SESSION['gshopping_from_url'] = $_SERVER['REQUEST_URI'];
+            $this->getSession()->set('gshopping_from_url', $_SERVER['REQUEST_URI']);
             header('Location: ' . $client->createAuthUrl());
             exit;
         }
+    }
+
+    public function createGoogleClient()
+    {
+        $client = new \Google_Client();
+        $client->setApplicationName(GoogleShopping::getConfigValue('application_name'));
+        $client->setClientId(GoogleShopping::getConfigValue('client_id'));
+        $client->setClientSecret(GoogleShopping::getConfigValue('client_secret'));
+        $client->setRedirectUri(URL::getInstance()->absoluteUrl('/googleshopping/oauth2callback'));
+        $client->setScopes('https://www.googleapis.com/auth/content');
+        $client->setAccessToken($this->getSession()->get('oauth_access_token'));
+
+        return $client;
     }
 }

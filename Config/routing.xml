@@ -32,7 +32,7 @@
     </route>
 
     <route id="googleshopping.callback" path="/googleshopping/oauth2callback">
-        <default key="_controller">GoogleShopping\Controller\Admin\BaseGoogleShoppingController::authorization</default>
+        <default key="_controller">GoogleShopping\Controller\Admin\BaseGoogleShoppingController::getAuthorization</default>
     </route>
 
     <route id="googleshopping.add.product" path="/admin/module/googleshopping/add/{id}" methods="POST">

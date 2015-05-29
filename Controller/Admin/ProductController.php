@@ -8,7 +8,6 @@ use GoogleShopping\Model\GoogleshoppingTaxonomy;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\Security\AccessManager;
@@ -45,7 +44,8 @@ class ProductController extends BaseGoogleShoppingController
             return $response;
         }
 
-        $this->authorization();
+        $client = $this->createGoogleClient();
+        $service = new \Google_Service_ShoppingContent($client);
 
         //Get local and lang by admin config flag selected
         $locale = $this->getRequest()->get('locale');
@@ -105,7 +105,7 @@ class ProductController extends BaseGoogleShoppingController
             }
 
             foreach ($googleProducts as $googleProduct) {
-                Tlog::getInstance()->info($this->service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $googleProduct));
+                Tlog::getInstance()->info($service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $googleProduct));
             }
 
             //Save in database for prevent multiple add of same item (Google don't like it)
