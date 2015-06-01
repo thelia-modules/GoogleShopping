@@ -12,7 +12,7 @@ class BaseGoogleShoppingController extends BaseAdminController
     protected $merchant_id;
     protected $service;
 
-    public function getAuthorization()
+    public function setAuthorization()
     {
         $client = new \Google_Client();
         $client->setApplicationName(GoogleShopping::getConfigValue('application_name'));
@@ -26,18 +26,21 @@ class BaseGoogleShoppingController extends BaseAdminController
 
         if (isset($oAuthToken)) {
             $client->setAccessToken($oAuthToken);
+            if ($client->isAccessTokenExpired()) {
+                $client->refreshToken($this->getRequest()->getSession()->get('oauth_refresh_token'));
+            }
             $this->service = new \Google_Service_ShoppingContent($client);
         } elseif (isset($code)) {
-            $token = $client->authenticate($code);
+            $client->authenticate($code);
+            $token = $client->getAccessToken();
+            $refreshToken = $client->getRefreshToken();
+
             $this->getRequest()->getSession()->set('oauth_access_token', $token);
-            if ($this->getSession()->get('gshopping_from_url')) {
-                return RedirectResponse::create(URL::getInstance()
-                    ->absoluteUrl($this->getSession()->get('gshopping_from_url')));
-            }
+            $this->getRequest()->getSession()->set('oauth_refresh_token', $refreshToken);
+
+            return $this->generateRedirectFromRoute('admin');
         } else {
-            $this->getSession()->set('gshopping_from_url', $_SERVER['REQUEST_URI']);
-            header('Location: ' . $client->createAuthUrl());
-            exit;
+            return $this->generateRedirect($client->createAuthUrl());
         }
     }
 

@@ -31,8 +31,8 @@
         <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveConfiguration</default>
     </route>
 
-    <route id="googleshopping.callback" path="/googleshopping/oauth2callback">
-        <default key="_controller">GoogleShopping\Controller\Admin\BaseGoogleShoppingController::getAuthorization</default>
+    <route id="googleshopping.callback" path="/googleshopping/oauth2callback" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\BaseGoogleShoppingController::setAuthorization</default>
     </route>
 
     <route id="googleshopping.add.product" path="/admin/module/googleshopping/add/{id}" methods="POST">

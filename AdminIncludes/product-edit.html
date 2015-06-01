@@ -9,16 +9,28 @@
             {intl l="You have to authorise this site to send your products to GoogleShopping before adding them :"}
         </div>
         <div class="form-group col-md-3">
-            <a class="btn btn-default btn-primary form-control" href="{url path='/googleshopping/oauth2callback'}"><span class="glyphicon glyphicon-check"></span>Authorize</a>
+            <form action="{url path='/googleshopping/oauth2callback'}" method="get">
+                <input type="hidden" name="redirect" value="{url path={navigate to="current"}}" />
+                <button class="btn btn-default btn-primary form-control" type="submit">
+                    <span class="glyphicon glyphicon-check"></span>
+                    {intl l="Authorize"}
+                </button>
+            </form>
         </div>
     </div>
 {elseif true === $tokenExpired}
     <div class="form-group col-md-12">
         <div class="form-group col-md-7">
-            {intl l="The token for Google authorization has expired please renew him :"}
+            {intl l="You have to authorise this site to send your products to GoogleShopping before adding them :"}
         </div>
         <div class="form-group col-md-3">
-            <a class="btn btn-default btn-primary form-control" href="{url path='/googleshopping/oauth2callback'}"><span class="glyphicon glyphicon-check"></span>Renew</a>
+            <form action="{url path='/googleshopping/oauth2callback'}" method="get">
+                <input type="hidden" name="redirect" value="{url path={navigate to="current"}}" />
+                <button class="btn btn-default btn-primary form-control" type="submit">
+                    <span class="glyphicon glyphicon-check"></span>
+                    {intl l="Renew"}
+                </button>
+            </form>
         </div>
     </div>
 {else}
