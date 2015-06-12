@@ -116,21 +116,6 @@ class ConfigurationForm extends BaseForm
                 'label_attr' => array(
                     'for' => 'attribute_size'
                 )
-            ))
-            ->add("shipping_price", "text", array(
-                'required' => true,
-                'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.shippingprice',
-                    array(),
-                    GoogleShopping::DOMAIN_NAME
-                ),
-                'data' => GoogleShopping::getConfigValue('shipping_price'),
-                'label_attr' => array(
-                    'for' => 'shipping_price'
-                ),
-                "constraints" => array(
-                    new Constraints\NotBlank(),
-                )
             ));
     }
 

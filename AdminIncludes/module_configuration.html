@@ -1,182 +1,199 @@
-<div class="row">
-    {default_translation_domain domain='googleshopping.ai'}
-    <div class="col-md-12 general-block-decorator">
-        <div class="col-md-12 title title-without-tabs">
-            {intl l='Configuration GoogleShopping'}
-        </div>
-        {form name="googleshopping.configuration"}
-            <form method="post" action='{url path="/admin/module/googleshopping/configuration"}'>
-                {form_hidden_fields form=$form}
-                <div class="col-md-12">
-                    <div class="row">
-                        {form_field form=$form field="application_name"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
-                                <span class="help-block">{intl l="The application name you have define when you have create the api apllication "}</span>
-                            </div>
-                        {/form_field}
+{default_translation_domain domain='googleshopping.ai'}
+{assign var="tab" value="configuration"}
+{if isset($smarty.get.current_tab)}
+    {assign var="tab" value=$smarty.get.current_tab}
+{/if}
+<div class="general-block-decorator">
+    <div class="row">
+        <div class="col-md-12">
+            <ul id="tabbed-menu" class="nav nav-tabs">
+                <li class="{if $tab eq "configuration"}active{/if}"><a data-toggle="tab" href="#configuration">{intl l="Configuration"}</a> </li>
+                <li class="{if $tab eq "association"}active{/if}"><a data-toggle="tab" href="#association">{intl l="Google Categories Associations"}</a></li>
+            </ul>
 
-                        {form_field form=$form field="client_id"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <input id="{$label_attr.for}" class="form-control" type="text" name="{$name}" value="{$value}" required/>
-                                <span class="help-block">{intl l="The client ID of the api who can be found in https://console.developers.google.com at APIs & auth > Credentials"}</span>
-                            </div>
-                        {/form_field}
+            <div class="tab-content">
+                <div id="configuration" class="tab-pane {if $tab eq "configuration"}active{/if} form-container">
+                    <div class="panel panel-default">
+                        <div class="panel-heading clearfix">
+                            {intl l='Configuration GoogleShopping'}
+                        </div>
+                        <div class="panel-body">
+                            {form name="googleshopping.configuration"}
+                                <form method="post" action='{url path="/admin/module/googleshopping/configuration"}'>
+                                    {form_hidden_fields form=$form}
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            {form_field form=$form field="application_name"}
+                                                <div class="form-group col-md-6 {if $error}has-error{/if}">
+                                                    <label for="{$label_attr.for}">{$label}</label>
+                                                    <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
+                                                    <span class="help-block">{intl l="The application name you have define when you have create the api apllication "}</span>
+                                                </div>
+                                            {/form_field}
 
-                        {form_field form=$form field="client_secret"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <input id="{$label_attr.for}" class="form-control"  type="text" name="{$name}" value="{$value}" required/>
-                                <span class="help-block">{intl l="The client secret associate to client ID"}</span>
-                            </div>
-                        {/form_field}
+                                            {form_field form=$form field="client_id"}
+                                                <div class="form-group col-md-6 {if $error}has-error{/if}">
+                                                    <label for="{$label_attr.for}">{$label}</label>
+                                                    <input id="{$label_attr.for}" class="form-control" type="text" name="{$name}" value="{$value}" required/>
+                                                    <span class="help-block">{intl l="The client ID of the api who can be found in https://console.developers.google.com at APIs & auth > Credentials"}</span>
+                                                </div>
+                                            {/form_field}
 
-                        {form_field form=$form field="merchant_id"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
-                                <span class="help-block">{intl l="Your google merchant ID, can be found in Google Merchant center"}</span>
-                            </div>
-                        {/form_field}
+                                            {form_field form=$form field="client_secret"}
+                                                <div class="form-group col-md-6 {if $error}has-error{/if}">
+                                                    <label for="{$label_attr.for}">{$label}</label>
+                                                    <input id="{$label_attr.for}" class="form-control"  type="text" name="{$name}" value="{$value}" required/>
+                                                    <span class="help-block">{intl l="The client secret associate to client ID"}</span>
+                                                </div>
+                                            {/form_field}
 
-                        {form_field form=$form field="target_country_id"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <select id="{$label_attr.for}" class="form-control"  name="{$name}">
-                                    {loop type="country" name="target_country"}
-                                        <option value="{$ID}" {if $value == $ID}selected{/if} >{$TITLE}</option>
-                                    {/loop}
-                                </select>
-                                <span class="help-block">{intl l="The target country for Google Shopping"}</span>
-                            </div>
-                        {/form_field}
+                                            {form_field form=$form field="merchant_id"}
+                                                <div class="form-group col-md-6 {if $error}has-error{/if}">
+                                                    <label for="{$label_attr.for}">{$label}</label>
+                                                    <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
+                                                    <span class="help-block">{intl l="Your google merchant ID, can be found in Google Merchant center"}</span>
+                                                </div>
+                                            {/form_field}
 
-                        {form_field form=$form field="shipping_price"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
-                                <span class="help-block">{intl l="A fix shipping price for notice to Google Shopping"}</span>
-                            </div>
-                        {/form_field}
+                                            {form_field form=$form field="target_country_id"}
+                                                <div class="form-group col-md-6 {if $error}has-error{/if}">
+                                                    <label for="{$label_attr.for}">{$label}</label>
+                                                    <select id="{$label_attr.for}" class="form-control"  name="{$name}">
+                                                        {loop type="country" name="target_country"}
+                                                            <option value="{$ID}" {if $value == $ID}selected{/if} >{$TITLE}</option>
+                                                        {/loop}
+                                                    </select>
+                                                    <span class="help-block">{intl l="The target country for Google Shopping"}</span>
+                                                </div>
+                                            {/form_field}
 
-                        {form_field form=$form field="attribute_color"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
-                                <span class="help-block">{intl l="The ID of thelia color attributes if you have one"}</span>
-                            </div>
-                        {/form_field}
+                                            {form_field form=$form field="attribute_color"}
+                                                <div class="form-group col-md-6 {if $error}has-error{/if}">
+                                                    <label for="{$label_attr.for}">{$label}</label>
+                                                    <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
+                                                    <span class="help-block">{intl l="The ID of thelia color attributes if you have one"}</span>
+                                                </div>
+                                            {/form_field}
 
-                        {form_field form=$form field="attribute_size"}
-                            <div class="form-group col-md-4 {if $error}has-error{/if}">
-                                <label for="{$label_attr.for}">{$label}</label>
-                                <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
-                                <span class="help-block">{intl l="The ID of thelia size attributes if you have one"}</span>
-                            </div>
-                        {/form_field}
+                                            {form_field form=$form field="attribute_size"}
+                                                <div class="form-group col-md-6 {if $error}has-error{/if}">
+                                                    <label for="{$label_attr.for}">{$label}</label>
+                                                    <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
+                                                    <span class="help-block">{intl l="The ID of thelia size attributes if you have one"}</span>
+                                                </div>
+                                            {/form_field}
 
-                        <div class="form-group col-md-4">
-                            <label class="control-label">&nbsp;</label>
-                            <button class="btn btn-default btn-primary form-control" type="submit">
-                                <span class="glyphicon glyphicon-check"></span>
-                                {intl l="Save"}
-                            </button>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label">&nbsp;</label>
+                                                <button class="btn btn-default btn-primary form-control" type="submit">
+                                                    <span class="glyphicon glyphicon-check"></span>
+                                                    {intl l="Save"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            {/form}
                         </div>
                     </div>
                 </div>
-            </form>
-        {/form}
 
-        <div class="col-md-12 title title-without-tabs">
-            {intl l='GoogleShopping category association'}
-        </div>
-        {form name="googleshopping.taxonomy"}
-            <form action="{url path="/admin/modules/googleshopping/taxonomy/associate"}" method="post">
-                {form_hidden_fields form=$form}
+                <div id="association" class="tab-pane {if $tab eq "association"}active{/if} form-container">
+                    <div class="panel panel-default">
+                        <div class="panel-heading clearfix">
+                            {intl l='GoogleShopping category association'}
+                        </div>
+                        <div class="panel-body">
+                            {form name="googleshopping.taxonomy"}
+                                <form action="{url path="/admin/modules/googleshopping/taxonomy/associate"}" method="post">
+                                    {form_hidden_fields form=$form}
 
-                <div class="col-md-12">
-                    <div class="row">
-                        <div class="form-group col-md-3">
-                            {form_field form=$form field="thelia_category_id"}
-                                <label for="thelia-category">{intl l="Thelia category"}</label>
-                                <select id="thelia-category" class="form-control" name="{$name}">
-                                    {loop type="category" name="thelia-category"}
-                                        <option value="{$ID}">{$TITLE}</option>
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="form-group col-md-3">
+                                                {form_field form=$form field="thelia_category_id"}
+                                                    <label for="thelia-category">{intl l="Thelia category"}</label>
+                                                    <select id="thelia-category" class="form-control" name="{$name}">
+                                                        {loop type="category" name="thelia-category"}
+                                                            <option value="{$ID}">{$TITLE}</option>
+                                                        {/loop}
+                                                    </select>
+                                                {/form_field}
+                                            </div>
+                                            <div class="form-group col-md-3">
+                                                <label for="search-taxonomy">{intl l="Search category (English only)"}</label>
+                                                <div class="input-group">
+                                                    <input class="form-control" type="text" id="search-taxonomy"/>
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-arrow-right"></span>
+                                            </span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-3">
+                                                {form_field form=$form field="google_category"}
+                                                    <label for="google-taxonomy">{intl l="Google Category"}</label>
+                                                    <select class="form-control" name="{$name}" id="google-taxonomy">
+
+                                                    </select>
+                                                {/form_field}
+                                            </div>
+                                            <div class="form-group col-md-3">
+                                                <label class="control-label">&nbsp;</label>
+                                                <button class="btn btn-default btn-primary form-control" type="submit">
+                                                    <span class="glyphicon glyphicon-check"></span>
+                                                    {intl l="Associate"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            {/form}
+                            <div class="table-responsive col-md-12">
+                                <table class="table table-striped table-condensed table-left-aligned">
+                                    <caption class="clearfix">
+                                        {intl l="GoogleShopping associated categories"}
+                                    </caption>
+                                    {loop type="googleshopping.category.associated" name="googleshopping_category_associated"}
+                                    {if $LOOP_COUNT === 1}
+                                        <thead>
+                                        <tr>
+                                            <th>{intl l="Thelia category Id"}</th>
+                                            <th>{intl l="Thelia category Title"}</th>
+                                            <th>{intl l="Associated Google category"}</th>
+                                        </tr>
+                                        </thead>
+                                    {/if}
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                {$THELIA_CATEGORY_ID}
+                                            </td>
+                                            <td>
+                                                {$THELIA_CATEGORY_TITLE}
+                                            </td>
+                                            <td>
+                                                {$GOOGLE_CATEGORY}
+                                            </td>
+                                        </tr>
+                                        </tbody>
                                     {/loop}
-                                </select>
-                            {/form_field}
-                        </div>
-                        <div class="form-group col-md-3">
-                                <label for="search-taxonomy">{intl l="Search category (English only)"}</label>
-                            <div class="input-group">
-                                <input class="form-control" type="text" id="search-taxonomy"/>
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-arrow-right"></span>
-                                </span>
+                                    {elseloop rel="googleshopping_category_associated"}
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <p class="alert alert-info" role="alert">
+                                                    {intl l="No associated category"}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    {/elseloop}
+                                </table>
                             </div>
-                        </div>
-                        <div class="form-group col-md-3">
-                            {form_field form=$form field="google_category"}
-                                <label for="google-taxonomy">{intl l="Google Category"}</label>
-                                <select class="form-control" name="{$name}" id="google-taxonomy">
-
-                                </select>
-                            {/form_field}
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label class="control-label">&nbsp;</label>
-                            <button class="btn btn-default btn-primary form-control" type="submit">
-                                <span class="glyphicon glyphicon-check"></span>
-                                {intl l="Associate"}
-                            </button>
                         </div>
                     </div>
                 </div>
-            </form>
-        {/form}
-        <div class="table-responsive col-md-12">
-            <table class="table table-striped table-condensed table-left-aligned">
-                <caption class="clearfix">
-                    {intl l="GoogleShopping associated categories"}
-                </caption>
-                {loop type="googleshopping.category.associated" name="googleshopping_category_associated"}
-                    {if $LOOP_COUNT === 1}
-                        <thead>
-                            <tr>
-                                <th>{intl l="Thelia category Id"}</th>
-                                <th>{intl l="Thelia category Title"}</th>
-                                <th>{intl l="Associated Google category"}</th>
-                            </tr>
-                        </thead>
-                    {/if}
-                    <tbody>
-                        <tr>
-                            <td>
-                                {$THELIA_CATEGORY_ID}
-                            </td>
-                            <td>
-                                {$THELIA_CATEGORY_TITLE}
-                            </td>
-                            <td>
-                                {$GOOGLE_CATEGORY}
-                            </td>
-                        </tr>
-                    </tbody>
-                {/loop}
-                {elseloop rel="googleshopping_category_associated"}
-                    <tbody>
-                        <tr>
-                            <td>
-                                <p class="alert alert-info" role="alert">
-                                    {intl l="No associated category"}
-                                </p>
-                            </td>
-                        </tr>
-                    </tbody>
-                {/elseloop}
-            </table>
+            </div>
         </div>
     </div>
 </div>
