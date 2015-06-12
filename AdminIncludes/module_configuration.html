@@ -14,12 +14,18 @@
             <div class="tab-content">
                 <div id="configuration" class="tab-pane {if $tab eq "configuration"}active{/if} form-container">
                     <div class="panel panel-default">
-                        <div class="panel-heading clearfix">
-                            {intl l='Configuration GoogleShopping'}
-                        </div>
-                        <div class="panel-body">
-                            {form name="googleshopping.configuration"}
-                                <form method="post" action='{url path="/admin/module/googleshopping/configuration"}'>
+                        {form name="googleshopping.api.configuration"}
+                            <form method="post" action='{url path="/admin/module/googleshopping/api/configuration"}'>
+                                <div class="panel-heading">
+                                    <h4>{intl l="Google Api configuration"}</h4>
+
+                                    {include
+                                    file      = "includes/inner-form-toolbar.html"
+                                    hide_flags = true
+                                    close_url = {url path='/admin/modules'}
+                                    }
+                                </div>
+                                <div class="panel-body">
                                     {form_hidden_fields form=$form}
                                     <div class="col-md-12">
                                         <div class="row">
@@ -46,7 +52,29 @@
                                                     <span class="help-block">{intl l="The client secret associate to client ID"}</span>
                                                 </div>
                                             {/form_field}
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        {/form}
+                    </div>
+                    <div class="panel panel-default">
+                        {form name="googleshopping.merchant.configuration"}
+                            <form method="post" action='{url path="/admin/module/googleshopping/merchant/configuration"}'>
+                                <div class="panel-heading">
+                                    <h4>{intl l="Google Merchant configuration"}</h4>
 
+                                    {include
+                                    file      = "includes/inner-form-toolbar.html"
+                                    hide_flags = true
+                                    close_url = {url path='/admin/modules'}
+                                    }
+                                </div>
+                                <div class="panel-body">
+
+                                    {form_hidden_fields form=$form}
+                                    <div class="col-md-12">
+                                        <div class="row">
                                             {form_field form=$form field="merchant_id"}
                                                 <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                     <label for="{$label_attr.for}">{$label}</label>
@@ -82,19 +110,11 @@
                                                     <span class="help-block">{intl l="The ID of thelia size attributes if you have one"}</span>
                                                 </div>
                                             {/form_field}
-
-                                            <div class="form-group col-md-6">
-                                                <label class="control-label">&nbsp;</label>
-                                                <button class="btn btn-default btn-primary form-control" type="submit">
-                                                    <span class="glyphicon glyphicon-check"></span>
-                                                    {intl l="Save"}
-                                                </button>
-                                            </div>
                                         </div>
                                     </div>
-                                </form>
-                            {/form}
-                        </div>
+                                </div>
+                            </form>
+                        {/form}
                     </div>
                 </div>
 

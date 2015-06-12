@@ -27,8 +27,12 @@
     ...
     </route>
     -->
-    <route id="googleshopping.configuration" path="/admin/module/googleshopping/configuration" methods="POST">
-        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveConfiguration</default>
+    <route id="googleshopping.configuration" path="/admin/module/googleshopping/api/configuration" methods="POST">
+        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveApiConfiguration</default>
+    </route>
+
+    <route id="googleshopping.configuration" path="/admin/module/googleshopping/merchant/configuration" methods="POST">
+        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveMerchantConfiguration</default>
     </route>
 
     <route id="googleshopping.callback" path="/googleshopping/oauth2callback" methods="GET">
