@@ -2,6 +2,8 @@
 
 namespace GoogleShopping\Controller\Admin;
 
+use GoogleShopping\Event\GoogleProductEvent;
+use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Model\GoogleshoppingProductQuery;
 use GoogleShopping\Model\GoogleshoppingTaxonomy;
@@ -10,6 +12,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
+use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Log\Tlog;
@@ -37,41 +40,43 @@ use Thelia\TaxEngine\Calculator;
 
 class ProductController extends BaseGoogleShoppingController
 {
-
     public function addProduct($id)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
             return $response;
         }
 
+        $eventArgs = [];
         //Get local and lang by admin config flag selected
         $locale = $this->getRequest()->get('locale');
-        $needGtin = $this->getRequest()->get('gtin');
-        $lang = LangQuery::create()->findOneByLocale($locale);
+        $eventArgs['ignoreGtin'] = $this->getRequest()->get('gtin') === "on" ? true : false;
+        $eventArgs['lang'] = LangQuery::create()->findOneByLocale($locale);
 
+        //If the authorisation is not set yet or has expired
         if (false === $this->checkGoogleAuth()) {
-            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=$needGtin");
+            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
             return $this->generateRedirect('/googleshopping/oauth2callback');
         }
 
+        //Init google client
         $client = $this->createGoogleClient();
-        $service = new \Google_Service_ShoppingContent($client);
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
 
         //Get target country in config TODO : Manage more than one country
         $targetCountryId = GoogleShopping::getConfigValue('target_country_id');
-        $targetCountry = CountryQuery::create()->findOneById($targetCountryId);
+        $eventArgs["targetCountry"] = CountryQuery::create()->findOneById($targetCountryId);
 
         //Get the product, his category and his google associated category
         $theliaProduct = ProductQuery::create()
             ->joinWithI18n($locale)
             ->findOneById($id);
-        $category =  CategoryQuery::create()
+        $eventArgs['theliaCategory'] =  CategoryQuery::create()
             ->findOneById($theliaProduct->getDefaultCategoryId());
-        $googleCategory = GoogleshoppingTaxonomyQuery::create()
-            ->findOneByTheliaCategoryId($category->getId());
+        $eventArgs['googleCategory'] = GoogleshoppingTaxonomyQuery::create()
+            ->findOneByTheliaCategoryId($eventArgs['theliaCategory']->getId());
 
         //Association is mandatory
-        if (null === $googleCategory) {
+        if (null === $eventArgs['googleCategory']) {
             throw new \Exception("Category of product is not associated with a Google category, please fix it in module configurartion");
         }
 
@@ -83,22 +88,21 @@ class ProductController extends BaseGoogleShoppingController
         $productImage = $theliaProduct->getProductImages()->getFirst();
         $imageEvent = $this->createImageEvent($productImage);
         $this->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imageEvent);
-        $imageAbsolutePath = $imageEvent->getFileUrl();
+        $eventArgs['imagePath'] = $imageEvent->getFileUrl();
 
         //If item don't have multiple pse he don't need an itemGroupId
-        $itemGroupId = null;
+        $eventArgs['itemGroupId'] = null;
 
         //Manage multiple pse for one product
         if ($productSaleElements->count() > 1) {
             $checkCombination = $this->checkCombination($productSaleElements);
-            $itemGroupId =  $checkCombination === true ? $theliaProduct->getRef() : null;
+            $eventArgs['itemGroupId'] = $checkCombination === true ? $theliaProduct->getRef() : null;
         }
 
         //Find all shipping available and get hist postage
-        $shippings = $this->getShippings($targetCountry);
+        $eventArgs['shippings'] = $this->getShippings($eventArgs['targetCountry']);
 
-
-        if ($itemGroupId === null) {
+        if ($eventArgs['itemGroupId'] === null) {
             $productSaleElements->getFirst();
         }
 
@@ -107,9 +111,13 @@ class ProductController extends BaseGoogleShoppingController
         try {
             /** @var ProductSaleElements $productSaleElement */
             foreach ($productSaleElements as $productSaleElement) {
-                $googleProducts[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $needGtin, $itemGroupId);
+                //$googleProducts[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $ignoreGtin, $itemGroupId);
+                $googleProductEvent = new GoogleProductEvent($theliaProduct, $productSaleElement, $googleShoppingService, $eventArgs);
+                $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD, $googleProductEvent);
             }
 
+
+            /*
             foreach ($googleProducts as $googleProduct) {
                 Tlog::getInstance()->info($service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $googleProduct));
             }
@@ -119,6 +127,7 @@ class ProductController extends BaseGoogleShoppingController
                 ->filterByProductId($theliaProduct->getId())
                 ->findOneOrCreate()
                 ->save();
+            */
 
             return $this->generateRedirectFromRoute(
                 "admin.products.update",
@@ -126,19 +135,74 @@ class ProductController extends BaseGoogleShoppingController
                 array(
                     'product_id' => $theliaProduct->getId(),
                     'google_alert' => "success",
-                    'error_message' => ""
+                    'google_message' => "Product added to Google with succes"
                 )
             );
 
 
         } catch (\Exception $e) {
+            if (true == $this->getRequest()->get('ajax')) {
+                return JsonResponse::create($e->getMessage(), 400);
+            }
             return $this->generateRedirectFromRoute(
                 "admin.products.update",
                 array(),
                 array(
                     'product_id' => $theliaProduct->getId(),
                     'google_alert' => "error",
-                    'error_message' => "Error on Google Shopping insertion : ".$e->getMessage()
+                    'google_message' => "Error on Google Shopping insertion : ".$e->getMessage()
+                )
+            );
+        }
+    }
+
+    public function deleteProduct($id)
+    {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
+            return $response;
+        }
+
+        //Init google client
+        $client = $this->createGoogleClient();
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+        //If the authorisation is not set yet or has expired
+        if (false === $this->checkGoogleAuth()) {
+            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/delete/$id");
+            return $this->generateRedirect('/googleshopping/oauth2callback');
+        }
+
+        try {
+            $product = ProductQuery::create()
+                ->findPk($id);
+            $productSaleElements = ProductSaleElementsQuery::create()
+                ->findByProductId($id);
+
+            foreach ($productSaleElements as $productSaleElement) {
+                $googleProductEvent = new GoogleProductEvent($product, $productSaleElement, $googleShoppingService);
+                $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE, $googleProductEvent);
+            }
+
+            return $this->generateRedirectFromRoute(
+                "admin.products.update",
+                array(),
+                array(
+                    'product_id' => $product->getId(),
+                    'google_alert' => "success",
+                    'google_message' => "Product deleted from Google with success"
+                )
+            );
+        } catch (\Exception $e) {
+            if (true == $this->getRequest()->get('ajax')) {
+                return JsonResponse::create($e->getMessage(), 400);
+            }
+            return $this->generateRedirectFromRoute(
+                "admin.products.update",
+                array(),
+                array(
+                    'product_id' => $id,
+                    'google_alert' => "error",
+                    'google_message' => "Error on Google Shopping deletion : ".$e->getMessage()
                 )
             );
         }
@@ -154,7 +218,7 @@ class ProductController extends BaseGoogleShoppingController
         GoogleshoppingTaxonomy $googleCategory,
         Country $targetCountry,
         $shippings,
-        $needGtin,
+        $passGtin,
         $itemGroupId = null
     ) {
         $product = new \Google_Service_ShoppingContent_Product();
@@ -207,12 +271,10 @@ class ProductController extends BaseGoogleShoppingController
             }
         }
 
-
         $brand = $theliaProduct->getBrand();
         $availability = $pse->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
-        if ($needGtin === "on") {
-            //TODO : Add better check to verify validity of GTIN
+        if ($passGtin !== "on") {
             if (null === $pse->getEanCode()) {
                 throw new \Exception("Empty GTIN (EAN) code");
             }
@@ -226,7 +288,6 @@ class ProductController extends BaseGoogleShoppingController
         } else {
             $product->setIdentifierExists(false); //Product don't have GTIN
         }
-
 
         $product->setChannel('online');
         $product->setContentLanguage($lang->getCode()); //Lang of product
@@ -248,6 +309,7 @@ class ProductController extends BaseGoogleShoppingController
         $taxCalculator->load($theliaProduct, $targetCountry);
         $price = new \Google_Service_ShoppingContent_Price();
         $price->setValue($taxCalculator->getTaxedPrice($psePrice->getPrice()));
+
         $price->setCurrency('EUR');
 
         //Delivery shippings
@@ -440,6 +502,4 @@ class ProductController extends BaseGoogleShoppingController
         }
         return $nulls.$int;
     }
-
-
 }

@@ -52,4 +52,13 @@
         <requirement key="id">\d+</requirement>
     </route>
 
+    <route id="googleshopping.add.products" path="/admin/module/googleshopping/add/products" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::addProducts</default>
+    </route>
+
+    <route id="googleshopping.delete.product" path="/admin/module/googleshopping/delete/{id}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::deleteProduct</default>
+        <requirement key="id">\d+</requirement>
+    </route>
+
 </routes>
