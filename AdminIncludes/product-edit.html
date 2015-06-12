@@ -13,8 +13,8 @@
                     <label for="gshopping-submit">{intl l="Everything is ok this product can be send to google :"}</label>
                 </div>
                 <div class="form-group col-md-12">
-                    <label for="gshopping-gtin">{intl l="If this product is unique and don't need a GTIN/EAN please uncheck this box :"}</label>
-                    <input id="gshopping-gtin" type="checkbox" name="gtin" checked>
+                    <label for="gshopping-gtin">{intl l="If this product is unique and don't need a GTIN/EAN please check this box :"}</label>
+                    <input id="gshopping-gtin" type="checkbox" name="gtin">
                     <span class="help-block">{intl l="Becareful if your product is not in case below you need a valid GTIN :"}<br>
                         <ul>
                             <li>{intl l="custom goods or one-of-a-kind items, like custom t-shirts, art, and perishables."}</li>
@@ -32,7 +32,7 @@
         </form>
     {else}
         <p class="alert alert-warning col-md-12">
-            {intl l="You have to associate the category of this product to the google's category <a href='%link'>here</a> before send it to google." link={url path='/admin/module/GoogleShopping'}}
+            {intl l="You have to associate the category of this product to a google category <a href='%link'>here</a> before send it to google." link={url path='/admin/module/GoogleShopping'}}
         </p>
     {/if}
 {else}

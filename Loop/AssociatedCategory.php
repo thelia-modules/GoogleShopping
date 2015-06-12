@@ -9,6 +9,7 @@ use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
 use Thelia\Core\Template\Element\PropelSearchLoopInterface;
+use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Model\CategoryQuery;
 
@@ -16,12 +17,20 @@ class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
 {
     public function getArgDefinitions()
     {
-        return new ArgumentCollection();
+        return new ArgumentCollection(
+            Argument::createIntTypeArgument('category_id')
+        );
     }
 
     public function buildModelCriteria()
     {
-        return GoogleshoppingTaxonomyQuery::create();
+        $query = GoogleshoppingTaxonomyQuery::create();
+
+        if($this->getCategoryId()) {
+            $query->filterByTheliaCategoryId($this->getCategoryId());
+        }
+
+        return $query;
     }
 
     public function parseResults(LoopResult $loopResult)

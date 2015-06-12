@@ -17,6 +17,50 @@
                     $("#google-taxonomy").html(res);
                 })
             }
-        })
+        });
+
+        $(".check-all-gtin").click(function(event) {
+            var catId = $(this).data("category");
+            if(this.checked) {
+                $('.check-gtin-'+catId).each(function() {
+                    this.checked = true;
+                });
+            } else {
+                $('.check-gtin-'+catId).each(function() {
+                    this.checked = false;
+                });
+            }
+        });
+
+        $(".check-all-product").click(function(event) {
+            var catId = $(this).data("category");
+            if(this.checked) {
+                $('.check-product-'+catId).each(function() {
+                    this.checked = true;
+                });
+            } else {
+                $('.check-product-'+catId).each(function() {
+                    this.checked = false;
+                });
+            }
+        });
+
+        $(".send-checked").click(function (event) {
+            var catId = $(this).data("category");
+            $('.check-product-'+catId+':checked').each(function() {
+                var productId = $(this).data("product");
+                $("#td-product-"+productId).html('<span class="loading" style="margin:auto"></span>');
+                var form = $("#form-product-"+productId);
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize()
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    $("#td-product-" + productId).html(jqXHR.responseText);
+                }).done(function(data){
+                    $("#td-product-"+productId).html('The products was added with success');
+                });
+            });
+        });
     })
 </script>

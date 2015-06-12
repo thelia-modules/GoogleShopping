@@ -10,6 +10,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
+use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Log\Tlog;
@@ -37,7 +38,6 @@ use Thelia\TaxEngine\Calculator;
 
 class ProductController extends BaseGoogleShoppingController
 {
-
     public function addProduct($id)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
@@ -46,11 +46,11 @@ class ProductController extends BaseGoogleShoppingController
 
         //Get local and lang by admin config flag selected
         $locale = $this->getRequest()->get('locale');
-        $needGtin = $this->getRequest()->get('gtin');
+        $passGtin = $this->getRequest()->get('gtin');
         $lang = LangQuery::create()->findOneByLocale($locale);
 
         if (false === $this->checkGoogleAuth()) {
-            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=$needGtin");
+            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=$passGtin");
             return $this->generateRedirect('/googleshopping/oauth2callback');
         }
 
@@ -107,7 +107,7 @@ class ProductController extends BaseGoogleShoppingController
         try {
             /** @var ProductSaleElements $productSaleElement */
             foreach ($productSaleElements as $productSaleElement) {
-                $googleProducts[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $needGtin, $itemGroupId);
+                $googleProducts[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $passGtin, $itemGroupId);
             }
 
             foreach ($googleProducts as $googleProduct) {
@@ -132,6 +132,9 @@ class ProductController extends BaseGoogleShoppingController
 
 
         } catch (\Exception $e) {
+            if (true == $this->getRequest()->get('ajax')) {
+                return JsonResponse::create($e->getMessage(), 400);
+            }
             return $this->generateRedirectFromRoute(
                 "admin.products.update",
                 array(),
@@ -154,7 +157,7 @@ class ProductController extends BaseGoogleShoppingController
         GoogleshoppingTaxonomy $googleCategory,
         Country $targetCountry,
         $shippings,
-        $needGtin,
+        $passGtin,
         $itemGroupId = null
     ) {
         $product = new \Google_Service_ShoppingContent_Product();
@@ -211,8 +214,7 @@ class ProductController extends BaseGoogleShoppingController
         $brand = $theliaProduct->getBrand();
         $availability = $pse->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
-        if ($needGtin === "on") {
-            //TODO : Add better check to verify validity of GTIN
+        if ($passGtin !== "on") {
             if (null === $pse->getEanCode()) {
                 throw new \Exception("Empty GTIN (EAN) code");
             }
@@ -440,6 +442,4 @@ class ProductController extends BaseGoogleShoppingController
         }
         return $nulls.$int;
     }
-
-
 }

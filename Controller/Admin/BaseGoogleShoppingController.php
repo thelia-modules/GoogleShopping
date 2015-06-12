@@ -3,7 +3,6 @@
 namespace GoogleShopping\Controller\Admin;
 
 use GoogleShopping\GoogleShopping;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Tools\URL;
 
@@ -25,10 +24,15 @@ class BaseGoogleShoppingController extends BaseAdminController
         $oAuthToken = $this->getSession()->get('oauth_access_token');
         $code = $this->getRequest()->query->get('code');
 
-        $redirection = '/admin';
+        $redirection = '/admin/module/GoogleShopping';
 
+        //Manage redirection after auth
         if ($url = $this->getSession()->get('google_action_url')) {
             $redirection = $url;
+            $this->getSession()->set('google_action_url', null);
+        } elseif ($url = $this->getRequest()->query->get('redirect')) {
+            $redirection = $url;
+            $this->getSession()->set('google_action_url', $redirection);
         }
 
         if (isset($oAuthToken)) {
@@ -45,7 +49,10 @@ class BaseGoogleShoppingController extends BaseAdminController
             $refreshToken = $client->getRefreshToken();
 
             $this->getSession()->set('oauth_access_token', $token);
-            GoogleShopping::setConfigValue('oauth_refresh_token', $refreshToken);
+
+            if ($refreshToken) {
+                GoogleShopping::setConfigValue('oauth_refresh_token', $refreshToken);
+            }
 
             return $this->generateRedirect($redirection);
         } else {

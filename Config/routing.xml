@@ -52,4 +52,8 @@
         <requirement key="id">\d+</requirement>
     </route>
 
+    <route id="googleshopping.add.products" path="/admin/module/googleshopping/add/products" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::addProducts</default>
+    </route>
+
 </routes>
