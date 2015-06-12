@@ -15,6 +15,7 @@ class BaseGoogleShoppingController extends BaseAdminController
     public function setAuthorization()
     {
         $client = new \Google_Client();
+        $client->setAccessType('offline');
         $client->setApplicationName(GoogleShopping::getConfigValue('application_name'));
         $client->setClientId(GoogleShopping::getConfigValue('client_id'));
         $client->setClientSecret(GoogleShopping::getConfigValue('client_secret'));
@@ -28,8 +29,10 @@ class BaseGoogleShoppingController extends BaseAdminController
             $client->setAccessToken($oAuthToken);
             if ($client->isAccessTokenExpired()) {
                 $client->refreshToken($this->getRequest()->getSession()->get('oauth_refresh_token'));
+                $newToken = $client->getAccessToken();
+                $this->getRequest()->getSession()->set('oauth_access_token', $newToken);
             }
-            $this->service = new \Google_Service_ShoppingContent($client);
+            return $this->generateRedirectFromRoute('admin');
         } elseif (isset($code)) {
             $client->authenticate($code);
             $token = $client->getAccessToken();
