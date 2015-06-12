@@ -25,26 +25,56 @@ class BaseGoogleShoppingController extends BaseAdminController
         $oAuthToken = $this->getSession()->get('oauth_access_token');
         $code = $this->getRequest()->query->get('code');
 
+        $redirection = '/admin';
+
+        if ($url = $this->getSession()->get('google_action_url')) {
+            $redirection = $url;
+        }
+
         if (isset($oAuthToken)) {
             $client->setAccessToken($oAuthToken);
             if ($client->isAccessTokenExpired()) {
-                $client->refreshToken($this->getRequest()->getSession()->get('oauth_refresh_token'));
+                $client->refreshToken(GoogleShopping::getConfigValue('oauth_refresh_token'));
                 $newToken = $client->getAccessToken();
-                $this->getRequest()->getSession()->set('oauth_access_token', $newToken);
+                $this->getSession()->set('oauth_access_token', $newToken);
             }
-            return $this->generateRedirectFromRoute('admin');
+            return $this->generateRedirect($redirection);
         } elseif (isset($code)) {
             $client->authenticate($code);
             $token = $client->getAccessToken();
             $refreshToken = $client->getRefreshToken();
 
-            $this->getRequest()->getSession()->set('oauth_access_token', $token);
-            $this->getRequest()->getSession()->set('oauth_refresh_token', $refreshToken);
+            $this->getSession()->set('oauth_access_token', $token);
+            GoogleShopping::setConfigValue('oauth_refresh_token', $refreshToken);
 
-            return $this->generateRedirectFromRoute('admin');
+            return $this->generateRedirect($redirection);
         } else {
             return $this->generateRedirect($client->createAuthUrl());
         }
+    }
+
+    public function checkGoogleAuth()
+    {
+        $token = $this->getSession()->get('oauth_access_token');
+
+        if (!$token) {
+            return false;
+        }
+
+        $client = new \Google_Client();
+        $client->setApplicationName(GoogleShopping::getConfigValue('application_name'));
+        $client->setClientId(GoogleShopping::getConfigValue('client_id'));
+        $client->setClientSecret(GoogleShopping::getConfigValue('client_secret'));
+        $client->setRedirectUri(URL::getInstance()->absoluteUrl('/googleshopping/oauth2callback'));
+        $client->setScopes('https://www.googleapis.com/auth/content');
+
+        $client->setAccessToken($token);
+
+        if (true === $client->isAccessTokenExpired()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function createGoogleClient()

@@ -44,13 +44,18 @@ class ProductController extends BaseGoogleShoppingController
             return $response;
         }
 
-        $client = $this->createGoogleClient();
-        $service = new \Google_Service_ShoppingContent($client);
-
         //Get local and lang by admin config flag selected
         $locale = $this->getRequest()->get('locale');
         $needGtin = $this->getRequest()->get('gtin');
         $lang = LangQuery::create()->findOneByLocale($locale);
+
+        if (false === $this->checkGoogleAuth()) {
+            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=$needGtin");
+            return $this->generateRedirect('/googleshopping/oauth2callback');
+        }
+
+        $client = $this->createGoogleClient();
+        $service = new \Google_Service_ShoppingContent($client);
 
         //Get target country in config TODO : Manage more than one country
         $targetCountryId = GoogleShopping::getConfigValue('target_country_id');
@@ -206,7 +211,7 @@ class ProductController extends BaseGoogleShoppingController
         $brand = $theliaProduct->getBrand();
         $availability = $pse->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
-        if ($needGtin === 1) {
+        if ($needGtin === "on") {
             //TODO : Add better check to verify validity of GTIN
             if (null === $pse->getEanCode()) {
                 throw new \Exception("Empty GTIN (EAN) code");

@@ -3,41 +3,10 @@
 <div class="col-md-12 title title-without-tabs">
     {intl l='GoogleShopping product management'}
 </div>
-{if 'none' === $tokenExist}
-    <div class="form-group col-md-12">
-        <div class="form-group col-md-7">
-            {intl l="You have to authorise this site to send your products to GoogleShopping before adding them :"}
-        </div>
-        <div class="form-group col-md-3">
-            <form action="{url path='/googleshopping/oauth2callback'}" method="get">
-                <input type="hidden" name="redirect" value="{url path={navigate to="current"}}" />
-                <button class="btn btn-default btn-primary form-control" type="submit">
-                    <span class="glyphicon glyphicon-check"></span>
-                    {intl l="Authorize"}
-                </button>
-            </form>
-        </div>
-    </div>
-{elseif true === $tokenExpired}
-    <div class="form-group col-md-12">
-        <div class="form-group col-md-7">
-            {intl l="You have to authorise this site to send your products to GoogleShopping before adding them :"}
-        </div>
-        <div class="form-group col-md-3">
-            <form action="{url path='/googleshopping/oauth2callback'}" method="get">
-                <input type="hidden" name="redirect" value="{url path={navigate to="current"}}" />
-                <button class="btn btn-default btn-primary form-control" type="submit">
-                    <span class="glyphicon glyphicon-check"></span>
-                    {intl l="Renew"}
-                </button>
-            </form>
-        </div>
-    </div>
-{else}
 {loop type="googleshopping.product" name="googleshopping_product" product_id={$ID}}
 {if {$EXIST} != 1}
     {if {$CATEGORY_ASSOCIATED} == 1}
-        <form action="/admin/module/googleshopping/add/{$ID}" method="post">
+        <form action="/admin/module/googleshopping/add/{$ID}" method="get">
             <div class="form-group col-md-9">
                 <div class="form-group col-md-12">
                     <input type="hidden" name="locale" value="{$edit_language_locale}">
@@ -74,4 +43,3 @@
     </div>
 {/if}
 {/loop}
-{/if}

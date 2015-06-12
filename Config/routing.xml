@@ -39,17 +39,17 @@
         <default key="_controller">GoogleShopping\Controller\Admin\BaseGoogleShoppingController::setAuthorization</default>
     </route>
 
-    <route id="googleshopping.add.product" path="/admin/module/googleshopping/add/{id}" methods="POST">
-        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::addProduct</default>
-        <requirement key="id">\d+</requirement>
-    </route>
-
     <route id="googleshopping.taxonomy.get" path="/admin/module/googleshopping/taxonomy" methods="GET">
         <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::getTaxonomy</default>
     </route>
 
     <route id="googleshopping.taxonomy.associate" path="/admin/modules/googleshopping/taxonomy/associate" methods="POST">
         <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::associateTaxonomy</default>
+    </route>
+
+    <route id="googleshopping.add.product" path="/admin/module/googleshopping/add/{id}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::addProduct</default>
+        <requirement key="id">\d+</requirement>
     </route>
 
 </routes>
