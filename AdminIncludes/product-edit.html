@@ -27,9 +27,19 @@
     {if {$CATEGORY_ASSOCIATED} == 1}
         <form action="/admin/module/googleshopping/add/{$ID}" method="post">
             <div class="form-group col-md-9">
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-12">
                     <input type="hidden" name="locale" value="{$edit_language_locale}">
                     <label for="gshopping-submit">{intl l="Everything is ok this product can be send to google :"}</label>
+                </div>
+                <div class="form-group col-md-12">
+                    <label for="gshopping-gtin">{intl l="If this product is unique and don't need a GTIN/EAN please uncheck this box :"}</label>
+                    <input id="gshopping-gtin" type="checkbox" name="gtin" checked>
+                    <span class="help-block">{intl l="Becareful if your product is not in case below you need a valid GTIN :"}<br>
+                        <ul>
+                            <li>{intl l="custom goods or one-of-a-kind items, like custom t-shirts, art, and perishables."}</li>
+                            <li>{intl l="goods produced before unique product identifiers were introduced, like vintage goods, antiques, books published before 1970, and other special items."}</li>
+                        </ul>
+                    </span>
                 </div>
                 <div class="form-group col-md-3">
                     <button id="gshopping-submit" class="btn btn-default btn-primary form-control" type="submit">

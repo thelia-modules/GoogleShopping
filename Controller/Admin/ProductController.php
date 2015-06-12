@@ -49,6 +49,7 @@ class ProductController extends BaseGoogleShoppingController
 
         //Get local and lang by admin config flag selected
         $locale = $this->getRequest()->get('locale');
+        $needGtin = $this->getRequest()->get('gtin');
         $lang = LangQuery::create()->findOneByLocale($locale);
 
         //Get target country in config TODO : Manage more than one country
@@ -101,7 +102,7 @@ class ProductController extends BaseGoogleShoppingController
         try {
             /** @var ProductSaleElements $productSaleElement */
             foreach ($productSaleElements as $productSaleElement) {
-                $googleProducts[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $itemGroupId);
+                $googleProducts[] = $this->insertPse($theliaProduct, $productSaleElement, $imageAbsolutePath, $lang, $category, $googleCategory, $targetCountry, $shippings, $needGtin, $itemGroupId);
             }
 
             foreach ($googleProducts as $googleProduct) {
@@ -148,6 +149,7 @@ class ProductController extends BaseGoogleShoppingController
         GoogleshoppingTaxonomy $googleCategory,
         Country $targetCountry,
         $shippings,
+        $needGtin,
         $itemGroupId = null
     ) {
         $product = new \Google_Service_ShoppingContent_Product();
@@ -204,22 +206,27 @@ class ProductController extends BaseGoogleShoppingController
         $brand = $theliaProduct->getBrand();
         $availability = $pse->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
-        //TODO : Add better check to verify validity of GTIN
-        if (null === $pse->getEanCode()) {
-            throw new \Exception("Empty GTIN (EAN) code");
+        if ($needGtin === 1) {
+            //TODO : Add better check to verify validity of GTIN
+            if (null === $pse->getEanCode()) {
+                throw new \Exception("Empty GTIN (EAN) code");
+            }
+
+            $checkGtin = $this->checkGtin($pse->getEanCode());
+
+            if (false === $checkGtin) {
+                throw new \Exception("Invalid GTIN (EAN) code : ".$pse->getEanCode());
+            }
+            $product->setGtin($pse->getEanCode()); //A valid GTIN code
+        } else {
+            $product->setIdentifierExists(false); //Product don't have GTIN
         }
 
-        $checkGtin = $this->checkGtin($pse->getEanCode());
-
-        if (false === $checkGtin) {
-            throw new \Exception("Invalid GTIN (EAN) code : ".$pse->getEanCode());
-        }
 
         $product->setChannel('online');
         $product->setContentLanguage($lang->getCode()); //Lang of product
         $product->setOfferId($pse->getRef()); //Unique identifier (one by pse)
         $product->setTargetCountry($targetCountry->getIsoalpha2()); //Target country in ISO 3166
-        $product->setGtin($pse->getEanCode()); //A valid GTIN code
         $product->setBrand($brand->getTitle());
         $product->setGoogleProductCategory($googleCategory->getGoogleCategory()); //The associated google category from google taxonomy
         $product->setCondition('new'); // "new", "refurbished" or "used"
