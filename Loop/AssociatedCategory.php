@@ -2,7 +2,6 @@
 
 namespace GoogleShopping\Loop;
 
-
 use GoogleShopping\Model\GoogleshoppingTaxonomy;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Thelia\Core\Template\Element\BaseLoop;
@@ -18,7 +17,8 @@ class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
     public function getArgDefinitions()
     {
         return new ArgumentCollection(
-            Argument::createIntTypeArgument('category_id')
+            Argument::createIntTypeArgument('category_id'),
+            Argument::createAnyTypeArgument('lang_id')
         );
     }
 
@@ -26,8 +26,12 @@ class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
     {
         $query = GoogleshoppingTaxonomyQuery::create();
 
-        if($this->getCategoryId()) {
+        if ($this->getCategoryId()) {
             $query->filterByTheliaCategoryId($this->getCategoryId());
+        }
+
+        if ($this->getLangId()) {
+            $query->filterByLangId($this->getLangId());
         }
 
         return $query;
@@ -49,5 +53,4 @@ class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
 
         return $loopResult;
     }
-
 }

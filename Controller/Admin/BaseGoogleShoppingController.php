@@ -21,7 +21,7 @@ class BaseGoogleShoppingController extends BaseAdminController
         $client->setRedirectUri(URL::getInstance()->absoluteUrl('/googleshopping/oauth2callback'));
         $client->setScopes('https://www.googleapis.com/auth/content');
 
-        $oAuthToken = $this->getSession()->get('oauth_access_token');
+        $oAuthToken = GoogleShopping::getConfigValue('oauth_access_token');
         $code = $this->getRequest()->query->get('code');
 
         $redirection = '/admin/module/GoogleShopping';
@@ -29,7 +29,7 @@ class BaseGoogleShoppingController extends BaseAdminController
         //Manage redirection after auth
         if ($url = $this->getSession()->get('google_action_url')) {
             $redirection = $url;
-            $this->getSession()->set('google_action_url', null);
+            //$this->getSession()->set('google_action_url', null);
         } elseif ($url = $this->getRequest()->query->get('redirect')) {
             $redirection = $url;
             $this->getSession()->set('google_action_url', $redirection);
@@ -40,7 +40,7 @@ class BaseGoogleShoppingController extends BaseAdminController
             if ($client->isAccessTokenExpired()) {
                 $client->refreshToken(GoogleShopping::getConfigValue('oauth_refresh_token'));
                 $newToken = $client->getAccessToken();
-                $this->getSession()->set('oauth_access_token', $newToken);
+                GoogleShopping::setConfigValue('oauth_access_token', $newToken);
             }
             return $this->generateRedirect($redirection);
         } elseif (isset($code)) {
@@ -48,7 +48,7 @@ class BaseGoogleShoppingController extends BaseAdminController
             $token = $client->getAccessToken();
             $refreshToken = $client->getRefreshToken();
 
-            $this->getSession()->set('oauth_access_token', $token);
+            GoogleShopping::setConfigValue('oauth_access_token', $token);
 
             if ($refreshToken) {
                 GoogleShopping::setConfigValue('oauth_refresh_token', $refreshToken);
@@ -62,7 +62,7 @@ class BaseGoogleShoppingController extends BaseAdminController
 
     public function checkGoogleAuth()
     {
-        $token = $this->getSession()->get('oauth_access_token');
+        $token = GoogleShopping::getConfigValue('oauth_access_token');
 
         if (!$token) {
             return false;
@@ -92,7 +92,7 @@ class BaseGoogleShoppingController extends BaseAdminController
         $client->setClientSecret(GoogleShopping::getConfigValue('client_secret'));
         $client->setRedirectUri(URL::getInstance()->absoluteUrl('/googleshopping/oauth2callback'));
         $client->setScopes('https://www.googleapis.com/auth/content');
-        $client->setAccessToken($this->getSession()->get('oauth_access_token'));
+        $client->setAccessToken(GoogleShopping::getConfigValue('oauth_access_token'));
 
         return $client;
     }

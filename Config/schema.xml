@@ -29,18 +29,24 @@
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
         <column name="thelia_category_id" type="INTEGER" required="true"/>
         <column name="google_category" type="VARCHAR" size="255" required="true" />
+        <column name="lang_id" type="INTEGER" required="true"/>
         <foreign-key foreignTable="category" name="fk_googleshopping_thelia_category_id" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference foreign="id" local="thelia_category_id" />
         </foreign-key>
+        <foreign-key foreignTable="lang" name="fk_googleshopping_thelia_lang_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="lang_id" />
+        </foreign-key>
     </table>
 
-    <table name="googleshopping_product">
+    <table name="googleshopping_product_synchronisation">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
         <column name="product_id" type="INTEGER" required="true"/>
-        <foreign-key foreignTable="product" name="fk_googleshopping_product_id" onDelete="CASCADE" onUpdate="RESTRICT">
+        <column name="target_country" type="VARCHAR" required="true"/>
+        <column name="lang" type="VARCHAR" required="true"/>
+        <column name="sync_enable" type="BOOLEAN"/>
+        <foreign-key foreignTable="product" name="fk_googleshopping_product_synchronisation_product_id" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference foreign="id" local="product_id" />
         </foreign-key>
-        <behavior name="timestampable" />
     </table>
 
     <external-schema filename="local/config/schema.xml" referenceOnly="true" />

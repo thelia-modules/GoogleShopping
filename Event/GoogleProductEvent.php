@@ -49,10 +49,14 @@ class GoogleProductEvent extends ActionEvent
     /** @var  int */
     protected $itemGroupId;
 
-    public function __construct(Product $product, ProductSaleElements $productSaleElements, \Google_Service_ShoppingContent $googleShoppingService, $array = array())
+    public function __construct(Product $product, ProductSaleElements $productSaleElements = null, \Google_Service_ShoppingContent $googleShoppingService = null, $array = array())
     {
         $this->product = $product;
-        $this->productSaleElements = $productSaleElements;
+
+        if ($productSaleElements) {
+            $this->productSaleElements = $productSaleElements;
+        }
+
         $this->googleShoppingService = $googleShoppingService;
 
         if (is_array($array)) {
@@ -157,7 +161,7 @@ class GoogleProductEvent extends ActionEvent
 
     public function setTargetCountry(Country $targetCountry)
     {
-        $this->$targetCountry = $targetCountry;
+        $this->targetCountry = $targetCountry;
         return $this;
     }
 

@@ -7,13 +7,24 @@ use GoogleShopping\Event\GoogleProductEvent;
 use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
-use GoogleShopping\Model\GoogleshoppingProductQuery;
+use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
+use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
+use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
+use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\Translation\Translator;
 use Thelia\Model\AttributeAvQuery;
+use Thelia\Model\CategoryQuery;
+use Thelia\Model\CountryQuery;
+use Thelia\Model\Currency;
+use Thelia\Model\LangQuery;
 use Thelia\Model\ProductImageQuery;
 use Thelia\Model\ProductPriceQuery;
+use Thelia\Model\ProductQuery;
+use Thelia\Model\ProductSaleElements;
+use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\TaxEngine\Calculator;
 
 class GoogleProductEventListener implements EventSubscriberInterface
@@ -24,13 +35,108 @@ class GoogleProductEventListener implements EventSubscriberInterface
     /** @var Request */
     protected $request;
 
-    public function __construct(GoogleShoppingHandler $googleShoppingHandler, Request $request)
+    /** @var Request */
+    protected $translator;
+
+    public function __construct(Request $request, Translator $translator, GoogleShoppingHandler $googleShoppingHandler)
     {
-        $this->googleShoppingHandler = $googleShoppingHandler;
         $this->request = $request;
+        $this->translator = $translator;
+        $this->googleShoppingHandler = $googleShoppingHandler;
     }
 
-    public function setGoogleProduct(GoogleProductEvent $event)
+    /**
+     * Get the info from product to add and dispatch an event
+     * for each product sale elements of this product to build their GoogleProduct
+     * @param GoogleProductEvent $event
+     * @throws \Exception if category association is missing
+     */
+    public function addGoogleProduct(GoogleProductEvent $event)
+    {
+        $product = $event->getProduct();
+
+        $theliaCategory = CategoryQuery::create()
+            ->findOneById($product->getDefaultCategoryId());
+
+        //Try to get associated Google category either in flux locale or english (accepted for all flux language)
+        $googleCategory = GoogleshoppingTaxonomyQuery::create()
+            ->filterByLangId($event->getLang()->getId())
+            ->findOneByTheliaCategoryId($theliaCategory->getId());
+        //If category is not associated in flux try to take the english association
+        if (null === $googleCategory) {
+            $englishLang = LangQuery::create()->findOneByLocale('en_US');
+            $googleCategory = GoogleshoppingTaxonomyQuery::create()
+                ->filterByLangId($englishLang->getId())
+                ->findOneByTheliaCategoryId($theliaCategory->getId());
+        }
+
+        //Association is mandatory
+        if (null === $theliaCategory) {
+            throw new \Exception(
+                $this->translator->trans(
+                    "Category of product is not associated with a Google category, please fix it in module configurartion",
+                    [],
+                    GoogleShopping::DOMAIN_NAME
+                )
+            );
+        }
+
+        //Set categories
+        $event->setTheliaCategory($theliaCategory)
+            ->setGoogleCategory($googleCategory);
+
+        $productSaleElementss = ProductSaleElementsQuery::create()
+            ->filterByProductId($product->getId())
+            ->find();
+
+        //Create link for image
+        $productImage = $product->getProductImages()->getFirst();
+        $imageEvent = $this->googleShoppingHandler->createProductImageEvent($productImage);
+        $event->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imageEvent);
+        $imagePath = $imageEvent->getFileUrl();
+
+
+        //If item don't have multiple pse he don't need an itemGroupId
+        $itemGroupId = null;
+
+        //Manage multiple pse for one product
+        if ($productSaleElementss->count() > 1) {
+            $checkCombination = $this->googleShoppingHandler->checkCombination($productSaleElementss);
+            $itemGroupId = $checkCombination === true ? $product->getRef() : null;
+        }
+
+        //Set imagePath and itemGroupId
+        $event->setImagePath($imagePath)
+            ->setItemGroupId($itemGroupId);
+
+        //Find all shipping available and get hist postage
+        $shippings = $this->googleShoppingHandler->getShippings($event->getTargetCountry());
+        $event->setShippings($shippings);
+
+        if ($itemGroupId === null) {
+            $productSaleElementss->getFirst();
+        }
+
+        //If a productSaleElements is passed to event only send him
+        if ($event->getProductSaleElements() !== null) {
+            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PSE, $event);
+        //Else dispatch all the pse of the product
+        } else {
+            /** @var ProductSaleElements $productSaleElement */
+            foreach ($productSaleElementss as $productSaleElements) {
+                $event->setProductSaleElements($productSaleElements);
+                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PSE, $event);
+            }
+        }
+    }
+
+    /**
+     * Build the GoogleProduct object for the given product sale elements
+     * and dispatch the event who send this product to Google
+     * @param GoogleProductEvent $event
+     * @throws \Exception if a GTIN is not valid
+     */
+    public function addGoogleProductFromPse(GoogleProductEvent $event)
     {
         $googleProduct = new \Google_Service_ShoppingContent_Product();
 
@@ -91,13 +197,25 @@ class GoogleProductEventListener implements EventSubscriberInterface
 
         if ($event->getIgnoreGtin() !== true) {
             if (null === $productSaleElements->getEanCode()) {
-                throw new \Exception("Empty GTIN (EAN) code");
+                throw new \Exception(
+                    $this->translator->trans(
+                        "Empty GTIN (EAN) code for product : %title",
+                        ['title' => $product->getTitle()],
+                        GoogleShopping::DOMAIN_NAME
+                    )
+                );
             }
 
             $checkGtin = $this->googleShoppingHandler->checkGtin($productSaleElements->getEanCode());
 
             if (false === $checkGtin) {
-                throw new \Exception("Invalid GTIN (EAN) code : ".$productSaleElements->getEanCode());
+                throw new \Exception(
+                    $this->translator->trans(
+                        "Invalid GTIN (EAN) code : %ean",
+                        ['ean' => $productSaleElements->getEanCode()],
+                        GoogleShopping::DOMAIN_NAME
+                    )
+                );
             }
             $googleProduct->setGtin($productSaleElements->getEanCode()); //A valid GTIN code
         } else {
@@ -128,7 +246,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $productPrice = $productSaleElements->getPromo() === 0 ? $psePrice->getPrice() : $psePrice->getPromoPrice();
         $price->setValue($taxCalculator->getTaxedPrice($productPrice));
 
-        $price->setCurrency('EUR');
+        $price->setCurrency(Currency::getDefaultCurrency()->getCode());
 
         //Delivery shippings
         $googleShippings = array();
@@ -140,7 +258,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         foreach ($event->getShippings() as $shippingTitle => $shippingCost) {
             $shipping_price = new \Google_Service_ShoppingContent_Price();
             $shipping_price->setValue($shippingCost->getAmount());
-            $shipping_price->setCurrency('EUR');
+            $shipping_price->setCurrency(Currency::getDefaultCurrency()->getCode());
 
             $googleShipping = new \Google_Service_ShoppingContent_ProductShipping();
             $googleShipping->setPrice($shipping_price);
@@ -157,6 +275,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
     }
 
+
     public function sendGoogleProduct(GoogleProductEvent $event)
     {
         $product = $event->getGoogleProduct();
@@ -164,39 +283,85 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $service = $event->getGoogleShoppingService();
 
         $service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
-
-        //Todo : stop record it into base get it directly from google
-        //Save in database for prevent multiple add of same item (Google don't like it)
-        GoogleshoppingProductQuery::create()
-            ->filterByProductId($event->getProduct()->getId())
-            ->findOneOrCreate()
-            ->save();
     }
 
     public function deleteGoogleProduct(GoogleProductEvent $event)
     {
         $service = $event->getGoogleShoppingService();
 
+        $googleProductId = "online:".$event->getLang()->getCode().":".$event->getTargetCountry()->getIsoalpha2().":".$event->getProductSaleElements()->getId();
+
         $service->products->delete(
             GoogleShopping::getConfigValue('merchant_id'),
-            $event->getProductSaleElements()->getId()
+            $googleProductId
         );
+    }
 
-        //Todo : stop record it into base get it directly from google
-        $googleShoppingProduct = GoogleshoppingProductQuery::create()
-            ->findOneByProductId($event->getProduct()->getId());
+    public function toggleProductSync(GoogleProductEvent $event)
+    {
+        $productSync = GoogleshoppingProductSynchronisationQuery::create()
+            ->filterByProductId($event->getProduct()->getId())
+            ->filterByLang($event->getLang()->getCode())
+            ->filterByTargetCountry($event->getTargetCountry()->getIsoalpha2())
+            ->findOneOrCreate();
 
-        if ($googleShoppingProduct) {
-            $googleShoppingProduct->delete();
+        if ($productSync->getSyncEnable() === true) {
+            $productSync->setSyncEnable(false);
+        } else {
+            $productSync->setSyncEnable(true);
+        }
+        $productSync->save();
+    }
+
+    public function syncCatalog(Event $event)
+    {
+        $syncEnableds = GoogleshoppingProductSynchronisationQuery::create()
+            ->filterBySyncEnable(true)
+            ->find();
+
+        $client = $this->googleShoppingHandler->createGoogleClient();
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+        if ($client->isAccessTokenExpired()) {
+            $client->refreshToken(GoogleShopping::getConfigValue('oauth_refresh_token'));
+            $newToken = $client->getAccessToken();
+            $this->request->getSession()->set('oauth_access_token', $newToken);
+        }
+
+        /** @var GoogleshoppingProductSynchronisation $syncEnable */
+        foreach ($syncEnableds as $syncEnabled) {
+            $product = ProductQuery::create()->findOneById($syncEnabled->getProductId());
+
+            $eventArgs['ignoreGtin'] = false;
+
+            //Check if product has gtin
+            $productSaleElements = ProductSaleElementsQuery::create()
+                ->filterByProductId($product->getId())
+                ->find();
+            $firstPse = $productSaleElements->getFirst();
+            if (null === $firstPse->getEanCode()) {
+                $eventArgs['ignoreGtin'] = true;
+            }
+
+            $country = CountryQuery::create()->findOneByIsoalpha2($syncEnabled->getTargetCountry());
+            $lang = LangQuery::create()->findOneByCode($syncEnabled->getLang());
+            $eventArgs['targetCountry'] = $country;
+            $eventArgs['lang'] = $lang;
+
+            $googleProductEvent = new GoogleProductEvent($product, null, $googleShoppingService, $eventArgs);
+            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT, $googleProductEvent);
         }
     }
 
     public static function getSubscribedEvents()
     {
         return [
-            GoogleShoppingEvents::GOOGLE_PRODUCT_ADD => ["setGoogleProduct", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT => ["addGoogleProduct", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PSE => ["addGoogleProductFromPse", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_SEND => ["sendGoogleProduct", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE => ["deleteGoogleProduct", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC => ["toggleProductSync", 128],
+            GoogleShoppingEvents::GOOGLE_SYNC_CATALOG => ["syncCatalog", 128],
         ];
     }
 }

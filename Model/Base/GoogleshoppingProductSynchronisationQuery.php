@@ -4,9 +4,9 @@ namespace GoogleShopping\Model\Base;
 
 use \Exception;
 use \PDO;
-use GoogleShopping\Model\GoogleshoppingProduct as ChildGoogleshoppingProduct;
-use GoogleShopping\Model\GoogleshoppingProductQuery as ChildGoogleshoppingProductQuery;
-use GoogleShopping\Model\Map\GoogleshoppingProductTableMap;
+use GoogleShopping\Model\GoogleshoppingProductSynchronisation as ChildGoogleshoppingProductSynchronisation;
+use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery as ChildGoogleshoppingProductSynchronisationQuery;
+use GoogleShopping\Model\Map\GoogleshoppingProductSynchronisationTableMap;
 use GoogleShopping\Model\Thelia\Model\Product;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -18,71 +18,75 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 
 /**
- * Base class that represents a query for the 'googleshopping_product' table.
+ * Base class that represents a query for the 'googleshopping_product_synchronisation' table.
  *
  *
  *
- * @method     ChildGoogleshoppingProductQuery orderById($order = Criteria::ASC) Order by the id column
- * @method     ChildGoogleshoppingProductQuery orderByProductId($order = Criteria::ASC) Order by the product_id column
- * @method     ChildGoogleshoppingProductQuery orderByCreatedAt($order = Criteria::ASC) Order by the created_at column
- * @method     ChildGoogleshoppingProductQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery orderById($order = Criteria::ASC) Order by the id column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery orderByProductId($order = Criteria::ASC) Order by the product_id column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery orderByTargetCountry($order = Criteria::ASC) Order by the target_country column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery orderByLang($order = Criteria::ASC) Order by the lang column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery orderBySyncEnable($order = Criteria::ASC) Order by the sync_enable column
  *
- * @method     ChildGoogleshoppingProductQuery groupById() Group by the id column
- * @method     ChildGoogleshoppingProductQuery groupByProductId() Group by the product_id column
- * @method     ChildGoogleshoppingProductQuery groupByCreatedAt() Group by the created_at column
- * @method     ChildGoogleshoppingProductQuery groupByUpdatedAt() Group by the updated_at column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery groupById() Group by the id column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery groupByProductId() Group by the product_id column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery groupByTargetCountry() Group by the target_country column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery groupByLang() Group by the lang column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery groupBySyncEnable() Group by the sync_enable column
  *
- * @method     ChildGoogleshoppingProductQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
- * @method     ChildGoogleshoppingProductQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
- * @method     ChildGoogleshoppingProductQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ * @method     ChildGoogleshoppingProductSynchronisationQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
+ * @method     ChildGoogleshoppingProductSynchronisationQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
+ * @method     ChildGoogleshoppingProductSynchronisationQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method     ChildGoogleshoppingProductQuery leftJoinProduct($relationAlias = null) Adds a LEFT JOIN clause to the query using the Product relation
- * @method     ChildGoogleshoppingProductQuery rightJoinProduct($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Product relation
- * @method     ChildGoogleshoppingProductQuery innerJoinProduct($relationAlias = null) Adds a INNER JOIN clause to the query using the Product relation
+ * @method     ChildGoogleshoppingProductSynchronisationQuery leftJoinProduct($relationAlias = null) Adds a LEFT JOIN clause to the query using the Product relation
+ * @method     ChildGoogleshoppingProductSynchronisationQuery rightJoinProduct($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Product relation
+ * @method     ChildGoogleshoppingProductSynchronisationQuery innerJoinProduct($relationAlias = null) Adds a INNER JOIN clause to the query using the Product relation
  *
- * @method     ChildGoogleshoppingProduct findOne(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProduct matching the query
- * @method     ChildGoogleshoppingProduct findOneOrCreate(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProduct matching the query, or a new ChildGoogleshoppingProduct object populated from the query conditions when no match is found
+ * @method     ChildGoogleshoppingProductSynchronisation findOne(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProductSynchronisation matching the query
+ * @method     ChildGoogleshoppingProductSynchronisation findOneOrCreate(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProductSynchronisation matching the query, or a new ChildGoogleshoppingProductSynchronisation object populated from the query conditions when no match is found
  *
- * @method     ChildGoogleshoppingProduct findOneById(int $id) Return the first ChildGoogleshoppingProduct filtered by the id column
- * @method     ChildGoogleshoppingProduct findOneByProductId(int $product_id) Return the first ChildGoogleshoppingProduct filtered by the product_id column
- * @method     ChildGoogleshoppingProduct findOneByCreatedAt(string $created_at) Return the first ChildGoogleshoppingProduct filtered by the created_at column
- * @method     ChildGoogleshoppingProduct findOneByUpdatedAt(string $updated_at) Return the first ChildGoogleshoppingProduct filtered by the updated_at column
+ * @method     ChildGoogleshoppingProductSynchronisation findOneById(int $id) Return the first ChildGoogleshoppingProductSynchronisation filtered by the id column
+ * @method     ChildGoogleshoppingProductSynchronisation findOneByProductId(int $product_id) Return the first ChildGoogleshoppingProductSynchronisation filtered by the product_id column
+ * @method     ChildGoogleshoppingProductSynchronisation findOneByTargetCountry(string $target_country) Return the first ChildGoogleshoppingProductSynchronisation filtered by the target_country column
+ * @method     ChildGoogleshoppingProductSynchronisation findOneByLang(string $lang) Return the first ChildGoogleshoppingProductSynchronisation filtered by the lang column
+ * @method     ChildGoogleshoppingProductSynchronisation findOneBySyncEnable(boolean $sync_enable) Return the first ChildGoogleshoppingProductSynchronisation filtered by the sync_enable column
  *
- * @method     array findById(int $id) Return ChildGoogleshoppingProduct objects filtered by the id column
- * @method     array findByProductId(int $product_id) Return ChildGoogleshoppingProduct objects filtered by the product_id column
- * @method     array findByCreatedAt(string $created_at) Return ChildGoogleshoppingProduct objects filtered by the created_at column
- * @method     array findByUpdatedAt(string $updated_at) Return ChildGoogleshoppingProduct objects filtered by the updated_at column
+ * @method     array findById(int $id) Return ChildGoogleshoppingProductSynchronisation objects filtered by the id column
+ * @method     array findByProductId(int $product_id) Return ChildGoogleshoppingProductSynchronisation objects filtered by the product_id column
+ * @method     array findByTargetCountry(string $target_country) Return ChildGoogleshoppingProductSynchronisation objects filtered by the target_country column
+ * @method     array findByLang(string $lang) Return ChildGoogleshoppingProductSynchronisation objects filtered by the lang column
+ * @method     array findBySyncEnable(boolean $sync_enable) Return ChildGoogleshoppingProductSynchronisation objects filtered by the sync_enable column
  *
  */
-abstract class GoogleshoppingProductQuery extends ModelCriteria
+abstract class GoogleshoppingProductSynchronisationQuery extends ModelCriteria
 {
 
     /**
-     * Initializes internal state of \GoogleShopping\Model\Base\GoogleshoppingProductQuery object.
+     * Initializes internal state of \GoogleShopping\Model\Base\GoogleshoppingProductSynchronisationQuery object.
      *
      * @param     string $dbName The database name
      * @param     string $modelName The phpName of a model, e.g. 'Book'
      * @param     string $modelAlias The alias for the model in this query, e.g. 'b'
      */
-    public function __construct($dbName = 'thelia', $modelName = '\\GoogleShopping\\Model\\GoogleshoppingProduct', $modelAlias = null)
+    public function __construct($dbName = 'thelia', $modelName = '\\GoogleShopping\\Model\\GoogleshoppingProductSynchronisation', $modelAlias = null)
     {
         parent::__construct($dbName, $modelName, $modelAlias);
     }
 
     /**
-     * Returns a new ChildGoogleshoppingProductQuery object.
+     * Returns a new ChildGoogleshoppingProductSynchronisationQuery object.
      *
      * @param     string $modelAlias The alias of a model in the query
      * @param     Criteria $criteria Optional Criteria to build the query from
      *
-     * @return ChildGoogleshoppingProductQuery
+     * @return ChildGoogleshoppingProductSynchronisationQuery
      */
     public static function create($modelAlias = null, $criteria = null)
     {
-        if ($criteria instanceof \GoogleShopping\Model\GoogleshoppingProductQuery) {
+        if ($criteria instanceof \GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery) {
             return $criteria;
         }
-        $query = new \GoogleShopping\Model\GoogleshoppingProductQuery();
+        $query = new \GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery();
         if (null !== $modelAlias) {
             $query->setModelAlias($modelAlias);
         }
@@ -105,19 +109,19 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      * @param mixed $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
-     * @return ChildGoogleshoppingProduct|array|mixed the result, formatted by the current formatter
+     * @return ChildGoogleshoppingProductSynchronisation|array|mixed the result, formatted by the current formatter
      */
     public function findPk($key, $con = null)
     {
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = GoogleshoppingProductTableMap::getInstanceFromPool((string) $key))) && !$this->formatter) {
+        if ((null !== ($obj = GoogleshoppingProductSynchronisationTableMap::getInstanceFromPool((string) $key))) && !$this->formatter) {
             // the object is already in the instance pool
             return $obj;
         }
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
         }
         $this->basePreSelect($con);
         if ($this->formatter || $this->modelAlias || $this->with || $this->select
@@ -136,11 +140,11 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     ConnectionInterface $con A connection object
      *
-     * @return   ChildGoogleshoppingProduct A model object, or null if the key is not found
+     * @return   ChildGoogleshoppingProductSynchronisation A model object, or null if the key is not found
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT ID, PRODUCT_ID, CREATED_AT, UPDATED_AT FROM googleshopping_product WHERE ID = :p0';
+        $sql = 'SELECT ID, PRODUCT_ID, TARGET_COUNTRY, LANG, SYNC_ENABLE FROM googleshopping_product_synchronisation WHERE ID = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -151,9 +155,9 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
         }
         $obj = null;
         if ($row = $stmt->fetch(\PDO::FETCH_NUM)) {
-            $obj = new ChildGoogleshoppingProduct();
+            $obj = new ChildGoogleshoppingProductSynchronisation();
             $obj->hydrate($row);
-            GoogleshoppingProductTableMap::addInstanceToPool($obj, (string) $key);
+            GoogleshoppingProductSynchronisationTableMap::addInstanceToPool($obj, (string) $key);
         }
         $stmt->closeCursor();
 
@@ -166,7 +170,7 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     ConnectionInterface $con A connection object
      *
-     * @return ChildGoogleshoppingProduct|array|mixed the result, formatted by the current formatter
+     * @return ChildGoogleshoppingProductSynchronisation|array|mixed the result, formatted by the current formatter
      */
     protected function findPkComplex($key, $con)
     {
@@ -208,12 +212,12 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      *
      * @param     mixed $key Primary key to use for the query
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
     public function filterByPrimaryKey($key)
     {
 
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::ID, $key, Criteria::EQUAL);
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -221,12 +225,12 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      *
      * @param     array $keys The list of primary key to use for the query
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
     public function filterByPrimaryKeys($keys)
     {
 
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::ID, $keys, Criteria::IN);
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::ID, $keys, Criteria::IN);
     }
 
     /**
@@ -245,18 +249,18 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
     public function filterById($id = null, $comparison = null)
     {
         if (is_array($id)) {
             $useMinMax = false;
             if (isset($id['min'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::ID, $id['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::ID, $id['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($id['max'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::ID, $id['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::ID, $id['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -267,7 +271,7 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::ID, $id, $comparison);
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::ID, $id, $comparison);
     }
 
     /**
@@ -288,18 +292,18 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
     public function filterByProductId($productId = null, $comparison = null)
     {
         if (is_array($productId)) {
             $useMinMax = false;
             if (isset($productId['min'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::PRODUCT_ID, $productId['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID, $productId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($productId['max'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::PRODUCT_ID, $productId['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID, $productId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -310,93 +314,92 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::PRODUCT_ID, $productId, $comparison);
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID, $productId, $comparison);
     }
 
     /**
-     * Filter the query on the created_at column
+     * Filter the query on the target_country column
      *
      * Example usage:
      * <code>
-     * $query->filterByCreatedAt('2011-03-14'); // WHERE created_at = '2011-03-14'
-     * $query->filterByCreatedAt('now'); // WHERE created_at = '2011-03-14'
-     * $query->filterByCreatedAt(array('max' => 'yesterday')); // WHERE created_at > '2011-03-13'
+     * $query->filterByTargetCountry('fooValue');   // WHERE target_country = 'fooValue'
+     * $query->filterByTargetCountry('%fooValue%'); // WHERE target_country LIKE '%fooValue%'
      * </code>
      *
-     * @param     mixed $createdAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $targetCountry The value to use as filter.
+     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
-    public function filterByCreatedAt($createdAt = null, $comparison = null)
+    public function filterByTargetCountry($targetCountry = null, $comparison = null)
     {
-        if (is_array($createdAt)) {
-            $useMinMax = false;
-            if (isset($createdAt['min'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::CREATED_AT, $createdAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($createdAt['max'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::CREATED_AT, $createdAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
+        if (null === $comparison) {
+            if (is_array($targetCountry)) {
                 $comparison = Criteria::IN;
+            } elseif (preg_match('/[\%\*]/', $targetCountry)) {
+                $targetCountry = str_replace('*', '%', $targetCountry);
+                $comparison = Criteria::LIKE;
             }
         }
 
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::CREATED_AT, $createdAt, $comparison);
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY, $targetCountry, $comparison);
     }
 
     /**
-     * Filter the query on the updated_at column
+     * Filter the query on the lang column
      *
      * Example usage:
      * <code>
-     * $query->filterByUpdatedAt('2011-03-14'); // WHERE updated_at = '2011-03-14'
-     * $query->filterByUpdatedAt('now'); // WHERE updated_at = '2011-03-14'
-     * $query->filterByUpdatedAt(array('max' => 'yesterday')); // WHERE updated_at > '2011-03-13'
+     * $query->filterByLang('fooValue');   // WHERE lang = 'fooValue'
+     * $query->filterByLang('%fooValue%'); // WHERE lang LIKE '%fooValue%'
      * </code>
      *
-     * @param     mixed $updatedAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $lang The value to use as filter.
+     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
-    public function filterByUpdatedAt($updatedAt = null, $comparison = null)
+    public function filterByLang($lang = null, $comparison = null)
     {
-        if (is_array($updatedAt)) {
-            $useMinMax = false;
-            if (isset($updatedAt['min'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::UPDATED_AT, $updatedAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($updatedAt['max'])) {
-                $this->addUsingAlias(GoogleshoppingProductTableMap::UPDATED_AT, $updatedAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
+        if (null === $comparison) {
+            if (is_array($lang)) {
                 $comparison = Criteria::IN;
+            } elseif (preg_match('/[\%\*]/', $lang)) {
+                $lang = str_replace('*', '%', $lang);
+                $comparison = Criteria::LIKE;
             }
         }
 
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::UPDATED_AT, $updatedAt, $comparison);
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::LANG, $lang, $comparison);
+    }
+
+    /**
+     * Filter the query on the sync_enable column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterBySyncEnable(true); // WHERE sync_enable = true
+     * $query->filterBySyncEnable('yes'); // WHERE sync_enable = true
+     * </code>
+     *
+     * @param     boolean|string $syncEnable The value to use as filter.
+     *              Non-boolean arguments are converted using the following rules:
+     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
+     */
+    public function filterBySyncEnable($syncEnable = null, $comparison = null)
+    {
+        if (is_string($syncEnable)) {
+            $sync_enable = in_array(strtolower($syncEnable), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+        }
+
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE, $syncEnable, $comparison);
     }
 
     /**
@@ -405,20 +408,20 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      * @param \GoogleShopping\Model\Thelia\Model\Product|ObjectCollection $product The related object(s) to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
     public function filterByProduct($product, $comparison = null)
     {
         if ($product instanceof \GoogleShopping\Model\Thelia\Model\Product) {
             return $this
-                ->addUsingAlias(GoogleshoppingProductTableMap::PRODUCT_ID, $product->getId(), $comparison);
+                ->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID, $product->getId(), $comparison);
         } elseif ($product instanceof ObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(GoogleshoppingProductTableMap::PRODUCT_ID, $product->toKeyValue('PrimaryKey', 'Id'), $comparison);
+                ->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID, $product->toKeyValue('PrimaryKey', 'Id'), $comparison);
         } else {
             throw new PropelException('filterByProduct() only accepts arguments of type \GoogleShopping\Model\Thelia\Model\Product or Collection');
         }
@@ -430,7 +433,7 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
     public function joinProduct($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
@@ -477,21 +480,21 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
     /**
      * Exclude object from result
      *
-     * @param   ChildGoogleshoppingProduct $googleshoppingProduct Object to remove from the list of results
+     * @param   ChildGoogleshoppingProductSynchronisation $googleshoppingProductSynchronisation Object to remove from the list of results
      *
-     * @return ChildGoogleshoppingProductQuery The current query, for fluid interface
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
      */
-    public function prune($googleshoppingProduct = null)
+    public function prune($googleshoppingProductSynchronisation = null)
     {
-        if ($googleshoppingProduct) {
-            $this->addUsingAlias(GoogleshoppingProductTableMap::ID, $googleshoppingProduct->getId(), Criteria::NOT_EQUAL);
+        if ($googleshoppingProductSynchronisation) {
+            $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::ID, $googleshoppingProductSynchronisation->getId(), Criteria::NOT_EQUAL);
         }
 
         return $this;
     }
 
     /**
-     * Deletes all rows from the googleshopping_product table.
+     * Deletes all rows from the googleshopping_product_synchronisation table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
@@ -499,7 +502,7 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
     public function doDeleteAll(ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
         }
         $affectedRows = 0; // initialize var to track total num of affected rows
         try {
@@ -510,8 +513,8 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
             // Because this db requires some delete cascade/set null emulation, we have to
             // clear the cached instance *after* the emulation has happened (since
             // instances get re-added by the select statement contained therein).
-            GoogleshoppingProductTableMap::clearInstancePool();
-            GoogleshoppingProductTableMap::clearRelatedInstancePool();
+            GoogleshoppingProductSynchronisationTableMap::clearInstancePool();
+            GoogleshoppingProductSynchronisationTableMap::clearRelatedInstancePool();
 
             $con->commit();
         } catch (PropelException $e) {
@@ -523,9 +526,9 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
     }
 
     /**
-     * Performs a DELETE on the database, given a ChildGoogleshoppingProduct or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a ChildGoogleshoppingProductSynchronisation or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or ChildGoogleshoppingProduct object or primary key or array of primary keys
+     * @param mixed               $values Criteria or ChildGoogleshoppingProductSynchronisation object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -536,13 +539,13 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
      public function delete(ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
         }
 
         $criteria = $this;
 
         // Set the correct dbName
-        $criteria->setDbName(GoogleshoppingProductTableMap::DATABASE_NAME);
+        $criteria->setDbName(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
 
         $affectedRows = 0; // initialize var to track total num of affected rows
 
@@ -552,10 +555,10 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
             $con->beginTransaction();
 
 
-        GoogleshoppingProductTableMap::removeInstanceFromPool($criteria);
+        GoogleshoppingProductSynchronisationTableMap::removeInstanceFromPool($criteria);
 
             $affectedRows += ModelCriteria::delete($con);
-            GoogleshoppingProductTableMap::clearRelatedInstancePool();
+            GoogleshoppingProductSynchronisationTableMap::clearRelatedInstancePool();
             $con->commit();
 
             return $affectedRows;
@@ -565,70 +568,4 @@ abstract class GoogleshoppingProductQuery extends ModelCriteria
         }
     }
 
-    // timestampable behavior
-
-    /**
-     * Filter by the latest updated
-     *
-     * @param      int $nbDays Maximum age of the latest update in days
-     *
-     * @return     ChildGoogleshoppingProductQuery The current query, for fluid interface
-     */
-    public function recentlyUpdated($nbDays = 7)
-    {
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::UPDATED_AT, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
-    }
-
-    /**
-     * Filter by the latest created
-     *
-     * @param      int $nbDays Maximum age of in days
-     *
-     * @return     ChildGoogleshoppingProductQuery The current query, for fluid interface
-     */
-    public function recentlyCreated($nbDays = 7)
-    {
-        return $this->addUsingAlias(GoogleshoppingProductTableMap::CREATED_AT, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
-    }
-
-    /**
-     * Order by update date desc
-     *
-     * @return     ChildGoogleshoppingProductQuery The current query, for fluid interface
-     */
-    public function lastUpdatedFirst()
-    {
-        return $this->addDescendingOrderByColumn(GoogleshoppingProductTableMap::UPDATED_AT);
-    }
-
-    /**
-     * Order by update date asc
-     *
-     * @return     ChildGoogleshoppingProductQuery The current query, for fluid interface
-     */
-    public function firstUpdatedFirst()
-    {
-        return $this->addAscendingOrderByColumn(GoogleshoppingProductTableMap::UPDATED_AT);
-    }
-
-    /**
-     * Order by create date desc
-     *
-     * @return     ChildGoogleshoppingProductQuery The current query, for fluid interface
-     */
-    public function lastCreatedFirst()
-    {
-        return $this->addDescendingOrderByColumn(GoogleshoppingProductTableMap::CREATED_AT);
-    }
-
-    /**
-     * Order by create date asc
-     *
-     * @return     ChildGoogleshoppingProductQuery The current query, for fluid interface
-     */
-    public function firstCreatedFirst()
-    {
-        return $this->addAscendingOrderByColumn(GoogleshoppingProductTableMap::CREATED_AT);
-    }
-
-} // GoogleshoppingProductQuery
+} // GoogleshoppingProductSynchronisationQuery

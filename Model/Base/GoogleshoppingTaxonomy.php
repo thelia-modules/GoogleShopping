@@ -8,6 +8,8 @@ use GoogleShopping\Model\GoogleshoppingTaxonomyQuery as ChildGoogleshoppingTaxon
 use GoogleShopping\Model\Map\GoogleshoppingTaxonomyTableMap;
 use GoogleShopping\Model\Thelia\Model\CategoryQuery;
 use GoogleShopping\Model\Thelia\Model\Category as ChildCategory;
+use GoogleShopping\Model\Thelia\Model\Lang as ChildLang;
+use GoogleShopping\Model\Thelia\Model\LangQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -72,9 +74,20 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
     protected $google_category;
 
     /**
+     * The value for the lang_id field.
+     * @var        int
+     */
+    protected $lang_id;
+
+    /**
      * @var        Category
      */
     protected $aCategory;
+
+    /**
+     * @var        Lang
+     */
+    protected $aLang;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -376,6 +389,17 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
     }
 
     /**
+     * Get the [lang_id] column value.
+     *
+     * @return   int
+     */
+    public function getLangId()
+    {
+
+        return $this->lang_id;
+    }
+
+    /**
      * Set the value of [id] column.
      *
      * @param      int $v new value
@@ -443,6 +467,31 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
     } // setGoogleCategory()
 
     /**
+     * Set the value of [lang_id] column.
+     *
+     * @param      int $v new value
+     * @return   \GoogleShopping\Model\GoogleshoppingTaxonomy The current object (for fluent API support)
+     */
+    public function setLangId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->lang_id !== $v) {
+            $this->lang_id = $v;
+            $this->modifiedColumns[GoogleshoppingTaxonomyTableMap::LANG_ID] = true;
+        }
+
+        if ($this->aLang !== null && $this->aLang->getId() !== $v) {
+            $this->aLang = null;
+        }
+
+
+        return $this;
+    } // setLangId()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -487,6 +536,9 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingTaxonomyTableMap::translateFieldName('GoogleCategory', TableMap::TYPE_PHPNAME, $indexType)];
             $this->google_category = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : GoogleshoppingTaxonomyTableMap::translateFieldName('LangId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->lang_id = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -495,7 +547,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 3; // 3 = GoogleshoppingTaxonomyTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 4; // 4 = GoogleshoppingTaxonomyTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingTaxonomy object", 0, $e);
@@ -519,6 +571,9 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
     {
         if ($this->aCategory !== null && $this->thelia_category_id !== $this->aCategory->getId()) {
             $this->aCategory = null;
+        }
+        if ($this->aLang !== null && $this->lang_id !== $this->aLang->getId()) {
+            $this->aLang = null;
         }
     } // ensureConsistency
 
@@ -560,6 +615,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
         if ($deep) {  // also de-associate any related objects?
 
             $this->aCategory = null;
+            $this->aLang = null;
         } // if (deep)
     }
 
@@ -683,6 +739,13 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
                 $this->setCategory($this->aCategory);
             }
 
+            if ($this->aLang !== null) {
+                if ($this->aLang->isModified() || $this->aLang->isNew()) {
+                    $affectedRows += $this->aLang->save($con);
+                }
+                $this->setLang($this->aLang);
+            }
+
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -729,6 +792,9 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
         if ($this->isColumnModified(GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY)) {
             $modifiedColumns[':p' . $index++]  = 'GOOGLE_CATEGORY';
         }
+        if ($this->isColumnModified(GoogleshoppingTaxonomyTableMap::LANG_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'LANG_ID';
+        }
 
         $sql = sprintf(
             'INSERT INTO googleshopping_taxonomy (%s) VALUES (%s)',
@@ -748,6 +814,9 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
                         break;
                     case 'GOOGLE_CATEGORY':
                         $stmt->bindValue($identifier, $this->google_category, PDO::PARAM_STR);
+                        break;
+                    case 'LANG_ID':
+                        $stmt->bindValue($identifier, $this->lang_id, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -820,6 +889,9 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
             case 2:
                 return $this->getGoogleCategory();
                 break;
+            case 3:
+                return $this->getLangId();
+                break;
             default:
                 return null;
                 break;
@@ -852,6 +924,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
             $keys[0] => $this->getId(),
             $keys[1] => $this->getTheliaCategoryId(),
             $keys[2] => $this->getGoogleCategory(),
+            $keys[3] => $this->getLangId(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -861,6 +934,9 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
         if ($includeForeignObjects) {
             if (null !== $this->aCategory) {
                 $result['Category'] = $this->aCategory->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aLang) {
+                $result['Lang'] = $this->aLang->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -905,6 +981,9 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
             case 2:
                 $this->setGoogleCategory($value);
                 break;
+            case 3:
+                $this->setLangId($value);
+                break;
         } // switch()
     }
 
@@ -932,6 +1011,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
         if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setTheliaCategoryId($arr[$keys[1]]);
         if (array_key_exists($keys[2], $arr)) $this->setGoogleCategory($arr[$keys[2]]);
+        if (array_key_exists($keys[3], $arr)) $this->setLangId($arr[$keys[3]]);
     }
 
     /**
@@ -946,6 +1026,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
         if ($this->isColumnModified(GoogleshoppingTaxonomyTableMap::ID)) $criteria->add(GoogleshoppingTaxonomyTableMap::ID, $this->id);
         if ($this->isColumnModified(GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID)) $criteria->add(GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID, $this->thelia_category_id);
         if ($this->isColumnModified(GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY)) $criteria->add(GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY, $this->google_category);
+        if ($this->isColumnModified(GoogleshoppingTaxonomyTableMap::LANG_ID)) $criteria->add(GoogleshoppingTaxonomyTableMap::LANG_ID, $this->lang_id);
 
         return $criteria;
     }
@@ -1011,6 +1092,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
     {
         $copyObj->setTheliaCategoryId($this->getTheliaCategoryId());
         $copyObj->setGoogleCategory($this->getGoogleCategory());
+        $copyObj->setLangId($this->getLangId());
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
@@ -1091,6 +1173,57 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
     }
 
     /**
+     * Declares an association between this object and a ChildLang object.
+     *
+     * @param                  ChildLang $v
+     * @return                 \GoogleShopping\Model\GoogleshoppingTaxonomy The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setLang(ChildLang $v = null)
+    {
+        if ($v === null) {
+            $this->setLangId(NULL);
+        } else {
+            $this->setLangId($v->getId());
+        }
+
+        $this->aLang = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildLang object, it will not be re-added.
+        if ($v !== null) {
+            $v->addGoogleshoppingTaxonomy($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildLang object
+     *
+     * @param      ConnectionInterface $con Optional Connection object.
+     * @return                 ChildLang The associated ChildLang object.
+     * @throws PropelException
+     */
+    public function getLang(ConnectionInterface $con = null)
+    {
+        if ($this->aLang === null && ($this->lang_id !== null)) {
+            $this->aLang = LangQuery::create()->findPk($this->lang_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aLang->addGoogleshoppingTaxonomies($this);
+             */
+        }
+
+        return $this->aLang;
+    }
+
+    /**
      * Clears the current object and sets all attributes to their default values
      */
     public function clear()
@@ -1098,6 +1231,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
         $this->id = null;
         $this->thelia_category_id = null;
         $this->google_category = null;
+        $this->lang_id = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1120,6 +1254,7 @@ abstract class GoogleshoppingTaxonomy implements ActiveRecordInterface
         } // if ($deep)
 
         $this->aCategory = null;
+        $this->aLang = null;
     }
 
     /**

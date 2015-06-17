@@ -2,7 +2,8 @@
 
 namespace GoogleShopping\Loop;
 
-use GoogleShopping\Model\GoogleshoppingProductQuery;
+use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
+use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Thelia\Core\Template\Element\BaseLoop;
@@ -24,6 +25,7 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         return new ArgumentCollection(
             Argument::createIntTypeArgument('category_id'),
             Argument::createIntTypeArgument('product_id'),
+            Argument::createAnyTypeArgument('locale', 'en_US'),
             new Argument(
                 'product_order',
                 new TypeCollection(
@@ -41,7 +43,6 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         );
     }
 
-
     public function buildModelCriteria()
     {
         $categoryId = $this->getCategoryId();
@@ -49,7 +50,7 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         $productOrders = $this->getProductOrder();
 
         $query = ProductQuery::create()
-            ->joinWithI18n();
+            ->joinWithI18n($this->getLocale());
 
         if ($categoryId) {
             $category = CategoryQuery::create()->findPk($categoryId);
@@ -93,9 +94,6 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         $notEanArray = [];
         /** @var Product $product */
         foreach ($loopResult->getResultDataCollection() as $product) {
-            $alreadyExist = GoogleshoppingProductQuery::create()
-                ->findOneByProductId($product->getId()) === null ? false : true;
-
             $checkEan = "";
 
             $productSaleElements = $product->getProductSaleElementss();
@@ -113,14 +111,12 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
             if ($checkEan === false) {
                 $notEanArray[] = [
                     "product" => $product,
-                    "exist" => $alreadyExist,
                     "category_associated" => $isCategoryAssociated,
                     "valid_ean" => $checkEan
                 ];
             } else {
                 $eanArray[] = [
                     "product" => $product,
-                    "exist" => $alreadyExist,
                     "category_associated" => $isCategoryAssociated,
                     "valid_ean" => $checkEan
                 ];
@@ -140,7 +136,6 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
             $loopResultRow->set("ID", $product->getId());
             $loopResultRow->set("REF", $product->getRef());
             $loopResultRow->set("TITLE", $product->getTitle());
-            $loopResultRow->set("EXIST", $loopResultProduct["exist"]);
             $loopResultRow->set("CATEGORY_ASSOCIATED", $loopResultProduct["category_associated"]);
             $loopResultRow->set("VALID_EAN", $loopResultProduct["valid_ean"]);
 
@@ -153,9 +148,6 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
     {
         /** @var Product $product */
         foreach ($loopResult->getResultDataCollection() as $product) {
-            $alreadyExist = GoogleshoppingProductQuery::create()
-                ->findOneByProductId($product->getId()) === null ? false : true;
-
             $checkEan = "";
 
             $productSaleElements = $product->getProductSaleElementss();
@@ -175,7 +167,6 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
             $loopResultRow->set("ID", $product->getId());
             $loopResultRow->set("REF", $product->getRef());
             $loopResultRow->set("TITLE", $product->getTitle());
-            $loopResultRow->set("EXIST", $alreadyExist);
             $loopResultRow->set("CATEGORY_ASSOCIATED", $isCategoryAssociated);
             $loopResultRow->set("VALID_EAN", $checkEan);
 
@@ -206,7 +197,6 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
                     break;
             }
         }
-
         return $loopResult;
     }
 }

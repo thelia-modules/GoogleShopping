@@ -10,6 +10,7 @@
         -->
         <loop name="googleshopping.category.associated" class="GoogleShopping\Loop\AssociatedCategory" />
         <loop name="googleshopping.product" class="GoogleShopping\Loop\GoogleShoppingProduct" />
+        <loop name="googleshopping.product.sync" class="GoogleShopping\Loop\ProductSync" />
     </loops>
 
     <forms>
@@ -21,34 +22,28 @@
         <form name="googleshopping.taxonomy" class="GoogleShopping\Form\TaxonomyForm" />
     </forms>
 
-    <commands>
-        <!--
-        <command class="GoogleShopping\Command\MySuperCommand" />
-        -->
-    </commands>
-
     <services>
         <service id="googleshopping.oauth.smarty.plugin" class="GoogleShopping\Smarty\Plugins\GoogleOauth" scope="request">
             <argument type="service" id="request" />
             <tag name="thelia.parser.register_plugin" />
         </service>
         <service id="googleshopping.handler" class="GoogleShopping\Handler\GoogleShoppingHandler" scope="request">
+            <argument type="service" id="service_container"/>
             <argument type="service" id="request"/>
         </service>
         <service id="googleshopping.product.listener" class="GoogleShopping\EventListener\GoogleProductEventListener" scope="request">
-            <argument type="service" id="googleshopping.handler"/>
             <argument type="service" id="request" />
+            <argument type="service" id="thelia.translator"/>
+            <argument type="service" id="googleshopping.handler"/>
             <tag name="kernel.event_subscriber" />
         </service>
     </services>
 
-    <!--
     <hooks>
-        <hook id="googleshopping.hook" class="GoogleShopping\Hook\MySuperHook" scope="request">
-            <tag name="hook.event_listener" event="main.body.bottom" type="front|back|pdf|email" method="onMainBodyBottom" />
+        <hook id="googleshopping.tool.hook" class="GoogleShopping\Hook\AdminToolHook" scope="request">
+            <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
         </hook>
     </hooks>
-    -->
 
     <!--
     <exports>

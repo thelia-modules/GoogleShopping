@@ -27,11 +27,18 @@
     ...
     </route>
     -->
-    <route id="googleshopping.configuration" path="/admin/module/googleshopping/api/configuration" methods="POST">
+
+
+
+    <route id="google_shopping_module_config" path="/admin/module/GoogleShopping">
+        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::viewAllAction</default>
+    </route>
+
+    <route id="googleshopping.configuration.api" path="/admin/module/googleshopping/api/" methods="POST">
         <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveApiConfiguration</default>
     </route>
 
-    <route id="googleshopping.configuration" path="/admin/module/googleshopping/merchant/configuration" methods="POST">
+    <route id="googleshopping.configuration.merchant" path="/admin/module/googleshopping/merchant/configuration" methods="POST">
         <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveMerchantConfiguration</default>
     </route>
 
@@ -39,12 +46,18 @@
         <default key="_controller">GoogleShopping\Controller\Admin\BaseGoogleShoppingController::setAuthorization</default>
     </route>
 
-    <route id="googleshopping.taxonomy.get" path="/admin/module/googleshopping/taxonomy" methods="GET">
+    <route id="googleshopping.taxonomy.get" path="/admin/module/googleshopping/taxonomy/{langId}" methods="GET">
         <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::getTaxonomy</default>
+        <requirement key="langId">\d+</requirement>
     </route>
 
     <route id="googleshopping.taxonomy.associate" path="/admin/modules/googleshopping/taxonomy/associate" methods="POST">
         <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::associateTaxonomy</default>
+    </route>
+
+    <route id="googleshopping.get.product" path="/admin/module/googleshopping/get/{id}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::getGoogleProduct</default>
+        <requirement key="id">\d+</requirement>
     </route>
 
     <route id="googleshopping.add.product" path="/admin/module/googleshopping/add/{id}" methods="GET">
@@ -59,6 +72,18 @@
     <route id="googleshopping.delete.product" path="/admin/module/googleshopping/delete/{id}" methods="GET">
         <default key="_controller">GoogleShopping\Controller\Admin\ProductController::deleteProduct</default>
         <requirement key="id">\d+</requirement>
+    </route>
+
+    <route id="googleshopping.toggle.sync.product" path="/admin/module/googleshopping/toggle/sync/{id}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::toggleProductSync</default>
+    </route>
+
+    <route id="googleshopping.sync.catalog" path="/admin/module/googleshopping/sync/catalog" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::syncCatalog</default>
+    </route>
+
+    <route id="googleshopping.sync.catalog.cron" path="/admin/module/googleshopping/sync/catalog/{secret}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::syncCatalog</default>
     </route>
 
 </routes>

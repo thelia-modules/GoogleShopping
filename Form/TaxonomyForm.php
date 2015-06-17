@@ -41,6 +41,12 @@ class TaxonomyForm extends BaseForm
                     new Constraints\NotBlank(),
                 )
             ))
+            ->add("lang", "text", array(
+                'required' => true,
+                "constraints" => array(
+                    new Constraints\NotBlank(),
+                )
+            ))
             ;
     }
 
