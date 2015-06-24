@@ -26,7 +26,8 @@ class GoogleOauth extends AbstractSmartyPlugin
 
     public function oAuthCheckToken($params, $smarty)
     {
-        $token = $this->request->getSession()->get('oauth_access_token');
+
+        $token = GoogleShopping::getConfigValue('oauth_access_token');
 
         if (!$token) {
             $smarty->assign('tokenExist', 'none');

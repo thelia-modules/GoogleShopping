@@ -58,7 +58,7 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 3;
+    const NUM_COLUMNS = 4;
 
     /**
      * The number of lazy-loaded columns
@@ -68,7 +68,7 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 3;
+    const NUM_HYDRATE_COLUMNS = 4;
 
     /**
      * the column name for the ID field
@@ -86,6 +86,11 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
     const GOOGLE_CATEGORY = 'googleshopping_taxonomy.GOOGLE_CATEGORY';
 
     /**
+     * the column name for the LANG_ID field
+     */
+    const LANG_ID = 'googleshopping_taxonomy.LANG_ID';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -97,12 +102,12 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'TheliaCategoryId', 'GoogleCategory', ),
-        self::TYPE_STUDLYPHPNAME => array('id', 'theliaCategoryId', 'googleCategory', ),
-        self::TYPE_COLNAME       => array(GoogleshoppingTaxonomyTableMap::ID, GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID, GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY, ),
-        self::TYPE_RAW_COLNAME   => array('ID', 'THELIA_CATEGORY_ID', 'GOOGLE_CATEGORY', ),
-        self::TYPE_FIELDNAME     => array('id', 'thelia_category_id', 'google_category', ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id', 'TheliaCategoryId', 'GoogleCategory', 'LangId', ),
+        self::TYPE_STUDLYPHPNAME => array('id', 'theliaCategoryId', 'googleCategory', 'langId', ),
+        self::TYPE_COLNAME       => array(GoogleshoppingTaxonomyTableMap::ID, GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID, GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY, GoogleshoppingTaxonomyTableMap::LANG_ID, ),
+        self::TYPE_RAW_COLNAME   => array('ID', 'THELIA_CATEGORY_ID', 'GOOGLE_CATEGORY', 'LANG_ID', ),
+        self::TYPE_FIELDNAME     => array('id', 'thelia_category_id', 'google_category', 'lang_id', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -112,12 +117,12 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'TheliaCategoryId' => 1, 'GoogleCategory' => 2, ),
-        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'theliaCategoryId' => 1, 'googleCategory' => 2, ),
-        self::TYPE_COLNAME       => array(GoogleshoppingTaxonomyTableMap::ID => 0, GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID => 1, GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY => 2, ),
-        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'THELIA_CATEGORY_ID' => 1, 'GOOGLE_CATEGORY' => 2, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'thelia_category_id' => 1, 'google_category' => 2, ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'TheliaCategoryId' => 1, 'GoogleCategory' => 2, 'LangId' => 3, ),
+        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'theliaCategoryId' => 1, 'googleCategory' => 2, 'langId' => 3, ),
+        self::TYPE_COLNAME       => array(GoogleshoppingTaxonomyTableMap::ID => 0, GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID => 1, GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY => 2, GoogleshoppingTaxonomyTableMap::LANG_ID => 3, ),
+        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'THELIA_CATEGORY_ID' => 1, 'GOOGLE_CATEGORY' => 2, 'LANG_ID' => 3, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'thelia_category_id' => 1, 'google_category' => 2, 'lang_id' => 3, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -139,6 +144,7 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
         $this->addPrimaryKey('ID', 'Id', 'INTEGER', true, null, null);
         $this->addForeignKey('THELIA_CATEGORY_ID', 'TheliaCategoryId', 'INTEGER', 'category', 'ID', true, null, null);
         $this->addColumn('GOOGLE_CATEGORY', 'GoogleCategory', 'VARCHAR', true, 255, null);
+        $this->addForeignKey('LANG_ID', 'LangId', 'INTEGER', 'lang', 'ID', true, null, null);
     } // initialize()
 
     /**
@@ -147,6 +153,7 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
     public function buildRelations()
     {
         $this->addRelation('Category', '\\GoogleShopping\\Model\\Thelia\\Model\\Category', RelationMap::MANY_TO_ONE, array('thelia_category_id' => 'id', ), 'CASCADE', 'RESTRICT');
+        $this->addRelation('Lang', '\\GoogleShopping\\Model\\Thelia\\Model\\Lang', RelationMap::MANY_TO_ONE, array('lang_id' => 'id', ), 'CASCADE', 'RESTRICT');
     } // buildRelations()
 
     /**
@@ -290,10 +297,12 @@ class GoogleshoppingTaxonomyTableMap extends TableMap
             $criteria->addSelectColumn(GoogleshoppingTaxonomyTableMap::ID);
             $criteria->addSelectColumn(GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID);
             $criteria->addSelectColumn(GoogleshoppingTaxonomyTableMap::GOOGLE_CATEGORY);
+            $criteria->addSelectColumn(GoogleshoppingTaxonomyTableMap::LANG_ID);
         } else {
             $criteria->addSelectColumn($alias . '.ID');
             $criteria->addSelectColumn($alias . '.THELIA_CATEGORY_ID');
             $criteria->addSelectColumn($alias . '.GOOGLE_CATEGORY');
+            $criteria->addSelectColumn($alias . '.LANG_ID');
         }
     }
 

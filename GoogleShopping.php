@@ -34,5 +34,6 @@ class GoogleShopping extends BaseModule
     {
         $database = new Database($con);
         $database->insertSql(null, [__DIR__ . "/Config/thelia.sql", __DIR__ . "/Config/insert.sql"]);
+        $this->setConfigValue("sync_secret", md5(uniqid(rand(), true)));
     }
 }

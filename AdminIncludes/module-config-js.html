@@ -1,9 +1,15 @@
+{default_translation_domain domain='googleshopping.ai'}
+
+{javascripts file='assets/js/bootstrap-switch/bootstrap-switch.js'}
+    <script src='{$asset_url}'></script>
+{/javascripts}
+
 <script>
     $(function() {
         $("#search-taxonomy").keyup(function(){
             search = $(this).val();
             if (search.length > 2) {
-                $.get('{url path="/admin/module/googleshopping/taxonomy"}', function(data) {
+                $.get('{url path="/admin/module/googleshopping/taxonomy/{$edit_language_id}"}', function(data) {
                     var lines = data.split("\n");
                     var res = "";
                     for (var i = 0, len = lines.length; i < len; i++) {
@@ -32,6 +38,15 @@
             }
         });
 
+        $(".check-gtin").click(function(event) {
+            var prodId = $(this).data("id");
+            if(this.checked) {
+                $('#gtin-product-'+prodId).val('on')
+            } else {
+                $('#gtin-product-'+prodId).val('off');
+            }
+        });
+
         $(".check-all-product").click(function(event) {
             var catId = $(this).data("category");
             if(this.checked) {
@@ -49,18 +64,70 @@
             var catId = $(this).data("category");
             $('.check-product-'+catId+':checked').each(function() {
                 var productId = $(this).data("product");
-                $("#td-product-"+productId).html('<span class="loading" style="margin:auto"></span>');
-                var form = $("#form-product-"+productId);
+                $(".td-product-"+productId+":first").html('<span class="loading" style="margin:auto"></span>');
+                var form = $("#add-form-product-"+productId);
+                form.append("<input type='hidden' name='ajax' value='true'>");
                 $.ajax({
                     url: form.attr('action'),
                     type: form.attr('method'),
                     data: form.serialize()
                 }).fail(function(jqXHR, textStatus, errorThrown) {
-                    $("#td-product-" + productId).html(jqXHR.responseText);
+                    $(".td-product-" + productId).remove();
+                    $("#tr-product-"+productId).addClass("danger").append("<td colspan='2'>"+jqXHR.responseText+"</td>");
                 }).done(function(data){
-                    $("#td-product-"+productId).html('The products was added with success');
-                });
+                    $(".td-product-" + productId).remove();
+                    $("#tr-product-"+productId).addClass("success").append("<td colspan='2'>{intl l="product.add.success"}</td>");
+                })
             });
+        });
+
+        $("#select-country").change(function (event) {
+            window.location.href = $(this).val();
+        });
+
+
+        $(".tr-product").each(function() {
+            var productId = $(this).data("product");
+            var form = $("#add-form-product-"+productId);
+            var tr = $(this);
+            var url = "{url path="/admin/module/googleshopping/get/"}"+productId;
+
+            $.ajax({
+                url: url,
+                type: form.attr('method'),
+                data: form.serialize()
+            }).done(function(data){
+                if (data.id) {
+                    tr.addClass("success");
+
+                    if (data.identifier == false) {
+                        $("#td-gtin-product-"+productId).html("{intl l="product.add.no.gtin"}");
+                        $("#gtin-product-"+productId).val("on");
+                    }
+
+                    $("#delete-form-product-"+productId).show().addClass("col-md-6");
+                    $("#add-form-product-"+productId).children("button").html("{intl l="Update"}");
+                    $("#add-form-product-"+productId).addClass("col-md-6");
+
+                    $("#td-exist-"+productId).show();
+                }
+            })
+        });
+
+        $(".sync-switch").bootstrapSwitch();
+
+        $(".sync-switch").on("switch-change", function(e, data) {
+            var productId = $(this).data("product");
+            var form = $("#add-form-product-"+productId);
+            var url = "{url path="/admin/module/googleshopping/toggle/sync/"}"+productId;
+            $('body').append('<div class="modal-backdrop fade in" id="loading-event"><div class="loading"></div></div>');
+            $.ajax({
+                url: url,
+                type: form.attr('method'),
+                data: form.serialize()
+            }).done(function(data){
+                $("#loading-event").remove();
+            })
         });
     })
 </script>

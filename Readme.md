@@ -36,8 +36,11 @@ Before install this module you need to create a project in your google account f
 Until part 5. For the part 4 you have to choose "Web application".
 
 After that you will be able to get your credentials to set in Thelia BackOffice after module activation.
+
 Then you need to associate your own categories with Google's one.
 
-When everything is configured you can go to a product edit page in backOffice, tab module and if everything is good you will see a button for send product to google.
+When everything is configured you can add product to your google shopping account through the catalog management tab in google configuration modules.
+If a product don't have gtin/ean and is unique you have to check the box to specify to google that product is unique and he don't need an unique identifier.
 
-For send a product to google he need a valid GTIN (EAN)
+The synchronisation button is useful when you want implements a synchronisation auto with a cron, the url to call with cron is on GoogleShopping configuration.
+Each time this url is called all the product with synchronisation enable will be updated. You can also sync manually them with a button in Catalog management tab.

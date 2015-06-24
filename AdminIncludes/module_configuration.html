@@ -2,6 +2,9 @@
 {assign var="tab" value="configuration"}
 {if isset($smarty.get.current_tab)}
     {assign var="tab" value=$smarty.get.current_tab}
+    {if $tab == ""}
+        {assign var="tab" value="configuration"}
+    {/if}
 {/if}
 {if isset($smarty.get.current_cat)}
     {assign var="curr_cat" value=$smarty.get.current_cat}
@@ -11,9 +14,9 @@
     <div class="row">
         <div class="col-md-12">
             <ul id="tabbed-menu" class="nav nav-tabs">
-                <li class="{if $tab eq "configuration"}active{/if}"><a data-toggle="tab" href="#configuration">{intl l="Configuration"}</a> </li>
-                <li class="{if $tab eq "association"}active{/if}"><a data-toggle="tab" href="#association">{intl l="Google Categories Associations"}</a></li>
-                <li class="{if $tab eq "management"}active{/if}"><a data-toggle="tab" href="#management">{intl l="Catalog management"}</a></li>
+                <li class="{if $tab eq "configuration"}active{/if}"><a data-toggle="tab" href="#configuration">{intl l="googleshopping.configuration.li.configuration"}</a> </li>
+                <li class="{if $tab eq "association"}active{/if}"><a data-toggle="tab" href="#association">{intl l="googleshopping.configuration.li.association"}</a></li>
+                <li class="{if $tab eq "management"}active{/if}"><a data-toggle="tab" href="#management">{intl l="googleshopping.configuration.li.management"}</a></li>
             </ul>
 
             <div class="tab-content">
@@ -22,7 +25,7 @@
                         {form name="googleshopping.api.configuration"}
                             <form method="post" action='{url path="/admin/module/googleshopping/api/configuration"}'>
                                 <div class="panel-heading">
-                                    <h4>{intl l="Google Api configuration"}</h4>
+                                    <h4>{intl l="googleshopping.configuration.h4.api"}</h4>
                                     {include
                                     file      = "includes/inner-form-toolbar.html"
                                     hide_flags = true
@@ -37,7 +40,7 @@
                                                 <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                     <label for="{$label_attr.for}">{$label}</label>
                                                     <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
-                                                    <span class="help-block">{intl l="The application name you have define when you have create the api apllication "}</span>
+                                                    <span class="help-block">{intl l="googleshopping.configuration.application.name"}</span>
                                                 </div>
                                             {/form_field}
 
@@ -45,7 +48,7 @@
                                                 <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                     <label for="{$label_attr.for}">{$label}</label>
                                                     <input id="{$label_attr.for}" class="form-control" type="text" name="{$name}" value="{$value}" required/>
-                                                    <span class="help-block">{intl l="The client ID of the api who can be found in https://console.developers.google.com at APIs & auth > Credentials"}</span>
+                                                    <span class="help-block">{intl l="googleshopping.configuration.client.id"}</span>
                                                 </div>
                                             {/form_field}
 
@@ -53,7 +56,7 @@
                                                 <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                     <label for="{$label_attr.for}">{$label}</label>
                                                     <input id="{$label_attr.for}" class="form-control"  type="text" name="{$name}" value="{$value}" required/>
-                                                    <span class="help-block">{intl l="The client secret associate to client ID"}</span>
+                                                    <span class="help-block">{intl l="googleshopping.configuration.help.client.secret"}</span>
                                                 </div>
                                             {/form_field}
                                         </div>
@@ -66,7 +69,7 @@
                         {form name="googleshopping.merchant.configuration"}
                             <form method="post" action='{url path="/admin/module/googleshopping/merchant/configuration"}'>
                                 <div class="panel-heading">
-                                    <h4>{intl l="Google Merchant configuration"}</h4>
+                                    <h4>{intl l="googleshopping.configuration.h4.merchant"}</h4>
 
                                     {include
                                     file      = "includes/inner-form-toolbar.html"
@@ -83,7 +86,7 @@
                                                 <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                     <label for="{$label_attr.for}">{$label}</label>
                                                     <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" required/>
-                                                    <span class="help-block">{intl l="Your google merchant ID, can be found in Google Merchant center"}</span>
+                                                    <span class="help-block">{intl l="googleshopping.configuration.help.merchant.id"}</span>
                                                 </div>
                                             {/form_field}
 
@@ -95,7 +98,7 @@
                                                             <option value="{$ID}" {if $value == $ID}selected{/if} >{$TITLE}</option>
                                                         {/loop}
                                                     </select>
-                                                    <span class="help-block">{intl l="The target country for Google Shopping"}</span>
+                                                    <span class="help-block">{intl l="googleshopping.configuration.help.target.country"}</span>
                                                 </div>
                                             {/form_field}
 
@@ -103,7 +106,7 @@
                                                 <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                     <label for="{$label_attr.for}">{$label}</label>
                                                     <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
-                                                    <span class="help-block">{intl l="The ID of thelia color attributes if you have one"}</span>
+                                                    <span class="help-block">{intl l="googleshopping.configuraton.help.attribut.color"}</span>
                                                 </div>
                                             {/form_field}
 
@@ -111,7 +114,7 @@
                                                 <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                     <label for="{$label_attr.for}">{$label}</label>
                                                     <input id="{$label_attr.for}" class="form-control"  name="{$name}" value="{$value}" />
-                                                    <span class="help-block">{intl l="The ID of thelia size attributes if you have one"}</span>
+                                                    <span class="help-block">{intl l="googleshopping.configuraton.help.attribut.size"}</span>
                                                 </div>
                                             {/form_field}
                                         </div>
@@ -119,18 +122,43 @@
                                 </div>
                             </form>
                         {/form}
+
+                    </div>
+                    <div>
+                        <div class="alert alert-info col-md-12" role="alert">{intl l="Url to call for Cron sync :"} {url path="/admin/module/googleshopping/sync/catalog/"}{$sync_secret}</div>
                     </div>
                 </div>
 
                 <div id="association" class="tab-pane {if $tab eq "association"}active{/if} form-container">
                     <div class="panel panel-default">
                         <div class="panel-heading clearfix">
+                            <h4>{intl l="googleshopping.configuration.h4.choose.flag"}</h4>
+                            <div class="row inner-toolbar{if $page_bottom} inner-toolbar-bottom{/if}">
+                                <div class="col-md-3 inner-actions">
+                                    <ul class="nav nav-pills">
+                                        {loop name="lang_list" type="lang"}
+                                            <li {if $ID == $edit_language_id}class="active"{/if}>
+                                                {if $current_tab}
+                                                    {$lang_url = {url path={$page_url|default:$current_url nofilter} edit_language_id=$ID current_tab=$current_tab}}
+                                                {else}
+                                                    {$lang_url = {url path={$page_url|default:$current_url nofilter} edit_language_id=$ID}}
+                                                {/if}
+                                                <a class="language-change-button" data-language-id="{$ID}" href="{$lang_url nofilter}" title="{intl l='Edit information in %lng' lng={$TITLE}}">
+                                                    <img src="{image file="assets/img/flags/$CODE.png"}" alt=$TITLE />
+                                                </a>
+                                            </li>
+                                        {/loop}
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         <div class="panel-body">
                             {form name="googleshopping.taxonomy"}
                                 <form action="{url path="/admin/modules/googleshopping/taxonomy/associate"}" method="post">
                                     {form_hidden_fields form=$form}
-
+                                    {form_field form=$form field="lang"}
+                                        <input type="hidden" name="{$name}" value="{$edit_language_id}">
+                                    {/form_field}
                                     <div class="col-md-12">
                                         <div class="row">
                                             <div class="form-group col-md-3">
@@ -144,7 +172,7 @@
                                                 {/form_field}
                                             </div>
                                             <div class="form-group col-md-3">
-                                                <label for="search-taxonomy">{intl l="Search category (English only)"}</label>
+                                                <label for="search-taxonomy">{intl l="Search category"}</label>
                                                 <div class="input-group">
                                                     <input class="form-control" type="text" id="search-taxonomy"/>
                                             <span class="input-group-addon">
@@ -176,7 +204,7 @@
                                     <caption class="clearfix">
                                         {intl l="GoogleShopping associated categories"}
                                     </caption>
-                                    {loop type="googleshopping.category.associated" name="googleshopping_category_associated"}
+                                    {loop type="googleshopping.category.associated" lang_id={$edit_language_id} name="googleshopping_category_associated"}
                                     {if $LOOP_COUNT === 1}
                                         <thead>
                                         <tr>
@@ -220,12 +248,35 @@
                 <div id="management" class="tab-pane {if $tab eq "management"}active{/if} form-container">
                     <div class="panel panel-default">
                         <div class="panel-heading clearfix">
-                            {include
-                            file      = "includes/inner-form-toolbar.html"
-                            hide_save_and_close_button = true
-                            hide_save_buttons = true
-                            hide_submit_buttons = true
-                            }
+                            <h4>{intl l="Choose language and country for send your product"}</h4>
+                            <div class="row inner-toolbar{if $page_bottom} inner-toolbar-bottom{/if}">
+                                <div class="col-md-3 inner-actions">
+                                    <ul class="nav nav-pills">
+                                        {loop name="lang_list" type="lang"}
+                                            <li {if $ID == $edit_language_id}class="active"{/if}>
+                                                {$lang_url = {url path={$page_url|default:$current_url nofilter} edit_language_id=$ID current_tab="management"}}
+                                                <a class="language-change-button" data-language-id="{$ID}" href="{$lang_url nofilter}" title="{intl l='Edit information in %lng' lng={$TITLE}}">
+                                                    <img src="{image file="assets/img/flags/$CODE.png"}" alt=$TITLE />
+                                                </a>
+                                            </li>
+                                        {/loop}
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 inner-actions">
+                                    <select id="select-country" class="form-control" name="{$name}">
+                                        {loop type="country" name="country-select"}
+                                            <option value="{url path={navigate to="current"} current_tab="management" target_country=$ISOALPHA2}"
+                                                    {if $IS_DEFAULT == 1 && !$smarty.get.target_country}selected
+                                                    {elseif $smarty.get.target_country == $ISOALPHA2 }selected{/if}>
+                                                {$TITLE}
+                                            </option>
+                                        {/loop}
+                                    </select>
+                                </div>
+                                <div class="col-md-3 col-md-offset-2 inner-actions">
+                                    <a class="btn btn-default btn-primary" href="{url path="/admin/module/googleshopping/sync/catalog"}">{intl l="googleshopping.catalog.synchronisation"}</a>
+                                </div>
+                            </div>
                         </div>
                         <div class="panel-body">
                             {if 'none' === $tokenExist}
@@ -259,12 +310,11 @@
                                 </div>
                             </div>
                             {else}
-                            {*<form action="{url path="/admin/module/googleshopping/add/products"}" method="get">*}
                                 <div class="panel-group js-product-accordion js-product active">
                                     {loop type="category" name="category" visible="*"}
                                         {$categoryId = $ID}
                                         {ifloop rel="googleshopping_category_associated_management"}
-                                            {loop type="googleshopping.category.associated" name="googleshopping_category_associated_management" category_id={$categoryId}}
+                                            {loop type="googleshopping.category.associated" name="googleshopping_category_associated_management" category_id={$categoryId} lang_id={$edit_language_id}}
                                             {/loop}
                                             <div class="panel panel-default">
                                                 <div class="panel-heading js-hash-product-category-{$categoryId}">
@@ -324,46 +374,70 @@
                                                                     }
                                                                 </th>
 
-                                                                <th>{intl l="Check all "}<input class="check-all-product" data-category="{$categoryId}" type="checkbox"/></th>
-                                                                <th>
+                                                                <th><input class="check-all-product" data-category="{$categoryId}" type="checkbox"/></th>
+                                                                <th class="text-center">
                                                                     <button class="send-checked btn btn-default btn-success btn-sm form-control" data-category="{$categoryId}" class="btn btn-default btn-success btn-xs form-control" type="submit">
                                                                         {intl l="Send checked"}
                                                                     </button>
                                                                 </th>
+                                                                <th class="text-center">
+                                                                    {intl l="Synchronisation"}
+                                                                </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
-                                                            {loop type="googleshopping.product" name="googleshopping_product" category_id={$categoryId} product_order=$smarty.get.product_order}
-                                                                <form id="form-product-{$ID}" action="/admin/module/googleshopping/add/{$ID}" method="get">
-                                                                    <input type="hidden" name="locale" value="{$edit_language_locale}">
-                                                                    <input type="hidden" name="ajax" value="true">
+                                                                {loop type="googleshopping.product" name="googleshopping_product" category_id={$categoryId} locale={$edit_language_locale} country={$smarty.get.target_country} product_order=$smarty.get.product_order}
+                                                                    {$SYNC_ENABLE = false}
 
-                                                                    <tr {if $EXIST == 1}class="success"{/if}>
-                                                                    <td>{$ID}</td>
-                                                                    <td><a href="{url path="/admin/products/update?product_id=%product_id" product_id=$ID}">{$REF}</a></td>
-                                                                    <td>{if $VALID_EAN === false}
-                                                                            {intl l="Error At least one GTIN is empty."}
-                                                                            <br/><input class="check-gtin-{$categoryId}" id="gtin-product-{$ID}" type="checkbox" name="gtin" /> {intl l="This product don't have GTIN."}
-                                                                        {else}
-                                                                            {intl l="GTIN ok"}
-                                                                        {/if}
-                                                                    </td>
-                                                                    <td>{$TITLE}</td>
-                                                                    {if $EXIST == 1}
-                                                                        <td colspan="2">
-                                                                            {intl l="Product already sent"}
+                                                                    <tr class="tr-product" data-product="{$ID}" id="tr-product-{$ID}">
+                                                                        <td>{$ID}</td>
+                                                                        <td><a href="{url path="/admin/products/update?product_id=%product_id" product_id=$ID}">{$REF}</a></td>
+                                                                        <td id="td-gtin-product-{$ID}">{if $VALID_EAN === false}
+                                                                                {intl l="Error At least one GTIN is empty."}
+                                                                                <br/><input class="check-gtin check-gtin-{$categoryId}" data-id="{$ID}" type="checkbox" name="gtin" /> {intl l="This product don't have GTIN."}
+                                                                            {else}
+                                                                                {intl l="GTIN ok"}
+                                                                            {/if}
                                                                         </td>
-                                                                    {else}
-                                                                        <td id="td-product-{$ID}"><input class="check-product-{$categoryId}" type="checkbox" data-product="{$ID}" name="products[{$ID}][checkbox]"/></td>
-                                                                        <td>
-                                                                            <button class="btn btn-default btn-primary btn-sm form-control" type="submit">
-                                                                                {intl l="Send"}
-                                                                            </button>
+                                                                        <td>{$TITLE}</td>
+                                                                        <td class="td-product-{$ID} td-not-exist-{$ID}">
+                                                                            <input class="check-product-{$categoryId}" type="checkbox" data-product="{$ID}" name="products[{$ID}][checkbox]"/>
                                                                         </td>
-                                                                    {/if}
+                                                                        <td class="text-center td-product-{$ID} td-not-exist-{$ID}">
+                                                                            <form id="add-form-product-{$ID}" action="/admin/module/googleshopping/add/{$ID}" method="get">
+                                                                                {if $smarty.get.target_country}
+                                                                                    <input type="hidden" name="target_country" value="{$smarty.get.target_country}"/>
+                                                                                {/if}
+                                                                                <input type="hidden" name="locale" value="{$edit_language_locale}">
+                                                                                <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
+                                                                                <button class="btn btn-default btn-primary btn-sm form-control" type="submit">
+                                                                                    {intl l="Send"}
+                                                                                </button>
+                                                                            </form><form id="delete-form-product-{$ID}" action="/admin/module/googleshopping/delete/{$ID}" method="get" style="display: none">
+                                                                                {if $smarty.get.target_country}
+                                                                                    <input type="hidden" name="target_country" value="{$smarty.get.target_country}"/>
+                                                                                {/if}
+                                                                                <input type="hidden" name="locale" value="{$edit_language_locale}">
+                                                                                <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
+                                                                                <button class="btn btn-default btn-danger btn-sm form-control" type="submit">
+                                                                                    {intl l="Delete"}
+                                                                                </button>
+                                                                            </form>
+                                                                        </td>
+                                                                        <td class="text-center">
+                                                                            <div class="switch-small sync-switch" data-on="success" data-off="danger" data-product="{$ID}" data-locale="{$edit_language_locale}" data-country="{$smarty.get.target_country}" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
+
+                                                                                {loop type="googleshopping.product.sync" name="googleshopping_product_sync" product_id={$ID} country={$smarty.get.target_country} locale={$edit_language_locale} }
+                                                                                    {if $ENABLE}
+                                                                                        {$SYNC_ENABLE = true}
+                                                                                    {/if}
+                                                                                {/loop}
+
+                                                                                <input type="checkbox" name="sync" value="true" {if $SYNC_ENABLE === true}checked{/if}/>
+                                                                            </div>
+                                                                        </td>
                                                                     </tr>
-                                                                </form>
-                                                            {/loop}
+                                                                {/loop}
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -384,7 +458,6 @@
                                         {/elseloop}
                                     {/loop}
                                 </div>
-                            {*</form>*}
                             {/if}
                         </div>
                     </div>
