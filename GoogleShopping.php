@@ -32,8 +32,11 @@ class GoogleShopping extends BaseModule
 
     public function postActivation(ConnectionInterface $con = null)
     {
-        $database = new Database($con);
-        $database->insertSql(null, [__DIR__ . "/Config/thelia.sql", __DIR__ . "/Config/insert.sql"]);
-        $this->setConfigValue("sync_secret", md5(uniqid(rand(), true)));
+        if (!self::getConfigValue('is_initialized', false)) {
+            $database = new Database($con);
+            $database->insertSql(null, [__DIR__ . "/Config/thelia.sql"]);
+            self::setConfigValue('is_initialized', true);
+            $this->setConfigValue("sync_secret", md5(uniqid(rand(), true)));
+        }
     }
 }
