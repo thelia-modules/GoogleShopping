@@ -20,14 +20,12 @@ class ConfigurationController extends BaseAdminController
         }
 
         return $this->render(
-            "module-configure",
+            "google-shopping/configuration",
             array(
-                "module_code" => 'GoogleShopping',
                 "sync_secret" => GoogleShopping::getConfigValue('sync_secret')
             )
         );
     }
-
 
     public function saveApiConfiguration()
     {

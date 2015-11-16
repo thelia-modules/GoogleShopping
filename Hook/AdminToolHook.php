@@ -13,7 +13,7 @@ class AdminToolHook extends BaseHook
     public function onMainTopMenuTools(HookRenderBlockEvent $event)
     {
         $event->add(array(
-            "url" => URL::getInstance()->absoluteUrl("/admin/module/GoogleShopping?current_tab=management"),
+            "url" => URL::getInstance()->absoluteUrl("/admin/module/GoogleShopping/catalog/management"),
             "title" => $this->trans("Google catalog management", [], GoogleShopping::DOMAIN_NAME)
         ));
     }

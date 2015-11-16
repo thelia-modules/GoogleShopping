@@ -17,7 +17,7 @@ class MerchantConfigurationForm extends BaseForm
             ->add("merchant_id", "text", array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.merchantid',
+                    'GoogleShopping merchant ID',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
@@ -31,7 +31,7 @@ class MerchantConfigurationForm extends BaseForm
             ))
             ->add("target_country_id", "text", array(
                 'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.target.country',
+                    'Target coutry',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
@@ -42,7 +42,7 @@ class MerchantConfigurationForm extends BaseForm
             ))
             ->add("attribute_color", "number", array(
                 'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.attribute.color',
+                    'Attribute color id',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
@@ -53,7 +53,7 @@ class MerchantConfigurationForm extends BaseForm
             ))
             ->add("attribute_size", "number", array(
                 'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.attribute.size',
+                    'Attribute size id',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),

@@ -16,7 +16,7 @@ class ApiConfigurationForm extends BaseForm
             ->add("client_id", "text", array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.clientid',
+                    'Client identifier',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
@@ -31,7 +31,7 @@ class ApiConfigurationForm extends BaseForm
             ->add("client_secret", "text", array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.clientsecret',
+                    'Client secret token',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
@@ -46,7 +46,7 @@ class ApiConfigurationForm extends BaseForm
             ->add("application_name", "text", array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
-                    'googleshopping.configuration.applicationname',
+                    'Application name',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
