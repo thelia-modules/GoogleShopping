@@ -15,13 +15,8 @@ class ConfigurationController extends BaseAdminController
 {
     public function viewAllAction($params = array())
     {
-        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), 'AttributeType', AccessManager::VIEW)) {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), 'GoogleShopping', AccessManager::VIEW)) {
             return $response;
-        }
-
-        if (false === (new GoogleShoppingHandler($this->container, $this->getRequest()))->checkGoogleAuth()) {
-            $this->getSession()->set('google_action_url', "/admin/module/GoogleShopping?current_tab=".$this->getRequest()->query->get('current_tab'));
-            return $this->generateRedirect('/googleshopping/oauth2callback');
         }
 
         return $this->render(
