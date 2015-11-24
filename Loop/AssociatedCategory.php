@@ -11,6 +11,7 @@ use Thelia\Core\Template\Element\PropelSearchLoopInterface;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Model\CategoryQuery;
+use Thelia\Model\LangQuery;
 
 class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
 {
@@ -18,7 +19,7 @@ class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
     {
         return new ArgumentCollection(
             Argument::createIntTypeArgument('category_id'),
-            Argument::createAnyTypeArgument('lang_id')
+            Argument::createAnyTypeArgument('lang_id', 'en_US')
         );
     }
 
@@ -30,20 +31,21 @@ class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
             $query->filterByTheliaCategoryId($this->getCategoryId());
         }
 
-        if ($this->getLangId()) {
-            $query->filterByLangId($this->getLangId());
-        }
+        $query->filterByLangId($this->getLangId());
 
         return $query;
     }
 
     public function parseResults(LoopResult $loopResult)
     {
+        $lang = LangQuery::create()
+            ->findOneById($this->getLangId());
         /** @var GoogleshoppingTaxonomy $data */
         foreach ($loopResult->getResultDataCollection() as $data) {
             $loopResultRow = new LoopResultRow();
             $theliaCategory = CategoryQuery::create()
                 ->findOneById($data->getTheliaCategoryId());
+            $theliaCategory->setLocale($lang->getLocale());
             $loopResultRow->set("THELIA_CATEGORY_ID", $data->getTheliaCategoryId());
             $loopResultRow->set("THELIA_CATEGORY_TITLE", $theliaCategory->getTitle());
             $loopResultRow->set("GOOGLE_CATEGORY", $data->getGoogleCategory());

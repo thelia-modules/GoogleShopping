@@ -6,6 +6,7 @@ use GoogleShopping\Form\TaxonomyForm;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
@@ -23,8 +24,15 @@ class CategoryController extends BaseAdminController
         }
 
         $file = file_get_contents("http://www.google.com/basepages/producttype/taxonomy.".str_replace("_", "-", $lang->getLocale()).".txt");
+        $rows = explode("\n", $file);
+        $cats = [];
 
-        return new Response($file);
+        foreach ($rows as $row) {
+            $name = end(explode('>', $row));
+            $cats[$name] =  htmlspecialchars($row);
+        }
+
+        return new JsonResponse(['cats' => $cats]);
     }
 
     public function associateTaxonomy()
