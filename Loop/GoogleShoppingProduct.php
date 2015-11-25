@@ -53,8 +53,10 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
             ->joinWithI18n($this->getLocale());
 
         if ($categoryId) {
-            $category = CategoryQuery::create()->findPk($categoryId);
-            $query->filterByCategory($category);
+            $query->useProductCategoryQuery()
+                ->filterByDefaultCategory(true)
+                ->filterByCategoryId($categoryId)
+            ->endUse();
         }
 
         if ($productId) {
