@@ -9,8 +9,7 @@
 {block name="main-content"}
     {oAuthCheckToken}
     {default_translation_domain domain='googleshopping.bo.default'}
-    {if false}
-    {*{if 'none' === $tokenExist}*}
+    {if 'none' === $tokenExist}
         <h4>{intl l="You have to authorise this site on GoogleShopping before adding products :"}</h4>
         <div class="form-group col-md-12">
             <div class="form-group">
@@ -23,8 +22,7 @@
                 </form>
             </div>
         </div>
-    {elseif false}
-    {*{elseif true === $tokenExpired}*}
+    {elseif true === $tokenExpired}
         <h4>{intl l="Your authorisation expired please refresh it before adding products :"}</h4>
         <div class="form-group col-md-12">
             <div class="form-group">
