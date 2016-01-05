@@ -28,7 +28,8 @@ class CategoryController extends BaseAdminController
         $cats = [];
 
         foreach ($rows as $row) {
-            $name = end(explode('>', $row));
+            $splittedCat = explode('>', $row);
+            $name = end($splittedCat);
             $cats[$name] =  htmlspecialchars($row);
         }
 
@@ -71,7 +72,7 @@ class CategoryController extends BaseAdminController
             array(),
             array(
                 'module_code' => 'GoogleShopping',
-                'current_tab' => 'association'
+                'current_tab' => 'management'
             )
         );
     }

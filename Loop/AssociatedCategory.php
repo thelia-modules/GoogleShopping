@@ -45,6 +45,9 @@ class AssociatedCategory extends BaseLoop implements PropelSearchLoopInterface
             $loopResultRow = new LoopResultRow();
             $theliaCategory = CategoryQuery::create()
                 ->findOneById($data->getTheliaCategoryId());
+            if(!$theliaCategory) {
+                continue;
+            }
             $theliaCategory->setLocale($lang->getLocale());
             $loopResultRow->set("THELIA_CATEGORY_ID", $data->getTheliaCategoryId());
             $loopResultRow->set("THELIA_CATEGORY_TITLE", $theliaCategory->getTitle());

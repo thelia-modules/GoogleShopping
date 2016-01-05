@@ -52,8 +52,9 @@
         <default key="_controller">GoogleShopping\Controller\Admin\ProductController::toggleProductSync</default>
     </route>
 
-    <route id="googleshopping.catalog.management" path="/admin/module/GoogleShopping/catalog/management" methods="GET">
-        <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::catalogManagementView</default>
+    <route id="googleshopping.catalog.management.category" path="/admin/module/GoogleShopping/category/management/{id}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::categoryManagementView</default>
+        <requirement key="id">\d+</requirement>
     </route>
 
     <route id="googleshopping.sync.catalog" path="/admin/module/googleshopping/sync/catalog" methods="GET">
