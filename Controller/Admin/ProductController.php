@@ -6,6 +6,7 @@ use GoogleShopping\Event\GoogleProductEvent;
 use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
+use GoogleShopping\Model\GoogleshoppingAccountQuery;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use GoogleShopping\Model\Map\GoogleshoppingProductSynchronisationTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -114,11 +115,15 @@ class ProductController extends BaseGoogleShoppingController
 
             $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT, $googleProductEvent);
 
+            $googleAccountId = GoogleshoppingAccountQuery::create()
+                ->findOneByMerchantId($merchantId);
+
             //Add auomatically product to sync
             $productSync = GoogleshoppingProductSynchronisationQuery::create()
                 ->filterByProductId($theliaProduct->getId())
                 ->filterByLang($eventArgs['lang']->getCode())
                 ->filterByTargetCountry($eventArgs['targetCountry']->getIsoalpha2())
+                ->filterByGoogleshoppingAccountId($googleAccountId)
                 ->findOneOrCreate();
 
             $productSync->setSyncEnable(true)
