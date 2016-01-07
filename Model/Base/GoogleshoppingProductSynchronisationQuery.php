@@ -27,12 +27,14 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGoogleshoppingProductSynchronisationQuery orderByTargetCountry($order = Criteria::ASC) Order by the target_country column
  * @method     ChildGoogleshoppingProductSynchronisationQuery orderByLang($order = Criteria::ASC) Order by the lang column
  * @method     ChildGoogleshoppingProductSynchronisationQuery orderBySyncEnable($order = Criteria::ASC) Order by the sync_enable column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery orderByGoogleshoppingAccountId($order = Criteria::ASC) Order by the googleshopping_account_id column
  *
  * @method     ChildGoogleshoppingProductSynchronisationQuery groupById() Group by the id column
  * @method     ChildGoogleshoppingProductSynchronisationQuery groupByProductId() Group by the product_id column
  * @method     ChildGoogleshoppingProductSynchronisationQuery groupByTargetCountry() Group by the target_country column
  * @method     ChildGoogleshoppingProductSynchronisationQuery groupByLang() Group by the lang column
  * @method     ChildGoogleshoppingProductSynchronisationQuery groupBySyncEnable() Group by the sync_enable column
+ * @method     ChildGoogleshoppingProductSynchronisationQuery groupByGoogleshoppingAccountId() Group by the googleshopping_account_id column
  *
  * @method     ChildGoogleshoppingProductSynchronisationQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildGoogleshoppingProductSynchronisationQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -42,6 +44,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGoogleshoppingProductSynchronisationQuery rightJoinProduct($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Product relation
  * @method     ChildGoogleshoppingProductSynchronisationQuery innerJoinProduct($relationAlias = null) Adds a INNER JOIN clause to the query using the Product relation
  *
+ * @method     ChildGoogleshoppingProductSynchronisationQuery leftJoinGoogleshoppingAccount($relationAlias = null) Adds a LEFT JOIN clause to the query using the GoogleshoppingAccount relation
+ * @method     ChildGoogleshoppingProductSynchronisationQuery rightJoinGoogleshoppingAccount($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GoogleshoppingAccount relation
+ * @method     ChildGoogleshoppingProductSynchronisationQuery innerJoinGoogleshoppingAccount($relationAlias = null) Adds a INNER JOIN clause to the query using the GoogleshoppingAccount relation
+ *
  * @method     ChildGoogleshoppingProductSynchronisation findOne(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProductSynchronisation matching the query
  * @method     ChildGoogleshoppingProductSynchronisation findOneOrCreate(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProductSynchronisation matching the query, or a new ChildGoogleshoppingProductSynchronisation object populated from the query conditions when no match is found
  *
@@ -50,12 +56,14 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGoogleshoppingProductSynchronisation findOneByTargetCountry(string $target_country) Return the first ChildGoogleshoppingProductSynchronisation filtered by the target_country column
  * @method     ChildGoogleshoppingProductSynchronisation findOneByLang(string $lang) Return the first ChildGoogleshoppingProductSynchronisation filtered by the lang column
  * @method     ChildGoogleshoppingProductSynchronisation findOneBySyncEnable(boolean $sync_enable) Return the first ChildGoogleshoppingProductSynchronisation filtered by the sync_enable column
+ * @method     ChildGoogleshoppingProductSynchronisation findOneByGoogleshoppingAccountId(int $googleshopping_account_id) Return the first ChildGoogleshoppingProductSynchronisation filtered by the googleshopping_account_id column
  *
  * @method     array findById(int $id) Return ChildGoogleshoppingProductSynchronisation objects filtered by the id column
  * @method     array findByProductId(int $product_id) Return ChildGoogleshoppingProductSynchronisation objects filtered by the product_id column
  * @method     array findByTargetCountry(string $target_country) Return ChildGoogleshoppingProductSynchronisation objects filtered by the target_country column
  * @method     array findByLang(string $lang) Return ChildGoogleshoppingProductSynchronisation objects filtered by the lang column
  * @method     array findBySyncEnable(boolean $sync_enable) Return ChildGoogleshoppingProductSynchronisation objects filtered by the sync_enable column
+ * @method     array findByGoogleshoppingAccountId(int $googleshopping_account_id) Return ChildGoogleshoppingProductSynchronisation objects filtered by the googleshopping_account_id column
  *
  */
 abstract class GoogleshoppingProductSynchronisationQuery extends ModelCriteria
@@ -144,7 +152,7 @@ abstract class GoogleshoppingProductSynchronisationQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT ID, PRODUCT_ID, TARGET_COUNTRY, LANG, SYNC_ENABLE FROM googleshopping_product_synchronisation WHERE ID = :p0';
+        $sql = 'SELECT ID, PRODUCT_ID, TARGET_COUNTRY, LANG, SYNC_ENABLE, GOOGLESHOPPING_ACCOUNT_ID FROM googleshopping_product_synchronisation WHERE ID = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -403,6 +411,49 @@ abstract class GoogleshoppingProductSynchronisationQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the googleshopping_account_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByGoogleshoppingAccountId(1234); // WHERE googleshopping_account_id = 1234
+     * $query->filterByGoogleshoppingAccountId(array(12, 34)); // WHERE googleshopping_account_id IN (12, 34)
+     * $query->filterByGoogleshoppingAccountId(array('min' => 12)); // WHERE googleshopping_account_id > 12
+     * </code>
+     *
+     * @see       filterByGoogleshoppingAccount()
+     *
+     * @param     mixed $googleshoppingAccountId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
+     */
+    public function filterByGoogleshoppingAccountId($googleshoppingAccountId = null, $comparison = null)
+    {
+        if (is_array($googleshoppingAccountId)) {
+            $useMinMax = false;
+            if (isset($googleshoppingAccountId['min'])) {
+                $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID, $googleshoppingAccountId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($googleshoppingAccountId['max'])) {
+                $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID, $googleshoppingAccountId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID, $googleshoppingAccountId, $comparison);
+    }
+
+    /**
      * Filter the query by a related \GoogleShopping\Model\Thelia\Model\Product object
      *
      * @param \GoogleShopping\Model\Thelia\Model\Product|ObjectCollection $product The related object(s) to use as filter
@@ -475,6 +526,81 @@ abstract class GoogleshoppingProductSynchronisationQuery extends ModelCriteria
         return $this
             ->joinProduct($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'Product', '\GoogleShopping\Model\Thelia\Model\ProductQuery');
+    }
+
+    /**
+     * Filter the query by a related \GoogleShopping\Model\GoogleshoppingAccount object
+     *
+     * @param \GoogleShopping\Model\GoogleshoppingAccount|ObjectCollection $googleshoppingAccount The related object(s) to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
+     */
+    public function filterByGoogleshoppingAccount($googleshoppingAccount, $comparison = null)
+    {
+        if ($googleshoppingAccount instanceof \GoogleShopping\Model\GoogleshoppingAccount) {
+            return $this
+                ->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID, $googleshoppingAccount->getId(), $comparison);
+        } elseif ($googleshoppingAccount instanceof ObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID, $googleshoppingAccount->toKeyValue('PrimaryKey', 'Id'), $comparison);
+        } else {
+            throw new PropelException('filterByGoogleshoppingAccount() only accepts arguments of type \GoogleShopping\Model\GoogleshoppingAccount or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the GoogleshoppingAccount relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return ChildGoogleshoppingProductSynchronisationQuery The current query, for fluid interface
+     */
+    public function joinGoogleshoppingAccount($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('GoogleshoppingAccount');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'GoogleshoppingAccount');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the GoogleshoppingAccount relation GoogleshoppingAccount object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \GoogleShopping\Model\GoogleshoppingAccountQuery A secondary query class using the current class as primary query
+     */
+    public function useGoogleshoppingAccountQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinGoogleshoppingAccount($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GoogleshoppingAccount', '\GoogleShopping\Model\GoogleshoppingAccountQuery');
     }
 
     /**

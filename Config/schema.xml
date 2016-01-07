@@ -1,30 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <database defaultIdMethod="native" name="thelia" namespace="GoogleShopping\Model">
-    <!--
-    See propel documentation on http://propelorm.org for all information about schema file
-
-    <table name="product_rel" namespace="GoogleShopping\Model">
-        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
-        <column defaultValue="0" name="visible" required="true" type="TINYINT" />
-        <column defaultValue="0" name="position" required="true" type="INTEGER" />
-        <column name="title" size="255" type="VARCHAR" />
-        <column name="description" type="CLOB" />
-        <column name="chapo" type="LONGVARCHAR" />
-        <column name="postscriptum" type="LONGVARCHAR" />
-        <foreign-key foreignTable="product" name="fk_product_id" onDelete="CASCADE" onUpdate="RESTRICT">
-            <reference foreign="id" local="product_id" />
-        </foreign-key>
-        <behavior name="timestampable" />
-        <behavior name="i18n">
-            <parameter name="i18n_columns" value="title, description, chapo, postscriptum" />
-        </behavior>
-        <behavior name="versionable">
-            <parameter name="log_created_at" value="true" />
-            <parameter name="log_created_by" value="true" />
-        </behavior>
-    </table>
-    -->
-
     <table name="googleshopping_taxonomy">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
         <column name="thelia_category_id" type="INTEGER" required="true"/>
@@ -44,8 +19,21 @@
         <column name="target_country" type="VARCHAR" required="true"/>
         <column name="lang" type="VARCHAR" required="true"/>
         <column name="sync_enable" type="BOOLEAN"/>
+        <column name="googleshopping_account_id" type="INTEGER" required="true"/>
         <foreign-key foreignTable="product" name="fk_googleshopping_product_synchronisation_product_id" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference foreign="id" local="product_id" />
+        </foreign-key>
+        <foreign-key foreignTable="googleshopping_account" name="fk_googleshopping_prod_sync_googleshopping_account_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="googleshopping_account_id" />
+        </foreign-key>
+    </table>
+
+    <table name="googleshopping_account">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <column name="merchant_id" type="VARCHAR" size="255" required="true"/>
+        <column name="default_country_id" type="INTEGER" />
+        <foreign-key foreignTable="country" name="fk_googleshopping_account_country_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="default_country_id" />
         </foreign-key>
     </table>
 

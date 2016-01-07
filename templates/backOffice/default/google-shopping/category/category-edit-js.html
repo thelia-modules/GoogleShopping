@@ -1,0 +1,40 @@
+<script src='{javascript file='assets/js/bootstrap-switch/bootstrap-switch.js'}'></script>
+
+<script>
+    $(document).ready(function() {
+        $(".search_switch").bootstrapSwitch();
+
+        $(".search_switch").on("switch-change", function(e, data) {
+            var checkbox = $(this);
+            var is_checked = data.value;
+            var categoryid = $(this).data('categoryid');
+            var objectid = $(this).data('id');
+            var type = $(this).data('type');
+            var url = "{url path="/admin/module/config/CriteriaSearch/toggle/"}"+type;
+            {literal}
+                 $.post(url, {
+                     category_id : categoryid,
+                     object_id : objectid,
+                     searchable : is_checked
+                 }).fail(function() {
+                     checkbox.bootstrapSwitch('toggleState', true);
+                 });
+            {/literal}
+        });
+
+        $("#category_tax_rule").submit(function(event){
+            event.preventDefault();
+            var form = $(this);
+            $('#category_tax_rule_btn').addClass('btn-primary').removeClass('btn-success').val("{intl l='Wait...'}");
+            $.ajax({
+                url: form.attr('action'),
+                type: form.attr('method'),
+                data: form.serialize()
+            }).done(function(data){
+                $('#category_tax_rule_btn').addClass('btn-success').removeClass('btn-primary').val("{intl l='Ok!'}");
+            }).fail(function(jqXHR, textStatus) {
+                $('#category_tax_rule_btn').addClass('btn-danger').removeClass('btn-primary').val("{intl l='Error please retry'}");
+            });
+        });
+    });
+</script>

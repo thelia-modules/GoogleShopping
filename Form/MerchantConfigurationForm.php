@@ -14,21 +14,6 @@ class MerchantConfigurationForm extends BaseForm
     protected function buildForm()
     {
         $this->formBuilder
-            ->add("merchant_id", "text", array(
-                'required' => true,
-                'label' => Translator::getInstance()->trans(
-                    'GoogleShopping merchant ID',
-                    array(),
-                    GoogleShopping::DOMAIN_NAME
-                ),
-                'data' => GoogleShopping::getConfigValue('merchant_id'),
-                'label_attr' => array(
-                    'for' => 'merchant_id'
-                ),
-                "constraints" => array(
-                    new Constraints\NotBlank(),
-                )
-            ))
             ->add("target_country_id", "text", array(
                 'label' => Translator::getInstance()->trans(
                     'Target coutry',

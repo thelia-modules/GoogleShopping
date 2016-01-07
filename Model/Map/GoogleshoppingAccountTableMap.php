@@ -2,8 +2,8 @@
 
 namespace GoogleShopping\Model\Map;
 
-use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
-use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
+use GoogleShopping\Model\GoogleshoppingAccount;
+use GoogleShopping\Model\GoogleshoppingAccountQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'googleshopping_product_synchronisation' table.
+ * This class defines the structure of the 'googleshopping_account' table.
  *
  *
  *
@@ -26,14 +26,14 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class GoogleshoppingProductSynchronisationTableMap extends TableMap
+class GoogleshoppingAccountTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'GoogleShopping.Model.Map.GoogleshoppingProductSynchronisationTableMap';
+    const CLASS_NAME = 'GoogleShopping.Model.Map.GoogleshoppingAccountTableMap';
 
     /**
      * The default database name for this class
@@ -43,22 +43,22 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'googleshopping_product_synchronisation';
+    const TABLE_NAME = 'googleshopping_account';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\GoogleShopping\\Model\\GoogleshoppingProductSynchronisation';
+    const OM_CLASS = '\\GoogleShopping\\Model\\GoogleshoppingAccount';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'GoogleShopping.Model.GoogleshoppingProductSynchronisation';
+    const CLASS_DEFAULT = 'GoogleShopping.Model.GoogleshoppingAccount';
 
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 6;
+    const NUM_COLUMNS = 3;
 
     /**
      * The number of lazy-loaded columns
@@ -68,37 +68,22 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 6;
+    const NUM_HYDRATE_COLUMNS = 3;
 
     /**
      * the column name for the ID field
      */
-    const ID = 'googleshopping_product_synchronisation.ID';
+    const ID = 'googleshopping_account.ID';
 
     /**
-     * the column name for the PRODUCT_ID field
+     * the column name for the MERCHANT_ID field
      */
-    const PRODUCT_ID = 'googleshopping_product_synchronisation.PRODUCT_ID';
+    const MERCHANT_ID = 'googleshopping_account.MERCHANT_ID';
 
     /**
-     * the column name for the TARGET_COUNTRY field
+     * the column name for the DEFAULT_COUNTRY_ID field
      */
-    const TARGET_COUNTRY = 'googleshopping_product_synchronisation.TARGET_COUNTRY';
-
-    /**
-     * the column name for the LANG field
-     */
-    const LANG = 'googleshopping_product_synchronisation.LANG';
-
-    /**
-     * the column name for the SYNC_ENABLE field
-     */
-    const SYNC_ENABLE = 'googleshopping_product_synchronisation.SYNC_ENABLE';
-
-    /**
-     * the column name for the GOOGLESHOPPING_ACCOUNT_ID field
-     */
-    const GOOGLESHOPPING_ACCOUNT_ID = 'googleshopping_product_synchronisation.GOOGLESHOPPING_ACCOUNT_ID';
+    const DEFAULT_COUNTRY_ID = 'googleshopping_account.DEFAULT_COUNTRY_ID';
 
     /**
      * The default string format for model objects of the related table
@@ -112,12 +97,12 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'ProductId', 'TargetCountry', 'Lang', 'SyncEnable', 'GoogleshoppingAccountId', ),
-        self::TYPE_STUDLYPHPNAME => array('id', 'productId', 'targetCountry', 'lang', 'syncEnable', 'googleshoppingAccountId', ),
-        self::TYPE_COLNAME       => array(GoogleshoppingProductSynchronisationTableMap::ID, GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID, GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY, GoogleshoppingProductSynchronisationTableMap::LANG, GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE, GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID, ),
-        self::TYPE_RAW_COLNAME   => array('ID', 'PRODUCT_ID', 'TARGET_COUNTRY', 'LANG', 'SYNC_ENABLE', 'GOOGLESHOPPING_ACCOUNT_ID', ),
-        self::TYPE_FIELDNAME     => array('id', 'product_id', 'target_country', 'lang', 'sync_enable', 'googleshopping_account_id', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
+        self::TYPE_PHPNAME       => array('Id', 'MerchantId', 'DefaultCountryId', ),
+        self::TYPE_STUDLYPHPNAME => array('id', 'merchantId', 'defaultCountryId', ),
+        self::TYPE_COLNAME       => array(GoogleshoppingAccountTableMap::ID, GoogleshoppingAccountTableMap::MERCHANT_ID, GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID, ),
+        self::TYPE_RAW_COLNAME   => array('ID', 'MERCHANT_ID', 'DEFAULT_COUNTRY_ID', ),
+        self::TYPE_FIELDNAME     => array('id', 'merchant_id', 'default_country_id', ),
+        self::TYPE_NUM           => array(0, 1, 2, )
     );
 
     /**
@@ -127,12 +112,12 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'ProductId' => 1, 'TargetCountry' => 2, 'Lang' => 3, 'SyncEnable' => 4, 'GoogleshoppingAccountId' => 5, ),
-        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'productId' => 1, 'targetCountry' => 2, 'lang' => 3, 'syncEnable' => 4, 'googleshoppingAccountId' => 5, ),
-        self::TYPE_COLNAME       => array(GoogleshoppingProductSynchronisationTableMap::ID => 0, GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID => 1, GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY => 2, GoogleshoppingProductSynchronisationTableMap::LANG => 3, GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE => 4, GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID => 5, ),
-        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'PRODUCT_ID' => 1, 'TARGET_COUNTRY' => 2, 'LANG' => 3, 'SYNC_ENABLE' => 4, 'GOOGLESHOPPING_ACCOUNT_ID' => 5, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'product_id' => 1, 'target_country' => 2, 'lang' => 3, 'sync_enable' => 4, 'googleshopping_account_id' => 5, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'MerchantId' => 1, 'DefaultCountryId' => 2, ),
+        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'merchantId' => 1, 'defaultCountryId' => 2, ),
+        self::TYPE_COLNAME       => array(GoogleshoppingAccountTableMap::ID => 0, GoogleshoppingAccountTableMap::MERCHANT_ID => 1, GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID => 2, ),
+        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'MERCHANT_ID' => 1, 'DEFAULT_COUNTRY_ID' => 2, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'merchant_id' => 1, 'default_country_id' => 2, ),
+        self::TYPE_NUM           => array(0, 1, 2, )
     );
 
     /**
@@ -145,18 +130,15 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('googleshopping_product_synchronisation');
-        $this->setPhpName('GoogleshoppingProductSynchronisation');
-        $this->setClassName('\\GoogleShopping\\Model\\GoogleshoppingProductSynchronisation');
+        $this->setName('googleshopping_account');
+        $this->setPhpName('GoogleshoppingAccount');
+        $this->setClassName('\\GoogleShopping\\Model\\GoogleshoppingAccount');
         $this->setPackage('GoogleShopping.Model');
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('ID', 'Id', 'INTEGER', true, null, null);
-        $this->addForeignKey('PRODUCT_ID', 'ProductId', 'INTEGER', 'product', 'ID', true, null, null);
-        $this->addColumn('TARGET_COUNTRY', 'TargetCountry', 'VARCHAR', true, 255, null);
-        $this->addColumn('LANG', 'Lang', 'VARCHAR', true, 255, null);
-        $this->addColumn('SYNC_ENABLE', 'SyncEnable', 'BOOLEAN', false, 1, null);
-        $this->addForeignKey('GOOGLESHOPPING_ACCOUNT_ID', 'GoogleshoppingAccountId', 'INTEGER', 'googleshopping_account', 'ID', true, null, null);
+        $this->addColumn('MERCHANT_ID', 'MerchantId', 'VARCHAR', true, 255, null);
+        $this->addForeignKey('DEFAULT_COUNTRY_ID', 'DefaultCountryId', 'INTEGER', 'country', 'ID', false, null, null);
     } // initialize()
 
     /**
@@ -164,9 +146,18 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('Product', '\\GoogleShopping\\Model\\Thelia\\Model\\Product', RelationMap::MANY_TO_ONE, array('product_id' => 'id', ), 'CASCADE', 'RESTRICT');
-        $this->addRelation('GoogleshoppingAccount', '\\GoogleShopping\\Model\\GoogleshoppingAccount', RelationMap::MANY_TO_ONE, array('googleshopping_account_id' => 'id', ), 'CASCADE', 'RESTRICT');
+        $this->addRelation('Country', '\\GoogleShopping\\Model\\Thelia\\Model\\Country', RelationMap::MANY_TO_ONE, array('default_country_id' => 'id', ), 'CASCADE', 'RESTRICT');
+        $this->addRelation('GoogleshoppingProductSynchronisation', '\\GoogleShopping\\Model\\GoogleshoppingProductSynchronisation', RelationMap::ONE_TO_MANY, array('id' => 'googleshopping_account_id', ), 'CASCADE', 'RESTRICT', 'GoogleshoppingProductSynchronisations');
     } // buildRelations()
+    /**
+     * Method to invalidate the instance pool of all tables related to googleshopping_account     * by a foreign key with ON DELETE CASCADE
+     */
+    public static function clearRelatedInstancePool()
+    {
+        // Invalidate objects in ".$this->getClassNameFromBuilder($joinedTableTableMapBuilder)." instance pool,
+        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
+                GoogleshoppingProductSynchronisationTableMap::clearInstancePool();
+            }
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -224,7 +215,7 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? GoogleshoppingProductSynchronisationTableMap::CLASS_DEFAULT : GoogleshoppingProductSynchronisationTableMap::OM_CLASS;
+        return $withPrefix ? GoogleshoppingAccountTableMap::CLASS_DEFAULT : GoogleshoppingAccountTableMap::OM_CLASS;
     }
 
     /**
@@ -238,21 +229,21 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *         rethrown wrapped into a PropelException.
-     * @return array (GoogleshoppingProductSynchronisation object, last column rank)
+     * @return array (GoogleshoppingAccount object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = GoogleshoppingProductSynchronisationTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = GoogleshoppingProductSynchronisationTableMap::getInstanceFromPool($key))) {
+        $key = GoogleshoppingAccountTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = GoogleshoppingAccountTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + GoogleshoppingProductSynchronisationTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + GoogleshoppingAccountTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = GoogleshoppingProductSynchronisationTableMap::OM_CLASS;
+            $cls = GoogleshoppingAccountTableMap::OM_CLASS;
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            GoogleshoppingProductSynchronisationTableMap::addInstanceToPool($obj, $key);
+            GoogleshoppingAccountTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -275,8 +266,8 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = GoogleshoppingProductSynchronisationTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = GoogleshoppingProductSynchronisationTableMap::getInstanceFromPool($key))) {
+            $key = GoogleshoppingAccountTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = GoogleshoppingAccountTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
@@ -285,7 +276,7 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                GoogleshoppingProductSynchronisationTableMap::addInstanceToPool($obj, $key);
+                GoogleshoppingAccountTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -306,19 +297,13 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(GoogleshoppingProductSynchronisationTableMap::ID);
-            $criteria->addSelectColumn(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID);
-            $criteria->addSelectColumn(GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY);
-            $criteria->addSelectColumn(GoogleshoppingProductSynchronisationTableMap::LANG);
-            $criteria->addSelectColumn(GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE);
-            $criteria->addSelectColumn(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID);
+            $criteria->addSelectColumn(GoogleshoppingAccountTableMap::ID);
+            $criteria->addSelectColumn(GoogleshoppingAccountTableMap::MERCHANT_ID);
+            $criteria->addSelectColumn(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID);
         } else {
             $criteria->addSelectColumn($alias . '.ID');
-            $criteria->addSelectColumn($alias . '.PRODUCT_ID');
-            $criteria->addSelectColumn($alias . '.TARGET_COUNTRY');
-            $criteria->addSelectColumn($alias . '.LANG');
-            $criteria->addSelectColumn($alias . '.SYNC_ENABLE');
-            $criteria->addSelectColumn($alias . '.GOOGLESHOPPING_ACCOUNT_ID');
+            $criteria->addSelectColumn($alias . '.MERCHANT_ID');
+            $criteria->addSelectColumn($alias . '.DEFAULT_COUNTRY_ID');
         }
     }
 
@@ -331,7 +316,7 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME)->getTable(GoogleshoppingProductSynchronisationTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingAccountTableMap::DATABASE_NAME)->getTable(GoogleshoppingAccountTableMap::TABLE_NAME);
     }
 
     /**
@@ -339,16 +324,16 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-      $dbMap = Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
-      if (!$dbMap->hasTable(GoogleshoppingProductSynchronisationTableMap::TABLE_NAME)) {
-        $dbMap->addTableObject(new GoogleshoppingProductSynchronisationTableMap());
+      $dbMap = Propel::getServiceContainer()->getDatabaseMap(GoogleshoppingAccountTableMap::DATABASE_NAME);
+      if (!$dbMap->hasTable(GoogleshoppingAccountTableMap::TABLE_NAME)) {
+        $dbMap->addTableObject(new GoogleshoppingAccountTableMap());
       }
     }
 
     /**
-     * Performs a DELETE on the database, given a GoogleshoppingProductSynchronisation or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a GoogleshoppingAccount or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or GoogleshoppingProductSynchronisation object or primary key or array of primary keys
+     * @param mixed               $values Criteria or GoogleshoppingAccount object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -359,25 +344,25 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAccountTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \GoogleShopping\Model\GoogleshoppingProductSynchronisation) { // it's a model object
+        } elseif ($values instanceof \GoogleShopping\Model\GoogleshoppingAccount) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
-            $criteria->add(GoogleshoppingProductSynchronisationTableMap::ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(GoogleshoppingAccountTableMap::DATABASE_NAME);
+            $criteria->add(GoogleshoppingAccountTableMap::ID, (array) $values, Criteria::IN);
         }
 
-        $query = GoogleshoppingProductSynchronisationQuery::create()->mergeWith($criteria);
+        $query = GoogleshoppingAccountQuery::create()->mergeWith($criteria);
 
-        if ($values instanceof Criteria) { GoogleshoppingProductSynchronisationTableMap::clearInstancePool();
+        if ($values instanceof Criteria) { GoogleshoppingAccountTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
-            foreach ((array) $values as $singleval) { GoogleshoppingProductSynchronisationTableMap::removeInstanceFromPool($singleval);
+            foreach ((array) $values as $singleval) { GoogleshoppingAccountTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -385,20 +370,20 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the googleshopping_product_synchronisation table.
+     * Deletes all rows from the googleshopping_account table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return GoogleshoppingProductSynchronisationQuery::create()->doDeleteAll($con);
+        return GoogleshoppingAccountQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a GoogleshoppingProductSynchronisation or Criteria object.
+     * Performs an INSERT on the database, given a GoogleshoppingAccount or Criteria object.
      *
-     * @param mixed               $criteria Criteria or GoogleshoppingProductSynchronisation object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or GoogleshoppingAccount object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -407,22 +392,22 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAccountTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from GoogleshoppingProductSynchronisation object
+            $criteria = $criteria->buildCriteria(); // build Criteria from GoogleshoppingAccount object
         }
 
-        if ($criteria->containsKey(GoogleshoppingProductSynchronisationTableMap::ID) && $criteria->keyContainsValue(GoogleshoppingProductSynchronisationTableMap::ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.GoogleshoppingProductSynchronisationTableMap::ID.')');
+        if ($criteria->containsKey(GoogleshoppingAccountTableMap::ID) && $criteria->keyContainsValue(GoogleshoppingAccountTableMap::ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.GoogleshoppingAccountTableMap::ID.')');
         }
 
 
         // Set the correct dbName
-        $query = GoogleshoppingProductSynchronisationQuery::create()->mergeWith($criteria);
+        $query = GoogleshoppingAccountQuery::create()->mergeWith($criteria);
 
         try {
             // use transaction because $criteria could contain info
@@ -438,7 +423,7 @@ class GoogleshoppingProductSynchronisationTableMap extends TableMap
         return $pk;
     }
 
-} // GoogleshoppingProductSynchronisationTableMap
+} // GoogleshoppingAccountTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-GoogleshoppingProductSynchronisationTableMap::buildTableMap();
+GoogleshoppingAccountTableMap::buildTableMap();

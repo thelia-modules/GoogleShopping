@@ -13,6 +13,9 @@ use Thelia\Model\ProductSaleElements;
 
 class GoogleProductEvent extends ActionEvent
 {
+    /** @var  string */
+    protected $merchantId;
+
     /** @var  Product */
     protected $product;
 
@@ -195,6 +198,24 @@ class GoogleProductEvent extends ActionEvent
     public function setItemGroupId($itemGroupId)
     {
         $this->itemGroupId = $itemGroupId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMerchantId()
+    {
+        return $this->merchantId;
+    }
+
+    /**
+     * @param string $merchantId
+     * @return GoogleProductEvent
+     */
+    public function setMerchantId($merchantId)
+    {
+        $this->merchantId = $merchantId;
         return $this;
     }
 }

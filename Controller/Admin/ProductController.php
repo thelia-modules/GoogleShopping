@@ -7,9 +7,12 @@ use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
+use GoogleShopping\Model\Map\GoogleshoppingProductSynchronisationTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Propel;
 use Thelia\Core\HttpFoundation\JsonResponse;
+use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Model\AreaDeliveryModuleQuery;
@@ -32,14 +35,17 @@ class ProductController extends BaseGoogleShoppingController
 
     public function getGoogleProduct($id)
     {
-        if ($this->getRequest()->query->get('target_country')) {
-            $targetCountry = $this->getRequest()->get('target_country');
+        $query = $this->getRequest()->query;
+        $merchantId = $query->get('account');
+
+        if ($query->get('target_country')) {
+            $targetCountry = $query->get('target_country');
         } else {
             $targetCountry = Country::getDefaultCountry()->getIsoalpha2();
         }
 
-        if ($this->getRequest()->query->get('locale')) {
-            $lang = LangQuery::create()->findOneByLocale($this->getRequest()->query->get('locale'))->getCode();
+        if ($query->get('lang')) {
+            $lang = LangQuery::create()->findOneById($query->get('lang'))->getCode();
         } else {
             $lang = Lang::getDefaultLanguage()->getCode();
         }
@@ -53,7 +59,7 @@ class ProductController extends BaseGoogleShoppingController
 
             $client = $googleShoppingHandler->createGoogleClient();
             $googleShoppingService = new \Google_Service_ShoppingContent($client);
-            $googleProduct = $googleShoppingService->products->get(GoogleShopping::getConfigValue('merchant_id'), $googleProductId);
+            $googleProduct = $googleShoppingService->products->get($merchantId, $googleProductId);
             $response = ["id" => $googleProduct->getOfferId(), "identifier" => $googleProduct->getIdentifierExists()];
             return new JsonResponse($response);
         } catch (\Exception $e) {
@@ -63,43 +69,48 @@ class ProductController extends BaseGoogleShoppingController
 
     public function addProduct($id)
     {
-        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
         }
 
-        $eventArgs = [];
-        //Get local and lang by admin config flag selected
-        $locale = $this->getRequest()->get('locale');
-        $eventArgs['ignoreGtin'] = $this->getRequest()->get('gtin') === "on" ? true : false;
-        $eventArgs['lang'] = LangQuery::create()->findOneByLocale($locale);
+        $request = $this->getRequest()->request;
 
-        $eventArgs['targetCountry'] = Country::getDefaultCountry();
-
-        if ($this->getRequest()->get('target_country')) {
-            $eventArgs['targetCountry'] = CountryQuery::create()
-                ->findOneByIsoalpha2($this->getRequest()->get('target_country'));
-        }
-
-        //If the authorisation is not set yet or has expired
-        if (false === $this->checkGoogleAuth()) {
-            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
-            return $this->generateRedirect('/googleshopping/oauth2callback');
-        }
-
-        $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
-
-        //Init google client
-        $client = $googleShoppingHandler->createGoogleClient();
-        $googleShoppingService = new \Google_Service_ShoppingContent($client);
-
-        //Get the product
-        $theliaProduct = ProductQuery::create()
-            ->joinWithI18n($locale)
-            ->findOneById($id);
+        $con = Propel::getConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
+        $con->beginTransaction();
 
         try {
+
+            $eventArgs = [];
+            //Get local and lang by admin config flag selected
+            $eventArgs['ignoreGtin'] = $request->get('gtin') === "on" ? true : false;
+            $eventArgs['lang'] = LangQuery::create()->findOneById($request->get("lang"));
+            $eventArgs['targetCountry'] = CountryQuery::create()->findOneById($request->get('country'));
+            $merchantId = $request->get('account');
+
+            if ($eventArgs['targetCountry']) {
+                $eventArgs['targetCountry'] = Country::getDefaultCountry();
+            }
+
+            //If the authorisation is not set yet or has expired
+            if (false === $this->checkGoogleAuth()) {
+                $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
+                return $this->generateRedirect('/googleshopping/oauth2callback');
+            }
+
+            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
+
+            //Init google client
+            $client = $googleShoppingHandler->createGoogleClient();
+            $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+            //Get the product
+            $theliaProduct = ProductQuery::create()
+                ->joinWithI18n( $eventArgs['lang']->getLocale())
+                ->findOneById($id);
+
             /** @var ProductSaleElements $productSaleElement */
             $googleProductEvent = new GoogleProductEvent($theliaProduct, null, $googleShoppingService, $eventArgs);
+            $googleProductEvent->setMerchantId($merchantId);
 
             $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT, $googleProductEvent);
 
@@ -113,42 +124,13 @@ class ProductController extends BaseGoogleShoppingController
             $productSync->setSyncEnable(true)
                 ->save();
 
-            return $this->generateRedirectFromRoute(
-                "admin.module.configure",
-                array(),
-                array(
-                    'module_code' => 'GoogleShopping',
-                    'current_tab' => 'management',
-                    'google_alert' => "success",
-                    'google_message' =>
-                        $this->getTranslator()->trans(
-                            "Product added to Google with success",
-                            [],
-                            GoogleShopping::DOMAIN_NAME
-                        )
-                )
-            );
+            $con->commit();
 
+            return JsonResponse::create(json_encode(["message" => "Success"]), 200);
 
         } catch (\Exception $e) {
-            if (true == $this->getRequest()->get('ajax')) {
-                return JsonResponse::create($e->getMessage(), 400);
-            }
-            return $this->generateRedirectFromRoute(
-                "admin.module.configure",
-                array(),
-                array(
-                    'module_code' => 'GoogleShopping',
-                    'current_tab' => 'management',
-                    'google_alert' => "error",
-                    'google_message' =>
-                        $this->getTranslator()->trans(
-                            "Error on Google Shopping insertion : %message",
-                            ['message' => $e->getMessage()],
-                            GoogleShopping::DOMAIN_NAME
-                        )
-                )
-            );
+            $con->rollBack();
+            return JsonResponse::create($e->getMessage(), 500);
         }
     }
 
@@ -161,6 +143,7 @@ class ProductController extends BaseGoogleShoppingController
         //Init google client
         $client = $this->createGoogleClient();
         $googleShoppingService = new \Google_Service_ShoppingContent($client);
+        $merchantId = $this->getRequest()->request->get('account');
 
         //If the authorisation is not set yet or has expired
         if (false === $this->checkGoogleAuth()) {
@@ -168,14 +151,14 @@ class ProductController extends BaseGoogleShoppingController
             return $this->generateRedirect('/googleshopping/oauth2callback');
         }
 
-        if ($this->getRequest()->query->get('target_country')) {
+        if ($this->getRequest()->request->get('target_country')) {
             $targetCountry = CountryQuery::create()->findOneByIsoalpha2($this->getRequest()->get('target_country'));
         } else {
             $targetCountry = Country::getDefaultCountry();
         }
 
-        if ($this->getRequest()->query->get('locale')) {
-            $lang = LangQuery::create()->findOneByLocale($this->getRequest()->query->get('locale'));
+        if ($this->getRequest()->query->get('lang')) {
+            $lang = LangQuery::create()->findOneByLocale($this->getRequest()->request->get('lang'));
         } else {
             $lang = Lang::getDefaultLanguage();
         }
@@ -192,6 +175,7 @@ class ProductController extends BaseGoogleShoppingController
                 $googleProductEvent = new GoogleProductEvent($product, $productSaleElement, $googleShoppingService);
                 $googleProductEvent->setTargetCountry($targetCountry);
                 $googleProductEvent->setLang($lang);
+                $googleProductEvent->setMerchantId($merchantId);
                 $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE, $googleProductEvent);
             } catch (\Exception $e) {
                 $errors[] = $productSaleElement->getId()." : ".$e->getMessage();
@@ -199,45 +183,15 @@ class ProductController extends BaseGoogleShoppingController
         }
 
         if (!empty($errors)) {
-            if (true == $this->getRequest()->get('ajax')) {
-                return JsonResponse::create($errors, 400);
-            }
-            return $this->generateRedirectFromRoute(
-                "admin.module.configure",
-                array(),
-                array(
-                    'module_code' => 'GoogleShopping',
-                    'current_tab' => 'management',
-                    'google_alert' => "error",
-                    'google_message' =>
-                        $this->getTranslator()->trans(
-                            "Error on deletion for these product sales elements : %message",
-                            ['message' => implode(" , ", $errors)],
-                            GoogleShopping::DOMAIN_NAME
-                        )
-                )
-            );
+            return JsonResponse::create($errors, 400);
         }
-        return $this->generateRedirectFromRoute(
-            "admin.module.configure",
-            array(),
-            array(
-                'module_code' => 'GoogleShopping',
-                'current_tab' => 'management',
-                'google_alert' => "success",
-                'google_message' =>
-                    $this->getTranslator()->trans(
-                        "Product deleted from Google with success",
-                        [],
-                        GoogleShopping::DOMAIN_NAME
-                    )
-            )
-        );
+
+        return JsonResponse::create("Success", 200);
     }
 
     public function toggleProductSync($id)
     {
-        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::UPDATE)) {
             return $response;
         }
 
@@ -258,7 +212,8 @@ class ProductController extends BaseGoogleShoppingController
 
         $googleProductEvent = new GoogleProductEvent($product);
         $googleProductEvent->setTargetCountry($targetCountry)
-            ->setLang($lang);
+            ->setLang($lang)
+            ->setMerchantId();
 
         $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC, $googleProductEvent);
     }

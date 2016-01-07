@@ -4,7 +4,7 @@ Google Shopping
 Beta
 --
 Becareful this module is in beta stage. 
-He need lot of improvements and can contains some issues. 
+He need lot of improvements, can contains some issues and can have breaking compatibility during the beta.
 
 Summary
 ---

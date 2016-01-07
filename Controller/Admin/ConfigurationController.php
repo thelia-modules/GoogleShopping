@@ -7,7 +7,9 @@ use GoogleShopping\Form\ApiConfigurationForm;
 use GoogleShopping\Form\MerchantConfigurationForm;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
+use GoogleShopping\Model\GoogleshoppingAccountQuery;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 
@@ -98,6 +100,85 @@ class ConfigurationController extends BaseAdminController
         );
 
         return $this->render('module-configure', array('module_code' => 'GoogleShopping'));
+    }
+
+    public function addMerchantAccount()
+    {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
+            return $response;
+        }
+
+        $form = $this->createForm("googleshopping.merchant.account");
+
+        try {
+            $data = $this->validateForm($form, 'POST')->getData();
+
+            $googleShoppingAccount = GoogleshoppingAccountQuery::create()
+                ->filterByMerchantId($data['merchant_id'])
+                ->findOneOrCreate();
+
+            $googleShoppingAccount
+                ->setDefaultCountryId($data['default_country_id'])
+                ->setDefaultLangId($data['default_lang_id'])
+                ->save();
+
+            return new JsonResponse("", 200);
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function updateMerchantAccount($id)
+    {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
+            return $response;
+        }
+
+        $form = $this->createForm("googleshopping.merchant.account");
+
+        try {
+            $data = $this->validateForm($form, 'POST')->getData();
+
+            $googleShoppingAccount = GoogleshoppingAccountQuery::create()
+                ->findOneById($id);
+
+            if (null !== $googleShoppingAccount) {
+                $googleShoppingAccount->setMerchantId($data['merchant_id'])
+                    ->setDefaultCountryId($data['default_country_id'])
+                    ->setDefaultLangId($data['default_lang_id'])
+                    ->save();
+            }
+
+            return new JsonResponse("", 200);
+
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function deleteMerchantAccount($id)
+    {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
+            return $response;
+        }
+
+        $form = $this->createForm("googleshopping.merchant.account");
+
+        try {
+            $data = $this->validateForm($form, 'POST')->getData();
+
+            $googleShoppingAccount = GoogleshoppingAccountQuery::create()
+                ->findOneById($id);
+
+            if (null !== $googleShoppingAccount) {
+                $googleShoppingAccount->delete();
+            }
+
+            return new JsonResponse("", 200);
+
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), 500);
+        }
     }
 
     public function syncCatalog($secret = null)

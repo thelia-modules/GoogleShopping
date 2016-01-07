@@ -8,6 +8,7 @@
         <!-- sample definition
         <loop name="MySuperLoop" class="GoogleShopping\Loop\MySuperLoop" />
         -->
+        <loop name="googleshopping.merchant.account" class="GoogleShopping\Loop\MerchantAccount" />
         <loop name="googleshopping.category.associated" class="GoogleShopping\Loop\AssociatedCategory" />
         <loop name="googleshopping.product" class="GoogleShopping\Loop\GoogleShoppingProduct" />
         <loop name="googleshopping.product.sync" class="GoogleShopping\Loop\ProductSync" />
@@ -19,6 +20,7 @@
         -->
         <form name="googleshopping.api.configuration" class="GoogleShopping\Form\ApiConfigurationForm" />
         <form name="googleshopping.merchant.configuration" class="GoogleShopping\Form\MerchantConfigurationForm" />
+        <form name="googleshopping.merchant.account" class="GoogleShopping\Form\MerchantAccountForm" />
         <form name="googleshopping.taxonomy" class="GoogleShopping\Form\TaxonomyForm" />
     </forms>
 
@@ -40,6 +42,10 @@
     </services>
 
     <hooks>
+        <hook id="googleshopping.edit.category" class="GoogleShopping\Hook\CategoryEditHook" scope="request">
+            <tag name="hook.event_listener" event="category.tab-content" type="back" method="onCategoryTabContent" />
+            <tag name="hook.event_listener" event="category.edit-js" type="back" method="onCategoryEditJs" />
+        </hook>
         <hook id="googleshopping.tool.hook" class="GoogleShopping\Hook\AdminToolHook" scope="request">
             <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
         </hook>

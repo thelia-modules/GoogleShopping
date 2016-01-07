@@ -282,7 +282,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
 
         $service = $event->getGoogleShoppingService();
 
-        $service->products->insert(GoogleShopping::getConfigValue('merchant_id'), $product);
+        $service->products->insert($event->getMerchantId(), $product);
     }
 
     public function deleteGoogleProduct(GoogleProductEvent $event)
