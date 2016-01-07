@@ -254,7 +254,6 @@
             $("#product-category").show();
 
 
-            initGoogleProducts();
             searchGoogleProducts();
         });
 
@@ -264,7 +263,6 @@
                 $(this).val(countryId);
             });
 
-            initGoogleProducts();
             searchGoogleProducts();
         });
 
@@ -343,12 +341,6 @@
                 })
             });
         });
-
-        function initGoogleProduct() {
-            $(".tr-product").each(function () {
-
-            }
-        }
 
         function searchGoogleProducts() {
             $(".tr-product").each(function () {
