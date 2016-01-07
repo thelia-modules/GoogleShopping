@@ -119,7 +119,6 @@ class ConfigurationController extends BaseAdminController
 
             $googleShoppingAccount
                 ->setDefaultCountryId($data['default_country_id'])
-                ->setDefaultLangId($data['default_lang_id'])
                 ->save();
 
             return new JsonResponse("", 200);
@@ -145,7 +144,6 @@ class ConfigurationController extends BaseAdminController
             if (null !== $googleShoppingAccount) {
                 $googleShoppingAccount->setMerchantId($data['merchant_id'])
                     ->setDefaultCountryId($data['default_country_id'])
-                    ->setDefaultLangId($data['default_lang_id'])
                     ->save();
             }
 
