@@ -194,11 +194,11 @@
                                     </div>
                                 </div>
                                 <div class="panel panel-default">
-                                    {form name="googleshopping.merchant.configuration"}
+                                    {form name="googleshopping.attribute.configuration"}
                                         <form method="post"
-                                              action='{url path="/admin/module/googleshopping/merchant/configuration"}'>
+                                              action='{url path="/admin/module/googleshopping/attribute/configuration"}'>
                                             <div class="panel-heading">
-                                                <h4>{intl l="Google Merchant configuration"}</h4>
+                                                <h4>{intl l="Attribute correspondance"}</h4>
 
                                                 {include
                                                 file      = "includes/inner-form-toolbar.html"
@@ -210,26 +210,12 @@
                                                 {form_hidden_fields form=$form}
                                                 <div class="col-md-12">
                                                     <div class="row">
-                                                        {form_field form=$form field="target_country_id"}
-                                                            <div class="form-group col-md-6 {if $error}has-error{/if}">
-                                                                <label for="{$label_attr.for}">{$label}</label>
-                                                                <select id="{$label_attr.for}" class="form-control"
-                                                                        name="{$name}">
-                                                                    {loop type="country" name="target_country"}
-                                                                        <option value="{$ID}"
-                                                                                {if $value == $ID}selected{/if} >{$TITLE}</option>
-                                                                    {/loop}
-                                                                </select>
-                                                                <span class="help-block">{intl l="The target country for Google Shopping"}</span>
-                                                            </div>
-                                                        {/form_field}
-
                                                         {form_field form=$form field="attribute_color"}
                                                             <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                                 <label for="{$label_attr.for}">{$label}</label>
                                                                 <input id="{$label_attr.for}" class="form-control"
                                                                        name="{$name}" value="{$value}"/>
-                                                                <span class="help-block">{intl l="The ID of thelia color attributes if you have one"}</span>
+                                                                <span class="help-block">{intl l="The IDs of thelia color attributes separate by coma"}</span>
                                                             </div>
                                                         {/form_field}
 
@@ -238,7 +224,7 @@
                                                                 <label for="{$label_attr.for}">{$label}</label>
                                                                 <input id="{$label_attr.for}" class="form-control"
                                                                        name="{$name}" value="{$value}"/>
-                                                                <span class="help-block">{intl l="The ID of thelia size attributes if you have one"}</span>
+                                                                <span class="help-block">{intl l="The IDs of thelia size attributes separate by coma"}</span>
                                                             </div>
                                                         {/form_field}
                                                     </div>

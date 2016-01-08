@@ -10,6 +10,7 @@ use GoogleShopping\Handler\GoogleShoppingHandler;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\TheliaEvents;
@@ -167,7 +168,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
                 $colorCombination = AttributeAvQuery::create()
                     ->joinWithI18n($lang->getLocale())
                     ->useAttributeCombinationQuery()
-                    ->filterByAttributeId($colorAttributeId)
+                    ->filterByAttributeId(explode(',', $colorAttributeId), Criteria::IN)
                     ->filterByProductSaleElementsId($productSaleElements->getId())
                     ->endUse()
                     ->findOne();
@@ -182,7 +183,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
                     ->joinWithI18n($lang->getLocale())
                     ->useAttributeCombinationQuery()
                     ->filterByAttributeId($sizeAttributeId)
-                    ->filterByProductSaleElementsId($productSaleElements->getId())
+                    ->filterByAttributeId(explode(',', $sizeAttributeId), Criteria::IN)
                     ->endUse()
                     ->findOne();
                 if (null !== $sizeCombination) {

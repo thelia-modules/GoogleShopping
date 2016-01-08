@@ -19,7 +19,7 @@
         <form name="MyFormName" class="GoogleShopping\Form\MySuperForm" />
         -->
         <form name="googleshopping.api.configuration" class="GoogleShopping\Form\ApiConfigurationForm" />
-        <form name="googleshopping.merchant.configuration" class="GoogleShopping\Form\MerchantConfigurationForm" />
+        <form name="googleshopping.attribute.configuration" class="GoogleShopping\Form\AttributeConfigurationForm" />
         <form name="googleshopping.merchant.account" class="GoogleShopping\Form\MerchantAccountForm" />
         <form name="googleshopping.taxonomy" class="GoogleShopping\Form\TaxonomyForm" />
     </forms>

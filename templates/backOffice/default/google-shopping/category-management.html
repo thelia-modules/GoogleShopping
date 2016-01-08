@@ -175,7 +175,7 @@
                                         </td>
                                         <td>{$TITLE}</td>
                                         <td class="text-center td-product-{$ID} td-not-exist-{$ID}">
-                                            <input class="check-product-{$categoryId}" type="checkbox" data-product="{$ID}" name="products[{$ID}][checkbox]"/>
+                                            <input class="check-product" type="checkbox" data-product="{$ID}" name="products[{$ID}][checkbox]"/>
                                         </td>
                                         <td class="text-center td-product-{$ID} td-not-exist-{$ID}">
                                             <form class="ajax-form" id="add-form-product-{$ID}" action="/admin/module/googleshopping/add/{$ID}" method="post">
@@ -323,11 +323,9 @@
 
         $(".send-checked").click(function (event) {
             $('.check-product:checked').each(function () {
-
                 var productId = $(this).data("product");
                 $(".td-product-" + productId + ":first").html('<span class="loading" style="margin:auto"></span>');
                 var form = $("#add-form-product-" + productId);
-                form.append("<input type='hidden' name='ajax' value='true'>");
                 $.ajax({
                     url: form.attr('action'),
                     type: form.attr('method'),

@@ -87,8 +87,9 @@ class ProductController extends BaseGoogleShoppingController
             $eventArgs['lang'] = LangQuery::create()->findOneById($request->get("lang"));
             $eventArgs['targetCountry'] = CountryQuery::create()->findOneById($request->get('country'));
             $merchantId = $request->get('account');
+            $locale = $eventArgs['lang']->getLocale();
 
-            if ($eventArgs['targetCountry']) {
+            if (!$eventArgs['targetCountry']) {
                 $eventArgs['targetCountry'] = Country::getDefaultCountry();
             }
 
@@ -97,6 +98,7 @@ class ProductController extends BaseGoogleShoppingController
                 $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
                 return $this->generateRedirect('/googleshopping/oauth2callback');
             }
+
 
             $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
 
@@ -135,6 +137,7 @@ class ProductController extends BaseGoogleShoppingController
 
         } catch (\Exception $e) {
             $con->rollBack();
+//            $deleteResponse = $this->deleteProduct($id);
             return JsonResponse::create($e->getMessage(), 500);
         }
     }
@@ -217,52 +220,10 @@ class ProductController extends BaseGoogleShoppingController
 
         $googleProductEvent = new GoogleProductEvent($product);
         $googleProductEvent->setTargetCountry($targetCountry)
-            ->setLang($lang)
-            ->setMerchantId();
+            ->setLang($lang);
 
         $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC, $googleProductEvent);
     }
-
-    protected function checkCombination(ObjectCollection $productSaleElements)
-    {
-        $pse = $productSaleElements->getFirst();
-
-        $colorAttributeId = GoogleShopping::getConfigValue('attribute_color');
-        $sizeAttributeId = GoogleShopping::getConfigValue('attribute_size');
-
-        $color = false;
-        $size = false;
-
-        if (null !== $colorAttributeId) {
-            $colorCombination = AttributeAvQuery::create()
-                ->useAttributeCombinationQuery()
-                ->filterByAttributeId($colorAttributeId)
-                ->filterByProductSaleElementsId($pse->getId())
-                ->endUse()
-                ->findOne();
-            if (null !== $colorCombination) {
-                $color = true;
-            }
-        }
-
-        if (null !== $sizeAttributeId) {
-            $sizeCombination = AttributeAvQuery::create()
-                ->useAttributeCombinationQuery()
-                ->filterByAttributeId($sizeAttributeId)
-                ->filterByProductSaleElementsId($pse->getId())
-                ->endUse()
-                ->findOne();
-            if (null !== $sizeCombination) {
-                $size = true;
-            }
-        }
-
-        if (true === $color || true === $size) {
-            return true;
-        }
-        return false;
-    }
-
 
     protected function getShippings($country)
     {

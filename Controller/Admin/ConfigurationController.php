@@ -66,7 +66,7 @@ class ConfigurationController extends BaseAdminController
         return $this->render('module-configure', array('module_code' => 'GoogleShopping'));
     }
 
-    public function saveMerchantConfiguration()
+    public function saveAttributeConfiguration()
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
@@ -74,17 +74,13 @@ class ConfigurationController extends BaseAdminController
 
         $message = null;
 
-        $form = new MerchantConfigurationForm($this->getRequest());
+        $form = $this->createForm("googleshopping.attribute.configuration");
 
         try {
-            $formData = $this->validateForm($form)->getData();
+            $data = $this->validateForm($form, 'POST')->getData();
 
-            foreach ($formData as $name => $value) {
-                if ($name === "success_url" || $name === "error_message") {
-                    continue;
-                }
-                GoogleShopping::setConfigValue($name, $value);
-            }
+            GoogleShopping::setConfigValue('attribute_color', $data['attribute_color']);
+            GoogleShopping::setConfigValue('attribute_size', $data['attribute_size']);
 
             return $this->generateRedirect('/admin/module/GoogleShopping');
 

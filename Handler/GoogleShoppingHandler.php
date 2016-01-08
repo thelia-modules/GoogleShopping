@@ -90,7 +90,7 @@ class GoogleShoppingHandler
         if (null !== $colorAttributeId) {
             $colorCombination = AttributeAvQuery::create()
                 ->useAttributeCombinationQuery()
-                ->filterByAttributeId($colorAttributeId)
+                ->filterByAttributeId(explode(',', $colorAttributeId), Criteria::IN)
                 ->filterByProductSaleElementsId($pse->getId())
                 ->endUse()
                 ->findOne();
@@ -103,7 +103,7 @@ class GoogleShoppingHandler
             $sizeCombination = AttributeAvQuery::create()
                 ->useAttributeCombinationQuery()
                 ->filterByAttributeId($sizeAttributeId)
-                ->filterByProductSaleElementsId($pse->getId())
+                ->filterByAttributeId(explode(',', $sizeAttributeId), Criteria::IN)
                 ->endUse()
                 ->findOne();
             if (null !== $sizeCombination) {
