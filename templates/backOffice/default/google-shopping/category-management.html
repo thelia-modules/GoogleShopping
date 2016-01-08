@@ -287,6 +287,15 @@
             searchGoogleProducts();
         });
 
+        $("#select-currency").change(function (event) {
+           var currencyId = $(this).val();
+            $(".product_currency").each(function(){
+                $(this).val(currencyId);
+            });
+
+            searchGoogleProducts();
+        });
+
 
         $(".ajax-form").submit(function (event) {
             event.preventDefault();
