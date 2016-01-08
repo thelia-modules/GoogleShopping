@@ -250,18 +250,24 @@
                                                         {form_field form=$form field="attribute_color"}
                                                             <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                                 <label for="{$label_attr.for}">{$label}</label>
-                                                                <input id="{$label_attr.for}" class="form-control"
-                                                                       name="{$name}" value="{$value}"/>
-                                                                <span class="help-block">{intl l="The IDs of thelia color attributes separate by coma"}</span>
+                                                                <select class="form-control" name="{$name}[]" multiple id="{$label_attr.for}">
+                                                                    {loop type="attribute" name="color_attribute"}
+                                                                        <option value="{$ID}" {if $ID|in_array:$value}selected{/if}>{$TITLE}</option>
+                                                                    {/loop}
+                                                                </select>
+                                                                <span class="help-block">{intl l="Select color attributes"}</span>
                                                             </div>
                                                         {/form_field}
 
                                                         {form_field form=$form field="attribute_size"}
                                                             <div class="form-group col-md-6 {if $error}has-error{/if}">
                                                                 <label for="{$label_attr.for}">{$label}</label>
-                                                                <input id="{$label_attr.for}" class="form-control"
-                                                                       name="{$name}" value="{$value}"/>
-                                                                <span class="help-block">{intl l="The IDs of thelia size attributes separate by coma"}</span>
+                                                                <select class="form-control" name="{$name}[]" multiple id="{$label_attr.for}">
+                                                                    {loop type="attribute" name="color_attribute"}
+                                                                        <option value="{$ID}" {if $ID|in_array:$value}selected{/if}>{$TITLE}</option>
+                                                                    {/loop}
+                                                                </select>
+                                                                <span class="help-block">{intl l="Select size attributes"}</span>
                                                             </div>
                                                         {/form_field}
                                                     </div>

@@ -27,10 +27,7 @@ class BaseGoogleShoppingController extends BaseAdminController
         $redirection = '/admin/module/GoogleShopping';
 
         //Manage redirection after auth
-        if ($url = $this->getSession()->get('google_action_url')) {
-            $redirection = $url;
-            //$this->getSession()->set('google_action_url', null);
-        } elseif ($url = $this->getRequest()->query->get('redirect')) {
+        if ($url = $this->getRequest()->query->get('redirect')) {
             $redirection = $url;
             $this->getSession()->set('google_action_url', $redirection);
         }

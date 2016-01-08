@@ -20,10 +20,10 @@ class AttributeConfigurationForm extends BaseForm
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
-                'data' => GoogleShopping::getConfigValue('attribute_color'),
+                'data' => explode(',', GoogleShopping::getConfigValue('attribute_color')),
                 'label_attr' => array(
                     'for' => 'attribute_color'
-                )
+                ),
             ))
             ->add("attribute_size", "text", array(
                 'label' => Translator::getInstance()->trans(
@@ -31,7 +31,7 @@ class AttributeConfigurationForm extends BaseForm
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
-                'data' => GoogleShopping::getConfigValue('attribute_size'),
+                'data' => explode(',', GoogleShopping::getConfigValue('attribute_size')),
                 'label_attr' => array(
                     'for' => 'attribute_size'
                 )

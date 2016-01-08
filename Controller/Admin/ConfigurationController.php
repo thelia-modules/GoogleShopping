@@ -80,8 +80,8 @@ class ConfigurationController extends BaseAdminController
         try {
             $data = $this->validateForm($form, 'POST')->getData();
 
-            GoogleShopping::setConfigValue('attribute_color', $data['attribute_color']);
-            GoogleShopping::setConfigValue('attribute_size', $data['attribute_size']);
+            GoogleShopping::setConfigValue('attribute_color', implode(',',$data['attribute_color']));
+            GoogleShopping::setConfigValue('attribute_size', implode(',',$data['attribute_size']));
 
             return $this->generateRedirect('/admin/module/GoogleShopping');
 
