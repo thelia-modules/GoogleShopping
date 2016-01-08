@@ -44,6 +44,8 @@ class MerchantAccount extends BaseLoop implements PropelSearchLoopInterface
             $loopResultRow->set("ID", $account->getId());
             $loopResultRow->set("MERCHANT_ID", $account->getMerchantId());
             $loopResultRow->set("DEFAULT_COUNTRY_ID", $account->getDefaultCountryId());
+            $loopResultRow->set("DEFAULT_CURRENCY_ID", $account->getDefaultCurrencyId());
+            $loopResultRow->set("IS_DEFAULT", $account->getIsDefault());
 
             $loopResult->addRow($loopResultRow);
         }

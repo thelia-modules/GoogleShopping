@@ -32,8 +32,13 @@
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
         <column name="merchant_id" type="VARCHAR" size="255" required="true"/>
         <column name="default_country_id" type="INTEGER" />
+        <column name="default_currency_id" type="INTEGER" />
+        <column name="is_default" type="BOOLEAN"/>
         <foreign-key foreignTable="country" name="fk_googleshopping_account_country_id" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference foreign="id" local="default_country_id" />
+        </foreign-key>
+        <foreign-key foreignTable="currency" name="fk_googleshopping_account_currency_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="default_currency_id" />
         </foreign-key>
     </table>
 

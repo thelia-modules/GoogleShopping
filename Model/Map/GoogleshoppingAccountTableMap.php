@@ -58,7 +58,7 @@ class GoogleshoppingAccountTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 3;
+    const NUM_COLUMNS = 5;
 
     /**
      * The number of lazy-loaded columns
@@ -68,7 +68,7 @@ class GoogleshoppingAccountTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 3;
+    const NUM_HYDRATE_COLUMNS = 5;
 
     /**
      * the column name for the ID field
@@ -86,6 +86,16 @@ class GoogleshoppingAccountTableMap extends TableMap
     const DEFAULT_COUNTRY_ID = 'googleshopping_account.DEFAULT_COUNTRY_ID';
 
     /**
+     * the column name for the DEFAULT_CURRENCY_ID field
+     */
+    const DEFAULT_CURRENCY_ID = 'googleshopping_account.DEFAULT_CURRENCY_ID';
+
+    /**
+     * the column name for the IS_DEFAULT field
+     */
+    const IS_DEFAULT = 'googleshopping_account.IS_DEFAULT';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -97,12 +107,12 @@ class GoogleshoppingAccountTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'MerchantId', 'DefaultCountryId', ),
-        self::TYPE_STUDLYPHPNAME => array('id', 'merchantId', 'defaultCountryId', ),
-        self::TYPE_COLNAME       => array(GoogleshoppingAccountTableMap::ID, GoogleshoppingAccountTableMap::MERCHANT_ID, GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID, ),
-        self::TYPE_RAW_COLNAME   => array('ID', 'MERCHANT_ID', 'DEFAULT_COUNTRY_ID', ),
-        self::TYPE_FIELDNAME     => array('id', 'merchant_id', 'default_country_id', ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id', 'MerchantId', 'DefaultCountryId', 'DefaultCurrencyId', 'IsDefault', ),
+        self::TYPE_STUDLYPHPNAME => array('id', 'merchantId', 'defaultCountryId', 'defaultCurrencyId', 'isDefault', ),
+        self::TYPE_COLNAME       => array(GoogleshoppingAccountTableMap::ID, GoogleshoppingAccountTableMap::MERCHANT_ID, GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID, GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID, GoogleshoppingAccountTableMap::IS_DEFAULT, ),
+        self::TYPE_RAW_COLNAME   => array('ID', 'MERCHANT_ID', 'DEFAULT_COUNTRY_ID', 'DEFAULT_CURRENCY_ID', 'IS_DEFAULT', ),
+        self::TYPE_FIELDNAME     => array('id', 'merchant_id', 'default_country_id', 'default_currency_id', 'is_default', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -112,12 +122,12 @@ class GoogleshoppingAccountTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'MerchantId' => 1, 'DefaultCountryId' => 2, ),
-        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'merchantId' => 1, 'defaultCountryId' => 2, ),
-        self::TYPE_COLNAME       => array(GoogleshoppingAccountTableMap::ID => 0, GoogleshoppingAccountTableMap::MERCHANT_ID => 1, GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID => 2, ),
-        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'MERCHANT_ID' => 1, 'DEFAULT_COUNTRY_ID' => 2, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'merchant_id' => 1, 'default_country_id' => 2, ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'MerchantId' => 1, 'DefaultCountryId' => 2, 'DefaultCurrencyId' => 3, 'IsDefault' => 4, ),
+        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'merchantId' => 1, 'defaultCountryId' => 2, 'defaultCurrencyId' => 3, 'isDefault' => 4, ),
+        self::TYPE_COLNAME       => array(GoogleshoppingAccountTableMap::ID => 0, GoogleshoppingAccountTableMap::MERCHANT_ID => 1, GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID => 2, GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID => 3, GoogleshoppingAccountTableMap::IS_DEFAULT => 4, ),
+        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'MERCHANT_ID' => 1, 'DEFAULT_COUNTRY_ID' => 2, 'DEFAULT_CURRENCY_ID' => 3, 'IS_DEFAULT' => 4, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'merchant_id' => 1, 'default_country_id' => 2, 'default_currency_id' => 3, 'is_default' => 4, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -139,6 +149,8 @@ class GoogleshoppingAccountTableMap extends TableMap
         $this->addPrimaryKey('ID', 'Id', 'INTEGER', true, null, null);
         $this->addColumn('MERCHANT_ID', 'MerchantId', 'VARCHAR', true, 255, null);
         $this->addForeignKey('DEFAULT_COUNTRY_ID', 'DefaultCountryId', 'INTEGER', 'country', 'ID', false, null, null);
+        $this->addForeignKey('DEFAULT_CURRENCY_ID', 'DefaultCurrencyId', 'INTEGER', 'currency', 'ID', false, null, null);
+        $this->addColumn('IS_DEFAULT', 'IsDefault', 'BOOLEAN', false, 1, null);
     } // initialize()
 
     /**
@@ -147,6 +159,7 @@ class GoogleshoppingAccountTableMap extends TableMap
     public function buildRelations()
     {
         $this->addRelation('Country', '\\GoogleShopping\\Model\\Thelia\\Model\\Country', RelationMap::MANY_TO_ONE, array('default_country_id' => 'id', ), 'CASCADE', 'RESTRICT');
+        $this->addRelation('Currency', '\\GoogleShopping\\Model\\Thelia\\Model\\Currency', RelationMap::MANY_TO_ONE, array('default_currency_id' => 'id', ), 'CASCADE', 'RESTRICT');
         $this->addRelation('GoogleshoppingProductSynchronisation', '\\GoogleShopping\\Model\\GoogleshoppingProductSynchronisation', RelationMap::ONE_TO_MANY, array('id' => 'googleshopping_account_id', ), 'CASCADE', 'RESTRICT', 'GoogleshoppingProductSynchronisations');
     } // buildRelations()
     /**
@@ -300,10 +313,14 @@ class GoogleshoppingAccountTableMap extends TableMap
             $criteria->addSelectColumn(GoogleshoppingAccountTableMap::ID);
             $criteria->addSelectColumn(GoogleshoppingAccountTableMap::MERCHANT_ID);
             $criteria->addSelectColumn(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID);
+            $criteria->addSelectColumn(GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID);
+            $criteria->addSelectColumn(GoogleshoppingAccountTableMap::IS_DEFAULT);
         } else {
             $criteria->addSelectColumn($alias . '.ID');
             $criteria->addSelectColumn($alias . '.MERCHANT_ID');
             $criteria->addSelectColumn($alias . '.DEFAULT_COUNTRY_ID');
+            $criteria->addSelectColumn($alias . '.DEFAULT_CURRENCY_ID');
+            $criteria->addSelectColumn($alias . '.IS_DEFAULT');
         }
     }
 

@@ -20,6 +20,8 @@ use Thelia\Model\AreaDeliveryModuleQuery;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\Country;
 use Thelia\Model\CountryQuery;
+use Thelia\Model\Currency;
+use Thelia\Model\CurrencyQuery;
 use Thelia\Model\Lang;
 use Thelia\Model\LangQuery;
 use Thelia\Model\Module;
@@ -88,6 +90,14 @@ class ProductController extends BaseGoogleShoppingController
             $eventArgs['targetCountry'] = CountryQuery::create()->findOneById($request->get('country'));
             $merchantId = $request->get('account');
             $locale = $eventArgs['lang']->getLocale();
+            $currencyId = $request->get('currency');
+
+            $currency = CurrencyQuery::create()
+                ->findOneById($currencyId);
+
+            if (null === $currency) {
+                $currency = Currency::getDefaultCurrency();
+            }
 
             if (!$eventArgs['targetCountry']) {
                 $eventArgs['targetCountry'] = Country::getDefaultCountry();
@@ -113,7 +123,8 @@ class ProductController extends BaseGoogleShoppingController
 
             /** @var ProductSaleElements $productSaleElement */
             $googleProductEvent = new GoogleProductEvent($theliaProduct, null, $googleShoppingService, $eventArgs);
-            $googleProductEvent->setMerchantId($merchantId);
+            $googleProductEvent->setMerchantId($merchantId)
+                ->setCurrency($currency);
 
             $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT, $googleProductEvent);
 

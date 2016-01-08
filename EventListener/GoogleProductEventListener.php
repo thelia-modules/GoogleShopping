@@ -144,6 +144,8 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $itemGroupId = $event->getItemGroupId();
         $productSaleElements = $event->getProductSaleElements();
         $lang =  $event->getLang();
+        $currency = $event->getCurrency();
+
         //If we have multiple pse for one product manage attribute
         if ($itemGroupId !== null) {
             $googleProduct->setItemGroupId($itemGroupId);
@@ -245,9 +247,10 @@ class GoogleProductEventListener implements EventSubscriberInterface
 
         $price = new \Google_Service_ShoppingContent_Price();
         $productPrice = $productSaleElements->getPromo() === 0 ? $psePrice->getPrice() : $psePrice->getPromoPrice();
-        $price->setValue($taxCalculator->getTaxedPrice($productPrice));
+        $currencyProductPrice = $productPrice * $currency->getRate();
+        $price->setValue($taxCalculator->getTaxedPrice($currencyProductPrice));
 
-        $price->setCurrency(Currency::getDefaultCurrency()->getCode());
+        $price->setCurrency($currency->getCode());
 
         //Delivery shippings
         $googleShippings = array();
@@ -257,9 +260,10 @@ class GoogleProductEventListener implements EventSubscriberInterface
          * @var \Thelia\Model\OrderPostage $shippingCost
          */
         foreach ($event->getShippings() as $shippingTitle => $shippingCost) {
+            $currencyShippingCost = $shippingCost->getAmount() * $currency->getRate();
             $shipping_price = new \Google_Service_ShoppingContent_Price();
-            $shipping_price->setValue($shippingCost->getAmount());
-            $shipping_price->setCurrency(Currency::getDefaultCurrency()->getCode());
+            $shipping_price->setValue($currencyShippingCost);
+            $shipping_price->setCurrency($currency->getCode());
 
             $googleShipping = new \Google_Service_ShoppingContent_ProductShipping();
             $googleShipping->setPrice($shipping_price);

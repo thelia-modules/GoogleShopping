@@ -6,6 +6,8 @@
 
 <script>
     $(function () {
+        $(".switch").bootstrapSwitch();
+
         $("#search-taxonomy").keyup(function () {
             search = $(this).val();
             if (search.length > 2) {

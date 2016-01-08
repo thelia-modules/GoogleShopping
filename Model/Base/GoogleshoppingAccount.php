@@ -10,7 +10,9 @@ use GoogleShopping\Model\GoogleshoppingProductSynchronisation as ChildGoogleshop
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery as ChildGoogleshoppingProductSynchronisationQuery;
 use GoogleShopping\Model\Map\GoogleshoppingAccountTableMap;
 use GoogleShopping\Model\Thelia\Model\Country as ChildCountry;
+use GoogleShopping\Model\Thelia\Model\Currency as ChildCurrency;
 use GoogleShopping\Model\Thelia\Model\CountryQuery;
+use GoogleShopping\Model\Thelia\Model\CurrencyQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -76,9 +78,26 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     protected $default_country_id;
 
     /**
+     * The value for the default_currency_id field.
+     * @var        int
+     */
+    protected $default_currency_id;
+
+    /**
+     * The value for the is_default field.
+     * @var        boolean
+     */
+    protected $is_default;
+
+    /**
      * @var        Country
      */
     protected $aCountry;
+
+    /**
+     * @var        Currency
+     */
+    protected $aCurrency;
 
     /**
      * @var        ObjectCollection|ChildGoogleshoppingProductSynchronisation[] Collection to store aggregation of ChildGoogleshoppingProductSynchronisation objects.
@@ -392,6 +411,28 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     }
 
     /**
+     * Get the [default_currency_id] column value.
+     *
+     * @return   int
+     */
+    public function getDefaultCurrencyId()
+    {
+
+        return $this->default_currency_id;
+    }
+
+    /**
+     * Get the [is_default] column value.
+     *
+     * @return   boolean
+     */
+    public function getIsDefault()
+    {
+
+        return $this->is_default;
+    }
+
+    /**
      * Set the value of [id] column.
      *
      * @param      int $v new value
@@ -459,6 +500,60 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     } // setDefaultCountryId()
 
     /**
+     * Set the value of [default_currency_id] column.
+     *
+     * @param      int $v new value
+     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     */
+    public function setDefaultCurrencyId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->default_currency_id !== $v) {
+            $this->default_currency_id = $v;
+            $this->modifiedColumns[GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID] = true;
+        }
+
+        if ($this->aCurrency !== null && $this->aCurrency->getId() !== $v) {
+            $this->aCurrency = null;
+        }
+
+
+        return $this;
+    } // setDefaultCurrencyId()
+
+    /**
+     * Sets the value of the [is_default] column.
+     * Non-boolean arguments are converted using the following rules:
+     *   * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     *
+     * @param      boolean|integer|string $v The new value
+     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     */
+    public function setIsDefault($v)
+    {
+        if ($v !== null) {
+            if (is_string($v)) {
+                $v = in_array(strtolower($v), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+            } else {
+                $v = (boolean) $v;
+            }
+        }
+
+        if ($this->is_default !== $v) {
+            $this->is_default = $v;
+            $this->modifiedColumns[GoogleshoppingAccountTableMap::IS_DEFAULT] = true;
+        }
+
+
+        return $this;
+    } // setIsDefault()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -503,6 +598,12 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('DefaultCountryId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->default_country_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('DefaultCurrencyId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->default_currency_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('IsDefault', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->is_default = (null !== $col) ? (boolean) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -511,7 +612,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 3; // 3 = GoogleshoppingAccountTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 5; // 5 = GoogleshoppingAccountTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingAccount object", 0, $e);
@@ -535,6 +636,9 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     {
         if ($this->aCountry !== null && $this->default_country_id !== $this->aCountry->getId()) {
             $this->aCountry = null;
+        }
+        if ($this->aCurrency !== null && $this->default_currency_id !== $this->aCurrency->getId()) {
+            $this->aCurrency = null;
         }
     } // ensureConsistency
 
@@ -576,6 +680,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         if ($deep) {  // also de-associate any related objects?
 
             $this->aCountry = null;
+            $this->aCurrency = null;
             $this->collGoogleshoppingProductSynchronisations = null;
 
         } // if (deep)
@@ -701,6 +806,13 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                 $this->setCountry($this->aCountry);
             }
 
+            if ($this->aCurrency !== null) {
+                if ($this->aCurrency->isModified() || $this->aCurrency->isNew()) {
+                    $affectedRows += $this->aCurrency->save($con);
+                }
+                $this->setCurrency($this->aCurrency);
+            }
+
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -764,6 +876,12 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID)) {
             $modifiedColumns[':p' . $index++]  = 'DEFAULT_COUNTRY_ID';
         }
+        if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'DEFAULT_CURRENCY_ID';
+        }
+        if ($this->isColumnModified(GoogleshoppingAccountTableMap::IS_DEFAULT)) {
+            $modifiedColumns[':p' . $index++]  = 'IS_DEFAULT';
+        }
 
         $sql = sprintf(
             'INSERT INTO googleshopping_account (%s) VALUES (%s)',
@@ -783,6 +901,12 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                         break;
                     case 'DEFAULT_COUNTRY_ID':
                         $stmt->bindValue($identifier, $this->default_country_id, PDO::PARAM_INT);
+                        break;
+                    case 'DEFAULT_CURRENCY_ID':
+                        $stmt->bindValue($identifier, $this->default_currency_id, PDO::PARAM_INT);
+                        break;
+                    case 'IS_DEFAULT':
+                        $stmt->bindValue($identifier, (int) $this->is_default, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -855,6 +979,12 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
             case 2:
                 return $this->getDefaultCountryId();
                 break;
+            case 3:
+                return $this->getDefaultCurrencyId();
+                break;
+            case 4:
+                return $this->getIsDefault();
+                break;
             default:
                 return null;
                 break;
@@ -887,6 +1017,8 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
             $keys[0] => $this->getId(),
             $keys[1] => $this->getMerchantId(),
             $keys[2] => $this->getDefaultCountryId(),
+            $keys[3] => $this->getDefaultCurrencyId(),
+            $keys[4] => $this->getIsDefault(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -896,6 +1028,9 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         if ($includeForeignObjects) {
             if (null !== $this->aCountry) {
                 $result['Country'] = $this->aCountry->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aCurrency) {
+                $result['Currency'] = $this->aCurrency->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->collGoogleshoppingProductSynchronisations) {
                 $result['GoogleshoppingProductSynchronisations'] = $this->collGoogleshoppingProductSynchronisations->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
@@ -943,6 +1078,12 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
             case 2:
                 $this->setDefaultCountryId($value);
                 break;
+            case 3:
+                $this->setDefaultCurrencyId($value);
+                break;
+            case 4:
+                $this->setIsDefault($value);
+                break;
         } // switch()
     }
 
@@ -970,6 +1111,8 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setMerchantId($arr[$keys[1]]);
         if (array_key_exists($keys[2], $arr)) $this->setDefaultCountryId($arr[$keys[2]]);
+        if (array_key_exists($keys[3], $arr)) $this->setDefaultCurrencyId($arr[$keys[3]]);
+        if (array_key_exists($keys[4], $arr)) $this->setIsDefault($arr[$keys[4]]);
     }
 
     /**
@@ -984,6 +1127,8 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         if ($this->isColumnModified(GoogleshoppingAccountTableMap::ID)) $criteria->add(GoogleshoppingAccountTableMap::ID, $this->id);
         if ($this->isColumnModified(GoogleshoppingAccountTableMap::MERCHANT_ID)) $criteria->add(GoogleshoppingAccountTableMap::MERCHANT_ID, $this->merchant_id);
         if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID)) $criteria->add(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID, $this->default_country_id);
+        if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID)) $criteria->add(GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID, $this->default_currency_id);
+        if ($this->isColumnModified(GoogleshoppingAccountTableMap::IS_DEFAULT)) $criteria->add(GoogleshoppingAccountTableMap::IS_DEFAULT, $this->is_default);
 
         return $criteria;
     }
@@ -1049,6 +1194,8 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     {
         $copyObj->setMerchantId($this->getMerchantId());
         $copyObj->setDefaultCountryId($this->getDefaultCountryId());
+        $copyObj->setDefaultCurrencyId($this->getDefaultCurrencyId());
+        $copyObj->setIsDefault($this->getIsDefault());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1140,6 +1287,57 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         }
 
         return $this->aCountry;
+    }
+
+    /**
+     * Declares an association between this object and a ChildCurrency object.
+     *
+     * @param                  ChildCurrency $v
+     * @return                 \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setCurrency(ChildCurrency $v = null)
+    {
+        if ($v === null) {
+            $this->setDefaultCurrencyId(NULL);
+        } else {
+            $this->setDefaultCurrencyId($v->getId());
+        }
+
+        $this->aCurrency = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildCurrency object, it will not be re-added.
+        if ($v !== null) {
+            $v->addGoogleshoppingAccount($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildCurrency object
+     *
+     * @param      ConnectionInterface $con Optional Connection object.
+     * @return                 ChildCurrency The associated ChildCurrency object.
+     * @throws PropelException
+     */
+    public function getCurrency(ConnectionInterface $con = null)
+    {
+        if ($this->aCurrency === null && ($this->default_currency_id !== null)) {
+            $this->aCurrency = CurrencyQuery::create()->findPk($this->default_currency_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aCurrency->addGoogleshoppingAccounts($this);
+             */
+        }
+
+        return $this->aCurrency;
     }
 
 
@@ -1409,6 +1607,8 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         $this->id = null;
         $this->merchant_id = null;
         $this->default_country_id = null;
+        $this->default_currency_id = null;
+        $this->is_default = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1437,6 +1637,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
         $this->collGoogleshoppingProductSynchronisations = null;
         $this->aCountry = null;
+        $this->aCurrency = null;
     }
 
     /**

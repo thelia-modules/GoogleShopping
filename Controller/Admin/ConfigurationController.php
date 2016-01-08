@@ -7,6 +7,7 @@ use GoogleShopping\Form\ApiConfigurationForm;
 use GoogleShopping\Form\MerchantConfigurationForm;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
+use GoogleShopping\Model\GoogleshoppingAccount;
 use GoogleShopping\Model\GoogleshoppingAccountQuery;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
@@ -113,11 +114,27 @@ class ConfigurationController extends BaseAdminController
                 ->filterByMerchantId($data['merchant_id'])
                 ->findOneOrCreate();
 
+            $isDefault = boolval($data['is_default']);
+
+            if (true === $isDefault) {
+                $defaultAccounts = GoogleshoppingAccountQuery::create()
+                    ->filterByIsDefault(true)
+                    ->find();
+                /** @var GoogleshoppingAccount $defaultAccount */
+                foreach ($defaultAccounts as $defaultAccount) {
+                    $defaultAccount->setIsDefault(false)
+                        ->save();
+                }
+            }
+
             $googleShoppingAccount
                 ->setDefaultCountryId($data['default_country_id'])
+                ->setDefaultCurrencyId($data['default_currency_id'])
+                ->setIsDefault($isDefault)
                 ->save();
 
-            return new JsonResponse("", 200);
+            return new JsonResponse(json_encode(["message" => "Account added with succes !"]), 200);
+
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
         }
@@ -137,13 +154,28 @@ class ConfigurationController extends BaseAdminController
             $googleShoppingAccount = GoogleshoppingAccountQuery::create()
                 ->findOneById($id);
 
+            $isDefault = boolval($data['is_default']);
+
+            if (true === $isDefault) {
+                $defaultAccounts = GoogleshoppingAccountQuery::create()
+                    ->filterByIsDefault(true)
+                    ->find();
+                /** @var GoogleshoppingAccount $defaultAccount */
+                foreach ($defaultAccounts as $defaultAccount) {
+                    $defaultAccount->setIsDefault(false)
+                        ->save();
+                }
+            }
+
             if (null !== $googleShoppingAccount) {
                 $googleShoppingAccount->setMerchantId($data['merchant_id'])
                     ->setDefaultCountryId($data['default_country_id'])
+                    ->setDefaultCurrencyId($data['default_currency_id'])
+                    ->setIsDefault($isDefault)
                     ->save();
             }
 
-            return new JsonResponse("", 200);
+            return new JsonResponse(["message" => "Account updated with succes !"], 200);
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);

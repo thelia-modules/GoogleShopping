@@ -112,7 +112,7 @@
                                                 <form class="ajax-form" method="post" action='{url path="/admin/module/googleshopping/merchant/account/add"}'>
                                                     {form_hidden_fields form=$form}
                                                     {form_field form=$form field="merchant_id"}
-                                                        <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                        <div class="form-group col-md-3 {if $error}has-error{/if}">
                                                             <label for="{$label_attr.for}">{$label}</label>
                                                             <input id="{$label_attr.for}" class="form-control"
                                                                    name="{$name}" required/>
@@ -120,7 +120,7 @@
                                                         </div>
                                                     {/form_field}
                                                     {form_field form=$form field="default_country_id"}
-                                                        <div class="form-group col-md-3 {if $error}has-error{/if}">
+                                                        <div class="form-group col-md-2 {if $error}has-error{/if}">
                                                             <label for="{$label_attr.for}">{$label}</label>
                                                             <select id="{$label_attr.for}" class="form-control"
                                                                     name="{$name}">
@@ -128,6 +128,26 @@
                                                                     <option value="{$ID}">{$TITLE}</option>
                                                                 {/loop}
                                                             </select>
+                                                        </div>
+                                                    {/form_field}
+                                                    {form_field form=$form field="default_currency_id"}
+                                                        <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                            <label for="{$label_attr.for}">{$label}</label>
+                                                            <select id="{$label_attr.for}" class="form-control"
+                                                                    name="{$name}">
+                                                                {loop type="currency" name="default_currency_id"}
+                                                                    <option value="{$ID}">{$SYMBOL}</option>
+                                                                {/loop}
+                                                            </select>
+                                                        </div>
+                                                    {/form_field}
+                                                    {form_field form=$form field="is_default"}
+                                                        <div class="form-group col-md-1">
+                                                            <label for="{$label_attr.for}">{$label}</label>
+                                                            <br>
+                                                            <div id="{$label_attr.for}" class="switch-small switch" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
+                                                                <input  name="{$name}" type="checkbox"/>
+                                                            </div>
                                                         </div>
                                                     {/form_field}
                                                     <div class="form-group col-md-4">
@@ -148,13 +168,13 @@
                                                         <form class="ajax-form" method="post" action='{url path="/admin/module/googleshopping/merchant/account/update/{$ID}"}'>
                                                             {form_hidden_fields form=$form}
                                                             {form_field form=$form field="merchant_id"}
-                                                                <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                                <div class="form-group col-md-3 {if $error}has-error{/if}">
                                                                     <input id="{$label_attr.for}" class="form-control"
                                                                            name="{$name}" value="{$MERCHANT_ID}" required/>
                                                                 </div>
                                                             {/form_field}
                                                             {form_field form=$form field="default_country_id"}
-                                                                <div class="form-group col-md-3 {if $error}has-error{/if}">
+                                                                <div class="form-group col-md-2 {if $error}has-error{/if}">
                                                                     <select id="{$label_attr.for}" class="form-control"
                                                                             name="{$name}">
                                                                         {loop type="country" name="default_country"}
@@ -162,6 +182,23 @@
                                                                                     {if $DEFAULT_COUNTRY_ID == $ID}selected{/if} >{$TITLE}</option>
                                                                         {/loop}
                                                                     </select>
+                                                                </div>
+                                                            {/form_field}
+                                                            {form_field form=$form field="default_currency_id"}
+                                                                <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                                    <select id="{$label_attr.for}" class="form-control"
+                                                                            name="{$name}">
+                                                                        {loop type="currency" name="default_currency_id"}
+                                                                            <option value="{$ID}" {if $DEFAULT_CURRENCY_ID == $ID}selected{/if} >{$SYMBOL}</option>
+                                                                        {/loop}
+                                                                    </select>
+                                                                </div>
+                                                            {/form_field}
+                                                            {form_field form=$form field="is_default"}
+                                                                <div class="form-group col-md-1">
+                                                                    <div class="switch-small switch" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
+                                                                        <input name="{$name}" type="checkbox" {if $IS_DEFAULT}checked{/if}/>
+                                                                    </div>
                                                                 </div>
                                                             {/form_field}
                                                             <div class="form-group col-md-2">
@@ -370,6 +407,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="alert" style="position: fixed; top: 0px; z-index: 1000; margin: 0 auto;">
+
     </div>
 {/block}
 

@@ -5,6 +5,7 @@ namespace GoogleShopping\Event;
 
 use GoogleShopping\Model\GoogleshoppingTaxonomy;
 use Thelia\Core\Event\ActionEvent;
+use Thelia\Model\Currency;
 use Thelia\Model\Product;
 use Thelia\Model\Category;
 use Thelia\Model\Country;
@@ -51,6 +52,9 @@ class GoogleProductEvent extends ActionEvent
 
     /** @var  int */
     protected $itemGroupId;
+
+    /** @var  Currency */
+    protected $currency;
 
     public function __construct(Product $product, ProductSaleElements $productSaleElements = null, \Google_Service_ShoppingContent $googleShoppingService = null, $array = array())
     {
@@ -218,4 +222,24 @@ class GoogleProductEvent extends ActionEvent
         $this->merchantId = $merchantId;
         return $this;
     }
+
+    /**
+     * @return Currency
+     */
+    public function getCurrency()
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @param Currency $currency
+     * @return GoogleProductEvent
+     */
+    public function setCurrency($currency)
+    {
+        $this->currency = $currency;
+        return $this;
+    }
+
+
 }

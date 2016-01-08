@@ -70,11 +70,19 @@ CREATE TABLE `googleshopping_account`
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `merchant_id` VARCHAR(255) NOT NULL,
     `default_country_id` INTEGER,
+    `default_currency_id` INTEGER,
+    `is_default` TINYINT(1),
     PRIMARY KEY (`id`),
     INDEX `FI_googleshopping_account_country_id` (`default_country_id`),
+    INDEX `FI_googleshopping_account_currency_id` (`default_currency_id`),
     CONSTRAINT `fk_googleshopping_account_country_id`
         FOREIGN KEY (`default_country_id`)
         REFERENCES `country` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE,
+    CONSTRAINT `fk_googleshopping_account_currency_id`
+        FOREIGN KEY (`default_currency_id`)
+        REFERENCES `currency` (`id`)
         ON UPDATE RESTRICT
         ON DELETE CASCADE
 ) ENGINE=InnoDB;

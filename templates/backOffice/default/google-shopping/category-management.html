@@ -69,7 +69,7 @@
                                     {intl l="Choose merchant account"}
                                 </option>
                                 {loop type="googleshopping.merchant.account" name="googleshopping.merchant.account"}
-                                    <option value="{$MERCHANT_ID}" data-country="{$DEFAULT_COUNTRY_ID}">
+                                    <option value="{$MERCHANT_ID}" data-country="{$DEFAULT_COUNTRY_ID}" data-currency="{$DEFAULT_CURRENCY_ID}">
                                         {$MERCHANT_ID}
                                     </option>
                                 {/loop}
@@ -84,6 +84,19 @@
                                 {loop type="country" name="country-select"}
                                     <option value="{$ID}">
                                         {$TITLE}
+                                    </option>
+                                {/loop}
+                            </select>
+                        </div>
+                        <div class="col-md-3 inner-actions">
+                            <label for="select-currency">{intl l="Currency"}</label>
+                            <select id="select-currency" class="form-control" name="{$name}">
+                                <option>
+                                    {intl l="Choose currency"}
+                                </option>
+                                {loop type="currency" name="currency-select"}
+                                    <option value="{$ID}">
+                                        {$SYMBOL}
                                     </option>
                                 {/loop}
                             </select>
@@ -181,6 +194,7 @@
                                             <form class="ajax-form" id="add-form-product-{$ID}" action="/admin/module/googleshopping/add/{$ID}" method="post">
                                                 <input class="product_account" type="hidden" name="account">
                                                 <input class="product_country" type="hidden" name="country">
+                                                <input class="product_currency" type="hidden" name="currency">
                                                 <input type="hidden" name="lang" value="{$langId}">
                                                 <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
                                                 <button class="btn btn-default btn-primary btn-sm form-control"
@@ -191,6 +205,7 @@
                                             <form class="ajax-form" id="delete-form-product-{$ID}" action="/admin/module/googleshopping/delete/{$ID}" method="post" style="display: none">
                                                 <input class="product_account" type="hidden" name="account">
                                                 <input class="product_country" type="hidden" name="country">
+                                                <input class="product_currency" type="hidden" name="currency">
                                                 <input type="hidden" name="lang" value="{$langId}">
                                                 <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
                                                 <button class="btn btn-default btn-danger btn-sm form-control" type="submit">{intl l="Delete"}</button>
@@ -243,16 +258,22 @@
     <script>
         $("#select-account").change(function (event) {
             var countryId = $("#select-account option:selected").data("country");
+            var currencyId = $("#select-account option:selected").data("currency");
             var accountId = $(this).val();
             $('#select-country option[value="'+countryId+'"]').prop('selected', true);
+            $('#select-currency option[value="'+currencyId+'"]').prop('selected', true);
+
             $(".product_account").each(function(){
                 $(this).val(accountId);
             });
             $(".product_country").each(function(){
                 $(this).val(countryId);
             });
-            $("#product-category").show();
+            $(".product_currency").each(function(){
+                $(this).val(currencyId);
+            });
 
+            $("#product-category").show();
 
             searchGoogleProducts();
         });

@@ -37,6 +37,26 @@ class MerchantAccountForm extends BaseForm
                 'label_attr' => array(
                     'for' => 'default_country_id'
                 )
+            ))
+            ->add("default_currency_id", "text", array(
+                'label' => Translator::getInstance()->trans(
+                    'Default currency',
+                    array(),
+                    GoogleShopping::DOMAIN_NAME
+                ),
+                'label_attr' => array(
+                    'for' => 'default_currency_id'
+                )
+            ))
+            ->add("is_default", "text", array(
+                'label' => Translator::getInstance()->trans(
+                    'Is default',
+                    array(),
+                    GoogleShopping::DOMAIN_NAME
+                ),
+                'label_attr' => array(
+                    'for' => 'is_default'
+                )
             ));
     }
     
