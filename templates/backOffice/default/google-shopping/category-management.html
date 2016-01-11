@@ -69,7 +69,7 @@
                                     {intl l="Choose merchant account"}
                                 </option>
                                 {loop type="googleshopping.merchant.account" name="googleshopping.merchant.account"}
-                                    <option value="{$MERCHANT_ID}" data-country="{$DEFAULT_COUNTRY_ID}" data-currency="{$DEFAULT_CURRENCY_ID}">
+                                    <option value="{$MERCHANT_ID}" {if $MERCHANT_ID === $merchantId}selected{/if} data-country="{$DEFAULT_COUNTRY_ID}" data-currency="{$DEFAULT_CURRENCY_ID}">
                                         {$MERCHANT_ID}
                                     </option>
                                 {/loop}
@@ -82,7 +82,7 @@
                                     {intl l="Choose target country"}
                                 </option>
                                 {loop type="country" name="country-select"}
-                                    <option value="{$ID}">
+                                    <option value="{$ID}" {if $ID === $countryId}selected{/if}>
                                         {$TITLE}
                                     </option>
                                 {/loop}
@@ -95,7 +95,7 @@
                                     {intl l="Choose currency"}
                                 </option>
                                 {loop type="currency" name="currency-select"}
-                                    <option value="{$ID}">
+                                    <option value="{$ID}" {if $ID === $currencyId}selected{/if}>
                                         {$SYMBOL}
                                     </option>
                                 {/loop}
@@ -165,12 +165,12 @@
                                         </button>
                                     </th>
                                     <th class="text-center">
-                                        {intl l="Synchronisation"}
+                                        {intl l="Google info"}
                                     </th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {loop type="googleshopping.product" name="googleshopping_product" category_id={$categoryId} locale={$edit_language_locale} country={$smarty.get.target_country} product_order=$smarty.get.product_order}
+                                {loop type="googleshopping.product" name="googleshopping_product" category_id={$categoryId} locale={$edit_language_locale} product_order=$smarty.get.product_order}
                                 {$SYNC_ENABLE = false}
                                     <tr class="tr-product" data-product="{$ID}" id="tr-product-{$ID}">
                                         <td>{$ID}</td>
@@ -180,7 +180,7 @@
                                         <td id="td-gtin-product-{$ID}">{if $VALID_EAN === false}
                                                 {intl l="Error At least one GTIN is empty."}
                                                 <br/>
-                                                <input class="check-gtin check-gtin-{$categoryId}" data-id="{$ID}" type="checkbox" name="gtin"/>
+                                                <input class="check-gtin" data-id="{$ID}" type="checkbox" name="gtin"/>
                                                 {intl l="This product don't have GTIN."}
                                             {else}
                                                 {intl l="GTIN ok"}
@@ -192,9 +192,9 @@
                                         </td>
                                         <td class="text-center td-product-{$ID} td-not-exist-{$ID}">
                                             <form class="ajax-form" id="add-form-product-{$ID}" action="/admin/module/googleshopping/add/{$ID}" method="post">
-                                                <input class="product_account" type="hidden" name="account">
-                                                <input class="product_country" type="hidden" name="country">
-                                                <input class="product_currency" type="hidden" name="currency">
+                                                <input class="product_account" type="hidden" name="account" value="{$merchantId}">
+                                                <input class="product_country" type="hidden" name="country" value="{$countryId}">
+                                                <input class="product_currency" type="hidden" name="currency" value="{$currencyId}">
                                                 <input type="hidden" name="lang" value="{$langId}">
                                                 <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
                                                 <button class="btn btn-default btn-primary btn-sm form-control"
@@ -203,29 +203,16 @@
                                                 </button>
                                             </form>
                                             <form class="ajax-form" id="delete-form-product-{$ID}" action="/admin/module/googleshopping/delete/{$ID}" method="post" style="display: none">
-                                                <input class="product_account" type="hidden" name="account">
-                                                <input class="product_country" type="hidden" name="country">
-                                                <input class="product_currency" type="hidden" name="currency">
+                                                <input class="product_account" type="hidden" name="account" value="{$merchantId}">
+                                                <input class="product_country" type="hidden" name="country" value="{$countryId}">
+                                                <input class="product_currency" type="hidden" name="currency" value="{$currencyId}">
                                                 <input type="hidden" name="lang" value="{$langId}">
                                                 <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
                                                 <button class="btn btn-default btn-danger btn-sm form-control" type="submit">{intl l="Delete"}</button>
                                             </form>
                                         </td>
-                                        <td class="text-center">
-                                            <div class="switch-small sync-switch" readonly="true" data-on="success" data-off="danger"
-                                                 data-product="{$ID}" data-lang="{$langId}"
-                                                 data-country="{$smarty.get.target_country}"
-                                                 data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>"
-                                                 data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
-
-                                                {loop type="googleshopping.product.sync" name="googleshopping_product_sync" product_id={$ID} country={$smarty.get.target_country} locale={$edit_language_locale} }
-                                                {if $ENABLE}
-                                                    {$SYNC_ENABLE = true}
-                                                {/if}
-                                                {/loop}
-
-                                                <input type="checkbox" disabled readonly name="sync" value="true" {if $SYNC_ENABLE === true}checked{/if}/>
-                                            </div>
+                                        <td class="text-center" id="info-{$ID}">
+                                            {intl l="Not sended"}
                                         </td>
                                     </tr>
                                 {/loop}
@@ -234,7 +221,7 @@
                         {/ifloop}
                         {elseloop rel="googleshopping_product"}
                             <div class="panel-body panel-warning">
-                                <div class="panel-heading js-hash-product-category-{$categoryId}">
+                                <div class="panel-heading js-hash-product-category">
                                     <p>{intl l="Warning : No one products have this category on default category"}</p>
                                 </div>
                             </div>
@@ -256,6 +243,9 @@
         <script src='{$asset_url}'></script>
     {/javascripts}
     <script>
+        $("#product-category").show();
+        batchStatusProducts();
+
         $("#select-account").change(function (event) {
             var countryId = $("#select-account option:selected").data("country");
             var currencyId = $("#select-account option:selected").data("currency");
@@ -275,7 +265,7 @@
 
             $("#product-category").show();
 
-            searchGoogleProducts();
+            batchStatusProducts();
         });
 
         $("#select-country").change(function (event) {
@@ -284,7 +274,7 @@
                 $(this).val(countryId);
             });
 
-            searchGoogleProducts();
+            batchStatusProducts();
         });
 
         $("#select-currency").change(function (event) {
@@ -293,7 +283,7 @@
                 $(this).val(currencyId);
             });
 
-            searchGoogleProducts();
+            batchStatusProducts();
         });
 
         $(".ajax-form").submit(function (event) {
@@ -316,13 +306,12 @@
         });
 
         $(".check-all-gtin").click(function (event) {
-            var catId = $(this).data("category");
             if (this.checked) {
-                $('.check-gtin-' + catId).each(function () {
+                $('.check-gtin').each(function () {
                     this.checked = true;
                 });
             } else {
-                $('.check-gtin-' + catId).each(function () {
+                $('.check-gtin').each(function () {
                     this.checked = false;
                 });
             }
@@ -338,13 +327,12 @@
         });
 
         $(".check-all-product").click(function (event) {
-            var catId = $(this).data("category");
             if (this.checked) {
-                $('.check-product-' + catId).each(function () {
+                $('.check-product').each(function () {
                     this.checked = true;
                 });
             } else {
-                $('.check-product-' + catId).each(function () {
+                $('.check-product').each(function () {
                     this.checked = false;
                 });
             }
@@ -369,51 +357,41 @@
             });
         });
 
-        function searchGoogleProducts() {
-            $(".tr-product").each(function () {
-                var productId = $(this).data("product");
-                var form = $("#add-form-product-" + productId);
-                var tr = $(this);
-                var url = "{url path="/admin/module/googleshopping/get/"}" + productId;
+        function batchStatusProducts() {
+            var merchantId = $("#select-account option:selected").val();
+            var categoryId = {$categoryId}
+            var langId = {$langId};
+            var countryId = $("#select-country option:selected").val();
 
-                $.ajax({
-                    url: url,
-                    method: 'GET',
-                    data: form.serialize()
-                }).done(function (data) {
-                    if (data.id) {
-                        tr.addClass("success");
-
-                        if (data.identifier == false) {
-                            $("#td-gtin-product-" + productId).html("{intl l="Product no GTIN"}");
-                            $("#gtin-product-" + productId).val("on");
-                        }
-
-                        $("#delete-form-product-" + productId).show().addClass("col-md-6");
-                        $("#add-form-product-" + productId).children("button").html("{intl l="Update"}");
-                        $("#add-form-product-" + productId).addClass("col-md-6");
-
-                        $("#td-exist-" + productId).show();
-                    }
-                })
+            $.ajax({
+                url: '{url path="/admin/module/googleshopping/get/status/"}'+merchantId+'/'+categoryId+'/'+langId+'/'+countryId,
+                method: 'GET',
+                data: ''
+            }).done(function(data){
+                $.each(data['approvedProducts'], function(key, productId) {
+                    updateProductLine(productId, 'success', 'Ok');
+                });
+                $.each(data['disapprovedProducts'], function(key, productId) {
+                    updateProductLine(productId, 'danger', 'Error with google');
+                });
             });
         }
 
-        $(".sync-switch").bootstrapSwitch();
+        function updateProductLine(productId, statusClass, message) {
+            var tr = $("#tr-product-"+productId);
+            var deleteForm = $("#delete-form-product-" + productId);
+            var addForm = $("#add-form-product-" + productId);
 
-        $(".sync-switch").on("switch-change", function (e, data) {
-            var productId = $(this).data("product");
-            var form = $("#add-form-product-" + productId);
-            var url = "{url path="/admin/module/googleshopping/toggle/sync/"}" + productId;
-            $('body').append('<div class="modal-backdrop fade in" id="loading-event"><div class="loading"></div></div>');
-            $.ajax({
-                url: url,
-                type: form.attr('method'),
-                data: form.serialize()
-            }).done(function (data) {
-                $("#loading-event").remove();
-            })
-        });
+            tr.addClass(statusClass);
+            $("#info-"+productId).html(message);
+
+            deleteForm.show().addClass("col-md-6");
+            addForm.children("button").html("{intl l="Update"}");
+            addForm.addClass("col-md-6");
+
+            $("#td-exist-" + productId).show();
+
+        }
     </script>
 {/block}
 

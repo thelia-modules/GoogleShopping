@@ -68,6 +68,14 @@
         <requirement key="id">\d+</requirement>
     </route>
 
+    <route id="googleshopping.get.status.product." path="/admin/module/googleshopping/get/status/{merchantId}/{categoryId}/{langId}/{targetCountryId}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\ProductController::statusBatch</default>
+        <requirement key="merchantId">\d+</requirement>
+        <requirement key="categoryId">\d+</requirement>
+        <requirement key="langId">\d+</requirement>
+        <requirement key="targetCountryId">\d+</requirement>
+    </route>
+
     <route id="googleshopping.add.product" path="/admin/module/googleshopping/add/{id}" methods="POST">
         <default key="_controller">GoogleShopping\Controller\Admin\ProductController::addProduct</default>
         <requirement key="id">\d+</requirement>
@@ -77,7 +85,7 @@
         <default key="_controller">GoogleShopping\Controller\Admin\ProductController::addProducts</default>
     </route>
 
-    <route id="googleshopping.delete.product" path="/admin/module/googleshopping/delete/{id}" methods="GET">
+    <route id="googleshopping.delete.product" path="/admin/module/googleshopping/delete/{id}" methods="POST">
         <default key="_controller">GoogleShopping\Controller\Admin\ProductController::deleteProduct</default>
         <requirement key="id">\d+</requirement>
     </route>

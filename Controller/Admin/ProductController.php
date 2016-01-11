@@ -27,6 +27,7 @@ use Thelia\Model\LangQuery;
 use Thelia\Model\Module;
 use Thelia\Model\ModuleQuery;
 use Thelia\Model\OrderPostage;
+use Thelia\Model\Product;
 use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsQuery;
@@ -36,26 +37,31 @@ class ProductController extends BaseGoogleShoppingController
 {
     protected $googleShoppingHandler;
 
+    /** Todo Remove this function replaced by statusBatch()*/
     public function getGoogleProduct($id)
     {
         $query = $this->getRequest()->query;
         $merchantId = $query->get('account');
 
-        if ($query->get('target_country')) {
-            $targetCountry = $query->get('target_country');
+        $targetCountry = CountryQuery::create()->findOneById($query->get('country'));
+
+        if ($targetCountry) {
+            $isoAlpha2 = $targetCountry->getIsoalpha2();
         } else {
-            $targetCountry = Country::getDefaultCountry()->getIsoalpha2();
+            $isoAlpha2 = Country::getDefaultCountry()->getIsoalpha2();
         }
 
-        if ($query->get('lang')) {
-            $lang = LangQuery::create()->findOneById($query->get('lang'))->getCode();
+        $lang = LangQuery::create()->findOneById($query->get('lang'));
+
+        if ($lang) {
+            $langCode = $lang->getCode();
         } else {
-            $lang = Lang::getDefaultLanguage()->getCode();
+            $langCode = Lang::getDefaultLanguage()->getCode();
         }
 
         $productSaleElements = ProductSaleElementsQuery::create()->findOneByProductId($id);
 
-        $googleProductId = "online:".$lang.":".$targetCountry.":".$productSaleElements->getId();
+        $googleProductId = "online:".$langCode.":".$isoAlpha2.":".$productSaleElements->getId();
 
         try {
             $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
@@ -68,6 +74,90 @@ class ProductController extends BaseGoogleShoppingController
         } catch (\Exception $e) {
             return new JsonResponse();
         }
+    }
+
+    public function statusBatch($merchantId, $categoryId, $langId, $targetCountryId)
+    {
+        $products = ProductQuery::create()
+                ->useProductCategoryQuery()
+                    ->filterByCategoryId($categoryId)
+                    ->filterByDefaultCategory(true)
+                ->endUse()
+            ->find();
+
+        $targetCountry = CountryQuery::create()->findOneById($targetCountryId);
+
+        if ($targetCountry) {
+            $isoAlpha2 = $targetCountry->getIsoalpha2();
+        } else {
+            $isoAlpha2 = Country::getDefaultCountry()->getIsoalpha2();
+        }
+
+        $lang = LangQuery::create()->findOneById($langId);
+
+        if ($lang) {
+            $langCode = $lang->getCode();
+        } else {
+            $langCode = Lang::getDefaultLanguage()->getCode();
+        }
+
+        $i = 0;
+        $entries = [];
+
+        /** @var Product $product */
+        foreach ($products as $product) {
+            $i++;
+            $pse = $product->getDefaultSaleElements();
+
+            $googleProductId = "online:".$langCode.":".$isoAlpha2.":".$pse->getId();
+
+            $entry =  [
+                'batchId' => $product->getId(),
+                'merchantId' => $merchantId,
+                'method' => 'get',
+                'productId' => $googleProductId
+            ];
+
+            $entries[] = $entry;
+        }
+
+        $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
+        $client = $googleShoppingHandler->createGoogleClient();
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+        $statusesRequest = new \Google_Service_ShoppingContent_ProductstatusesCustomBatchRequest();
+        $statusesRequest->setEntries($entries);
+
+        $params['fields'] = 'entries(batchId, productStatus/destinationStatuses/approvalStatus)';
+        $googleStatuses = $googleShoppingService->productstatuses->custombatch($statusesRequest, $params);
+        $simpleResponse = $googleStatuses->toSimpleObject();
+
+        $disapprovedEntries = [];
+        $approvedEntries = [];
+
+        foreach ($simpleResponse->entries as $responseEntry) {
+            if (isset($responseEntry['productStatus'])) {
+                $isApproved = true;
+                foreach ($responseEntry['productStatus']['destinationStatuses'] as $destinationStatus) {
+                    if ($destinationStatus['approvalStatus'] === 'disapproved') {
+                        $isApproved = false;
+                    }
+                }
+
+                if ($isApproved === true) {
+                    $approvedEntries[] = $responseEntry['batchId'];
+                } else {
+                    $disapprovedEntries[] = $responseEntry['batchId'];
+                }
+            }
+        }
+
+        $responseArray = [
+            "approvedProducts" => $approvedEntries,
+            "disapprovedProducts" => $disapprovedEntries
+        ];
+
+        return new JsonResponse($responseArray);
     }
 
     public function addProduct($id)
@@ -126,7 +216,7 @@ class ProductController extends BaseGoogleShoppingController
             $googleProductEvent->setMerchantId($merchantId)
                 ->setCurrency($currency);
 
-            $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT, $googleProductEvent);
+            $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT, $googleProductEvent);
 
             $googleAccountId = GoogleshoppingAccountQuery::create()
                 ->findOneByMerchantId($merchantId);
@@ -153,16 +243,23 @@ class ProductController extends BaseGoogleShoppingController
         }
     }
 
+    public function batchProducts()
+    {
+
+    }
+
     public function deleteProduct($id)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
             return $response;
         }
 
+        $request = $this->getRequest()->request;
+
         //Init google client
         $client = $this->createGoogleClient();
         $googleShoppingService = new \Google_Service_ShoppingContent($client);
-        $merchantId = $this->getRequest()->request->get('account');
+        $merchantId = $request->get('account');
 
         //If the authorisation is not set yet or has expired
         if (false === $this->checkGoogleAuth()) {
@@ -170,16 +267,20 @@ class ProductController extends BaseGoogleShoppingController
             return $this->generateRedirect('/googleshopping/oauth2callback');
         }
 
-        if ($this->getRequest()->request->get('target_country')) {
-            $targetCountry = CountryQuery::create()->findOneByIsoalpha2($this->getRequest()->get('target_country'));
+        $targetCountry = CountryQuery::create()->findOneById($request->get('country'));
+
+        if ($targetCountry) {
+            $isoAlpha2 = $targetCountry->getIsoalpha2();
         } else {
-            $targetCountry = Country::getDefaultCountry();
+            $isoAlpha2 = Country::getDefaultCountry()->getIsoalpha2();
         }
 
-        if ($this->getRequest()->query->get('lang')) {
-            $lang = LangQuery::create()->findOneByLocale($this->getRequest()->request->get('lang'));
+        $lang = LangQuery::create()->findOneById($request->get('lang'));
+
+        if ($lang) {
+            $langCode = $lang->getCode();
         } else {
-            $lang = Lang::getDefaultLanguage();
+            $langCode = Lang::getDefaultLanguage()->getCode();
         }
 
         $product = ProductQuery::create()

@@ -3,6 +3,8 @@
 
 namespace GoogleShopping\EventListener;
 
+use GoogleShopping\Event\GoogleProductBatchEvent;
+use GoogleShopping\Event\GoogleProductBtachEvent;
 use GoogleShopping\Event\GoogleProductEvent;
 use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
@@ -52,7 +54,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
      * @param GoogleProductEvent $event
      * @throws \Exception if category association is missing
      */
-    public function addGoogleProduct(GoogleProductEvent $event)
+    public function createGoogleProduct(GoogleProductEvent $event)
     {
         $product = $event->getProduct();
 
@@ -120,13 +122,14 @@ class GoogleProductEventListener implements EventSubscriberInterface
 
         //If a productSaleElements is passed to event only send him
         if ($event->getProductSaleElements() !== null) {
-            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PSE, $event);
+            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE, $event);
         //Else dispatch all the pse of the product
         } else {
             /** @var ProductSaleElements $productSaleElement */
             foreach ($productSaleElementss as $productSaleElements) {
                 $event->setProductSaleElements($productSaleElements);
-                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PSE, $event);
+                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE, $event);
+                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
             }
         }
     }
@@ -137,7 +140,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
      * @param GoogleProductEvent $event
      * @throws \Exception if a GTIN is not valid
      */
-    public function addGoogleProductFromPse(GoogleProductEvent $event)
+    public function createGooglePse(GoogleProductEvent $event)
     {
         $googleProduct = new \Google_Service_ShoppingContent_Product();
 
@@ -277,7 +280,6 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $googleProduct->setShipping($googleShippings);
 
         $event->setGoogleProduct($googleProduct);
-        $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
     }
 
 
@@ -288,6 +290,13 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $service = $event->getGoogleShoppingService();
 
         $service->products->insert($event->getMerchantId(), $product);
+    }
+
+    public function batchGoogleProduct(GoogleProductBatchEvent $event)
+    {
+        $service = $event->getGoogleShoppingService();
+
+        $service->products->custombatch($event->getCustomBatchRequest());
     }
 
     public function deleteGoogleProduct(GoogleProductEvent $event)
@@ -361,9 +370,10 @@ class GoogleProductEventListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT => ["addGoogleProduct", 128],
-            GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PSE => ["addGoogleProductFromPse", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT => ["createGoogleProduct", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE => ["createGooglePse", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_SEND => ["sendGoogleProduct", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_BATCH => ["batchGoogleProduct", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE => ["deleteGoogleProduct", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC => ["toggleProductSync", 128],
             GoogleShoppingEvents::GOOGLE_SYNC_CATALOG => ["syncCatalog", 128],
