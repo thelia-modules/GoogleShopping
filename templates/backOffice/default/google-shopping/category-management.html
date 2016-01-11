@@ -140,7 +140,7 @@
                                         request_parameter_name='product_order'
                                         label={intl l='GTIN'}
                                         }
-                                        <input class="check-all-gtin" data-category="{$categoryId}" type="checkbox"/>
+                                        {*<input class="check-all-gtin" data-category="{$categoryId}" type="checkbox"/>*}
                                     </th>
 
                                     <th class="object-title">
@@ -180,8 +180,8 @@
                                         <td id="td-gtin-product-{$ID}">{if $VALID_EAN === false}
                                                 {intl l="Error At least one GTIN is empty."}
                                                 <br/>
-                                                <input class="check-gtin" data-id="{$ID}" type="checkbox" name="gtin"/>
-                                                {intl l="This product don't have GTIN."}
+                                                {*<input class="check-gtin" data-id="{$ID}" type="checkbox" name="gtin"/>*}
+                                                {*{intl l="This product don't have GTIN."}*}
                                             {else}
                                                 {intl l="GTIN ok"}
                                             {/if}
@@ -349,17 +349,19 @@
                     data: form.serialize()
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     $(".td-product-" + productId).remove();
-                    $("#tr-product-" + productId).addClass("danger").append("<td colspan='2'>" + jqXHR.responseText + "</td>");
+                    $("#tr-product-" + productId).addClass("danger");
+                    $("#info-"+productId).html(jqXHR.responseText);
                 }).done(function (data) {
                     $(".td-product-" + productId).remove();
-                    $("#tr-product-" + productId).addClass("success").append("<td colspan='2'>{intl l="Product add with success"}</td>");
+                    $("#info-"+productId).html('Product add with success');
+                    $("#tr-product-" + productId).addClass("success");
                 })
             });
         });
 
         function batchStatusProducts() {
             var merchantId = $("#select-account option:selected").val();
-            var categoryId = {$categoryId}
+            var categoryId = {$categoryId};
             var langId = {$langId};
             var countryId = $("#select-country option:selected").val();
 
