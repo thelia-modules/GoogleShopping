@@ -4,7 +4,6 @@
 namespace GoogleShopping\EventListener;
 
 use GoogleShopping\Event\GoogleProductBatchEvent;
-use GoogleShopping\Event\GoogleProductBtachEvent;
 use GoogleShopping\Event\GoogleProductEvent;
 use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
@@ -228,6 +227,18 @@ class GoogleProductEventListener implements EventSubscriberInterface
             $googleProduct->setIdentifierExists(false); //Product don't have GTIN
         }
 
+        $productLink = $product->getUrl();
+        $imageLink = $event->getImagePath();
+
+        if ($lang->getUrl() !== null) {
+            $productUrlPath = parse_url($productLink, PHP_URL_PATH);
+
+            $imageUrlPath = parse_url($imageLink, PHP_URL_PATH);
+
+            $productLink = $lang->getUrl().$productUrlPath;
+            $imageLink = $lang->getUrl().$imageUrlPath;
+        }
+
         $googleProduct->setChannel('online');
         $googleProduct->setContentLanguage($lang->getCode()); //Lang of product
         $googleProduct->setOfferId($productSaleElements->getId()); //Unique identifier (one by pse)
@@ -235,11 +246,11 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $googleProduct->setBrand($brand->getTitle());
         $googleProduct->setGoogleProductCategory($event->getGoogleCategory()->getGoogleCategory()); //The associated google category from google taxonomy
         $googleProduct->setCondition('new'); // "new", "refurbished" or "used"
-        $googleProduct->setLink($product->getUrl()); //Link to the product
+        $googleProduct->setLink($productLink); //Link to the product
         $googleProduct->setTitle($product->getTitle());
         $googleProduct->setAvailability($availability); //"in stock", "out of stock" or "preorder"
         $googleProduct->setDescription($product->getDescription());
-        $googleProduct->setImageLink($event->getImagePath()); //Link to the product image
+        $googleProduct->setImageLink($imageLink); //Link to the product image
         $googleProduct->setProductType($product->getTitle()); //Product category in store
 
         //Set price
