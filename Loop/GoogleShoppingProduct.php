@@ -2,19 +2,23 @@
 
 namespace GoogleShopping\Loop;
 
+use GoogleShopping\GoogleShopping;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Collection\ObjectCollection;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
 use Thelia\Core\Template\Element\PropelSearchLoopInterface;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
+use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\CategoryQuery;
 use Thelia\Model\Product;
 use Thelia\Model\ProductQuery;
+use Thelia\Model\ProductSaleElements;
 use Thelia\Type;
 use Thelia\Type\TypeCollection;
 
@@ -95,22 +99,51 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         return $query;
     }
 
+    protected function checkEan(Product $product, $colorAttributeId, $sizeAttributeId)
+    {
+        $isCombination = false;
+
+        $defaultPse = $product->getDefaultSaleElements();
+
+        $combinationAttribute = $colorAttributeId.','.$sizeAttributeId;
+        if (null !== $combinationAttribute) {
+            $combination = AttributeAvQuery::create()
+                ->useAttributeCombinationQuery()
+                ->filterByAttributeId(explode(',', $combinationAttribute), Criteria::IN)
+                ->filterByProductSaleElementsId($defaultPse->getId())
+                ->endUse()
+                ->findOne();
+            if (null !== $combination) {
+                 $isCombination = true;
+            }
+        }
+
+        if (false === $isCombination) {
+            if (null === $defaultPse->getEanCode()){
+                return false;
+            }
+        } else {
+            $productSaleElementss = $product->getProductSaleElementss();
+            foreach ($productSaleElementss as $productSaleElements) {
+                if (null === $productSaleElements->getEanCode()){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public function eanSortedParseResults(LoopResult $loopResult, $sort)
     {
         $eanArray = [];
         $notEanArray = [];
+
+        $colorAttributeId = GoogleShopping::getConfigValue('attribute_color');
+        $sizeAttributeId = GoogleShopping::getConfigValue('attribute_size');
         /** @var Product $product */
         foreach ($loopResult->getResultDataCollection() as $product) {
-            $checkEan = "";
 
-            $productSaleElements = $product->getProductSaleElementss();
-            foreach ($productSaleElements as $productSaleElement) {
-                $ean = $productSaleElement->getEanCode();
-
-                if (!$ean) {
-                    $checkEan = false;
-                }
-            }
+            $checkEan = $this->checkEan($product, $colorAttributeId, $sizeAttributeId);
 
             $isCategoryAssociated = GoogleshoppingTaxonomyQuery::create()
                 ->findOneByTheliaCategoryId($product->getDefaultCategoryId()) !== null ? true : false;
@@ -153,18 +186,13 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
 
     public function normalParseResults(LoopResult $loopResult)
     {
+        $colorAttributeId = GoogleShopping::getConfigValue('attribute_color');
+        $sizeAttributeId = GoogleShopping::getConfigValue('attribute_size');
+
         /** @var Product $product */
         foreach ($loopResult->getResultDataCollection() as $product) {
-            $checkEan = "";
 
-            $productSaleElements = $product->getProductSaleElementss();
-            foreach ($productSaleElements as $productSaleElement) {
-                $ean = $productSaleElement->getEanCode();
-
-                if (!$ean) {
-                    $checkEan = false;
-                }
-            }
+            $checkEan = $this->checkEan($product, $colorAttributeId, $sizeAttributeId);
 
             $isCategoryAssociated = GoogleshoppingTaxonomyQuery::create()
                 ->findOneByTheliaCategoryId($product->getDefaultCategoryId()) !== null ? true : false;
