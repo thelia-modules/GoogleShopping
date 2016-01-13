@@ -312,12 +312,45 @@ class GoogleProductEventListener implements EventSubscriberInterface
 
     public function deleteGoogleProduct(GoogleProductEvent $event)
     {
+        $product = $event->getProduct();
+
+        $checkCombination = false;
+
+        $productSaleElementss = ProductSaleElementsQuery::create()
+            ->filterByProductId($product->getId())
+            ->find();
+
+        //Manage multiple pse for one product
+        if ($productSaleElementss->count() > 1) {
+            $checkCombination = $this->googleShoppingHandler->checkCombination($productSaleElementss);
+        }
+
+        if (true === $checkCombination) {
+            foreach ($productSaleElementss as $productSaleElements) {
+                $googleProductEvent = new GoogleProductEvent($product, $productSaleElements, $event->getGoogleShoppingService());
+                $googleProductEvent->setTargetCountry($event->getTargetCountry());
+                $googleProductEvent->setLang($event->getLang());
+                $googleProductEvent->setMerchantId($event->getMerchantId());
+                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE, $googleProductEvent);
+            }
+        } else {
+            $productSaleElements = $product->getDefaultSaleElements();
+            $googleProductEvent = new GoogleProductEvent($product, $productSaleElements, $event->getGoogleShoppingService());
+            $googleProductEvent->setTargetCountry($event->getTargetCountry());
+            $googleProductEvent->setLang($event->getLang());
+            $googleProductEvent->setMerchantId($event->getMerchantId());
+            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE, $googleProductEvent);
+        }
+    }
+
+    public function deleteGooglePse(GoogleProductEvent $event)
+    {
         $service = $event->getGoogleShoppingService();
 
         $googleProductId = "online:".$event->getLang()->getCode().":".$event->getTargetCountry()->getIsoalpha2().":".$event->getProductSaleElements()->getId();
 
         $service->products->delete(
-            GoogleShopping::getConfigValue('merchant_id'),
+            $event->getMerchantId(),
             $googleProductId
         );
     }
@@ -385,7 +418,8 @@ class GoogleProductEventListener implements EventSubscriberInterface
             GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE => ["createGooglePse", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_SEND => ["sendGoogleProduct", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_BATCH => ["batchGoogleProduct", 128],
-            GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE => ["deleteGoogleProduct", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PRODUCT => ["deleteGoogleProduct", 128],
+            GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE => ["deleteGooglePse", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC => ["toggleProductSync", 128],
             GoogleShoppingEvents::GOOGLE_SYNC_CATALOG => ["syncCatalog", 128],
         ];

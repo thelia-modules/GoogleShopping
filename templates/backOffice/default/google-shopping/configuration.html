@@ -162,7 +162,7 @@
                                             </div>
                                         {/form}
                                         {loop type="googleshopping.merchant.account" name="googleshopping.merchant.account"}
-                                            <div class="row">
+                                            <div id="account_{$MERCHANT_ID}" class="row">
                                                 {form name="googleshopping.merchant.account"}
 
                                                         <form class="ajax-form" method="post" action='{url path="/admin/module/googleshopping/merchant/account/update/{$ID}"}'>
@@ -211,7 +211,7 @@
                                                         </form>
                                                 {/form}
                                                 {form name="googleshopping.merchant.account"}
-                                                    <form class="ajax-form" method="post" action='{url path="/admin/module/googleshopping/merchant/account/delete/{$ID}"}'>
+                                                    <form class="ajax-form" data-delete="account_{$MERCHANT_ID}" method="post" action='{url path="/admin/module/googleshopping/merchant/account/delete/{$ID}"}'>
                                                         {form_hidden_fields form=$form}
                                                         {form_field form=$form field="merchant_id"}
                                                                 <input type="hidden"
@@ -371,12 +371,12 @@
                                                         <th>{intl l="Thelia category Id"}</th>
                                                         <th>{intl l="Thelia category Title"}</th>
                                                         <th>{intl l="Associated Google category"}</th>
-                                                        <th>{intl l="Action"}</th>
+                                                        <th class="text-center">{intl l="Action"}</th>
                                                     </tr>
                                                     </thead>
                                                 {/if}
                                                     <tbody>
-                                                    <tr>
+                                                    <tr id="tr_category_{$THELIA_CATEGORY_ID}">
                                                         <td>
                                                             {$THELIA_CATEGORY_ID}
                                                         </td>
@@ -386,8 +386,18 @@
                                                         <td>
                                                             {$GOOGLE_CATEGORY}
                                                         </td>
-                                                        <td>
-                                                            <a href="{url path="/admin/module/GoogleShopping/category/management/%id/%lang_id" id=$THELIA_CATEGORY_ID lang_id=$edit_language_id}">{intl l="Manage product"}</a>
+                                                        <td class="text-right">
+                                                            <div class="btn-group" role="group">
+                                                                <a class="btn btn-primary" href="{url path="/admin/module/GoogleShopping/category/management/%id/%lang_id" id=$THELIA_CATEGORY_ID lang_id=$edit_language_id}"><span class="glyphicon glyphicon-transfer"></span> {intl l="Manage Catalog"}</a>
+                                                                <form class="btn-group ajax-form" data-delete="tr_category_{$THELIA_CATEGORY_ID}" method="post" action='{url path="/admin/modules/googleshopping/taxonomy/delete"}'>
+                                                                    <input type="hidden" name="category_id" value="{$THELIA_CATEGORY_ID}"/>
+                                                                    <input type="hidden" name="lang_id" value="{$edit_language_id}"/>
+                                                                    <button class="btn btn-danger" type="submit">
+                                                                        <span class="glyphicon glyphicon-trash"></span>
+                                                                        {intl l="Delete association"}
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                     </tbody>

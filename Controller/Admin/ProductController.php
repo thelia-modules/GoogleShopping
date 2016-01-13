@@ -234,7 +234,7 @@ class ProductController extends BaseGoogleShoppingController
 
             $con->commit();
 
-            return JsonResponse::create(json_encode(["message" => "Success"]), 200);
+            return JsonResponse::create(["message" => "Success"], 200);
 
         } catch (\Exception $e) {
             $con->rollBack();
@@ -254,59 +254,46 @@ class ProductController extends BaseGoogleShoppingController
             return $response;
         }
 
-        $request = $this->getRequest()->request;
+        try {
+            $request = $this->getRequest()->request;
 
-        //Init google client
-        $client = $this->createGoogleClient();
-        $googleShoppingService = new \Google_Service_ShoppingContent($client);
-        $merchantId = $request->get('account');
+            $eventArgs = [];
+            //Get local and lang by admin config flag selected
+            $eventArgs['lang'] = LangQuery::create()->findOneById($request->get("lang"));
+            $eventArgs['targetCountry'] = CountryQuery::create()->findOneById($request->get('country'));
+            $merchantId = $request->get('account');
 
-        //If the authorisation is not set yet or has expired
-        if (false === $this->checkGoogleAuth()) {
-            $this->getSession()->set('google_action_url', "/admin/module/googleshopping/delete/$id");
-            return $this->generateRedirect('/googleshopping/oauth2callback');
-        }
-
-        $targetCountry = CountryQuery::create()->findOneById($request->get('country'));
-
-        if ($targetCountry) {
-            $isoAlpha2 = $targetCountry->getIsoalpha2();
-        } else {
-            $isoAlpha2 = Country::getDefaultCountry()->getIsoalpha2();
-        }
-
-        $lang = LangQuery::create()->findOneById($request->get('lang'));
-
-        if ($lang) {
-            $langCode = $lang->getCode();
-        } else {
-            $langCode = Lang::getDefaultLanguage()->getCode();
-        }
-
-        $product = ProductQuery::create()
-            ->findPk($id);
-        $productSaleElements = ProductSaleElementsQuery::create()
-            ->findByProductId($id);
-
-        $errors = [];
-
-        foreach ($productSaleElements as $productSaleElement) {
-            try {
-                $googleProductEvent = new GoogleProductEvent($product, $productSaleElement, $googleShoppingService);
-                $googleProductEvent->setTargetCountry($targetCountry);
-                $googleProductEvent->setLang($lang);
-                $googleProductEvent->setMerchantId($merchantId);
-                $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE, $googleProductEvent);
-            } catch (\Exception $e) {
-                $errors[] = $productSaleElement->getId()." : ".$e->getMessage();
+            if (!$eventArgs['targetCountry']) {
+                $eventArgs['targetCountry'] = Country::getDefaultCountry();
             }
-        }
 
-        if (!empty($errors)) {
-            return JsonResponse::create($errors, 400);
-        }
+            //If the authorisation is not set yet or has expired
+            if (false === $this->checkGoogleAuth()) {
+                $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
+                return $this->generateRedirect('/googleshopping/oauth2callback');
+            }
 
-        return JsonResponse::create("Success", 200);
+            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
+
+            //Init google client
+            $client = $googleShoppingHandler->createGoogleClient();
+            $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+            //Get the product
+            $theliaProduct = ProductQuery::create()
+                ->joinWithI18n($eventArgs['lang']->getLocale())
+                ->findOneById($id);
+
+            /** @var ProductSaleElements $productSaleElement */
+            $googleProductEvent = new GoogleProductEvent($theliaProduct, null, $googleShoppingService, $eventArgs);
+            $googleProductEvent->setMerchantId($merchantId);
+
+            $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PRODUCT, $googleProductEvent);
+            return JsonResponse::create(["message" => "Success"], 200);
+
+        } catch (\Exception $e) {
+            return JsonResponse::create($e->getMessage(), 500);
+        }
     }
 
     public function toggleProductSync($id)

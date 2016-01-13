@@ -16,7 +16,7 @@
                 <form action="{url path='/googleshopping/oauth2callback'}" method="get">
                     <input type="hidden" name="redirect" value="{url path={navigate to="current"}}"/>
                     <button class="btn btn-default btn-primary form-control" type="submit">
-                        <span class="glyphicon glyphicon-check"></span>
+                        <span class="glyphicon glyphicon-ok"></span>
                         {intl l="Authorize"}
                     </button>
                 </form>
@@ -29,7 +29,7 @@
                 <form action="{url path='/googleshopping/oauth2callback'}" method="get">
                     <input type="hidden" name="redirect" value="{url path={navigate to="current"}}"/>
                     <button class="btn btn-default btn-primary form-control" type="submit">
-                        <span class="glyphicon glyphicon-check"></span>
+                        <span class="glyphicon glyphicon-refresh"></span>
                         {intl l="Refresh"}
                     </button>
                 </form>
@@ -158,11 +158,14 @@
                                         <input class="check-all-product" data-category="{$categoryId}" type="checkbox"/>
                                     </th>
                                     <th class="text-center">
-                                        <button class="send-checked btn btn-default btn-success btn-sm form-control"
-                                                data-category="{$categoryId}"
-                                                class="btn btn-default btn-success btn-xs form-control" type="submit">
-                                            {intl l="Send checked"}
-                                        </button>
+                                        <div class="btn-group">
+                                            <button class="send-checked btn btn-success" data-category="{$categoryId}" type="submit">
+                                                {intl l="Send checked"}
+                                            </button>
+                                            <button class="delete-checked btn btn-danger" data-category="{$categoryId}" type="submit">
+                                                {intl l="Delete checked"}
+                                            </button>
+                                        </div>
                                     </th>
                                     <th class="text-center">
                                         {intl l="Google info"}
@@ -191,25 +194,25 @@
                                             <input class="check-product" type="checkbox" data-product="{$ID}" name="products[{$ID}][checkbox]"/>
                                         </td>
                                         <td class="text-center td-product-{$ID} td-not-exist-{$ID}">
-                                            <form class="ajax-form" id="add-form-product-{$ID}" action="/admin/module/googleshopping/add/{$ID}" method="post">
-                                                <input class="product_account" type="hidden" name="account" value="{$merchantId}">
-                                                <input class="product_country" type="hidden" name="country" value="{$countryId}">
-                                                <input class="product_currency" type="hidden" name="currency" value="{$currencyId}">
-                                                <input type="hidden" name="lang" value="{$langId}">
-                                                <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
-                                                <button class="btn btn-default btn-primary btn-sm form-control"
-                                                        type="submit">
-                                                    {intl l="Send"}
-                                                </button>
-                                            </form>
-                                            <form class="ajax-form" id="delete-form-product-{$ID}" action="/admin/module/googleshopping/delete/{$ID}" method="post" style="display: none">
-                                                <input class="product_account" type="hidden" name="account" value="{$merchantId}">
-                                                <input class="product_country" type="hidden" name="country" value="{$countryId}">
-                                                <input class="product_currency" type="hidden" name="currency" value="{$currencyId}">
-                                                <input type="hidden" name="lang" value="{$langId}">
-                                                <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
-                                                <button class="btn btn-default btn-danger btn-sm form-control" type="submit">{intl l="Delete"}</button>
-                                            </form>
+                                            <div class="btn-group" role="group">
+                                                <form class="ajax-form btn-group" id="add-form-product-{$ID}" action="/admin/module/googleshopping/add/{$ID}" method="post">
+                                                    <input class="product_account" type="hidden" name="account" value="{$merchantId}">
+                                                    <input class="product_country" type="hidden" name="country" value="{$countryId}">
+                                                    <input class="product_currency" type="hidden" name="currency" value="{$currencyId}">
+                                                    <input type="hidden" name="lang" value="{$langId}">
+                                                    <input type="hidden" name="gtin" id="gtin-product-{$ID}"/>
+                                                    <button class="btn btn-primary btn-block"
+                                                            type="submit">
+                                                        {intl l="Send"}
+                                                    </button>
+                                                </form>
+                                                <form data-active="false" class="ajax-form btn-group" id="delete-form-product-{$ID}" action="/admin/module/googleshopping/delete/{$ID}" method="post" style="display: none">
+                                                    <input class="product_account" type="hidden" name="account" value="{$merchantId}">
+                                                    <input class="product_country" type="hidden" name="country" value="{$countryId}">
+                                                    <input type="hidden" name="lang" value="{$langId}">
+                                                    <button class="btn btn-danger" type="submit">{intl l="Delete"}</button>
+                                                </form>
+                                            </div>
                                         </td>
                                         <td class="text-center" id="info-{$ID}">
                                             {intl l="Not sended"}
@@ -359,6 +362,30 @@
             });
         });
 
+        $(".delete-checked").click(function (event) {
+            $('.check-product:checked').each(function () {
+                var productId = $(this).data("product");
+                $(".td-product-" + productId + ":first").html('<span class="loading" style="margin:auto"></span>');
+                var form = $("#delete-form-product-" + productId);
+
+                if (form.data('active') != "false") {
+                    $.ajax({
+                        url: form.attr('action'),
+                        type: form.attr('method'),
+                        data: form.serialize()
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        $(".td-product-" + productId).remove();
+                        $("#tr-product-" + productId).addClass("danger");
+                        $("#info-"+productId).html(jqXHR.responseText);
+                    }).done(function (data) {
+                        $(".td-product-" + productId).remove();
+                        $("#info-"+productId).html('Product add with success');
+                        $("#tr-product-" + productId).addClass("success");
+                    })
+                }
+            });
+        });
+
         function batchStatusProducts() {
             var merchantId = $("#select-account option:selected").val();
             var categoryId = {$categoryId};
@@ -387,9 +414,8 @@
             tr.addClass(statusClass);
             $("#info-"+productId).html(message);
 
-            deleteForm.show().addClass("col-md-6");
+            deleteForm.show().attr("data-active", "true");
             addForm.children("button").html("{intl l="Update"}");
-            addForm.addClass("col-md-6");
 
             $("#td-exist-" + productId).show();
 

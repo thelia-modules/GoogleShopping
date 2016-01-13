@@ -77,4 +77,24 @@ class CategoryController extends BaseAdminController
         );
     }
 
+    public function deleteTaxonomy()
+    {
+        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
+            return $response;
+        }
+
+        $categoryId = $this->getRequest()->request->get('category_id');
+        $langId = $this->getRequest()->request->get('lang_id');
+
+        $taxonomy = GoogleshoppingTaxonomyQuery::create()
+            ->filterByTheliaCategoryId($categoryId)
+            ->filterByLangId($langId)
+            ->findOne();
+
+        if (null !== $taxonomy) {
+            $taxonomy->delete();
+        }
+
+        return new JsonResponse(["message" => "Category association deleted with success !"], 200);
+    }
 }

@@ -38,6 +38,11 @@
             }).done(function(data){
                 $("#alert").html('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+data.message+'</div>');
                 btn.removeClass('disabled').html(btnHtml);
+
+                if (deleteId = form.data('delete')) {
+                    $("#"+deleteId).remove();
+                }
+
             }).fail(function(jqXHR, textStatus ){
                 $("#alert").html('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+jqXHR.responseText+'</div>');
                 btn.removeClass('disabled').html(btnHtml);

@@ -142,7 +142,7 @@ class ConfigurationController extends BaseAdminController
                 ->setIsDefault($isDefault)
                 ->save();
 
-            return new JsonResponse(json_encode(["message" => "Account added with succes !"]), 200);
+            return new JsonResponse(["message" => "Account added with success !"], 200);
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
@@ -184,7 +184,7 @@ class ConfigurationController extends BaseAdminController
                     ->save();
             }
 
-            return new JsonResponse(["message" => "Account updated with succes !"], 200);
+            return new JsonResponse(["message" => "Account updated with success !"], 200);
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
@@ -209,7 +209,7 @@ class ConfigurationController extends BaseAdminController
                 $googleShoppingAccount->delete();
             }
 
-            return new JsonResponse("", 200);
+            return new JsonResponse(["message" => "Account deleted with success !"], 200);
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);

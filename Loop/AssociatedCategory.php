@@ -29,36 +29,6 @@ class AssociatedCategory extends BaseI18nLoop implements PropelSearchLoopInterfa
         );
     }
 
-    public function buildModelCriteriaOld()
-    {
-        $query = GoogleshoppingTaxonomyQuery::create();
-
-        if ($this->getCategoryId()) {
-            $query->filterByTheliaCategoryId($this->getCategoryId());
-        }
-
-        $categoryJoin = new Join();
-        $categoryJoin->addExplicitCondition(
-            GoogleshoppingTaxonomyTableMap::TABLE_NAME,
-            'THELIA_CATEGORY_ID',
-            null,
-            CategoryTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-
-        $categoryJoin->setJoinType(Criteria::JOIN);
-
-        $query->addJoinObject($categoryJoin);
-
-        $this->configureI18nProcessing($query, array('TITLE'));
-
-
-        $query->filterByLangId($this->getLangId());
-
-        return $query;
-    }
-
     public function buildModelCriteria()
     {
         $query = CategoryQuery::create();

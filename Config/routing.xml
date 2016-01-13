@@ -42,6 +42,10 @@
         <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::associateTaxonomy</default>
     </route>
 
+    <route id="googleshopping.taxonomy.delete" path="/admin/modules/googleshopping/taxonomy/delete" methods="POST">
+        <default key="_controller">GoogleShopping\Controller\Admin\CategoryController::deleteTaxonomy</default>
+    </route>
+
     <!--AUTHENTIFICATION-->
     <route id="googleshopping.callback" path="/googleshopping/oauth2callback" methods="GET">
         <default key="_controller">GoogleShopping\Controller\Admin\BaseGoogleShoppingController::setAuthorization</default>
