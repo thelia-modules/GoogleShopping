@@ -25,6 +25,7 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         return new ArgumentCollection(
             Argument::createIntTypeArgument('category_id'),
             Argument::createIntTypeArgument('product_id'),
+            Argument::createBooleanTypeArgument('visible', false),
             Argument::createAnyTypeArgument('locale', 'en_US'),
             new Argument(
                 'product_order',
@@ -51,6 +52,10 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
 
         $query = ProductQuery::create()
             ->joinWithI18n($this->getLocale());
+
+        if (true === $this->getVisible()){
+            $query->filterByVisible(true);
+        }
 
         if ($categoryId) {
             $query->useProductCategoryQuery()

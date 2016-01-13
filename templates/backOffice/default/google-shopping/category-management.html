@@ -170,7 +170,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {loop type="googleshopping.product" name="googleshopping_product" category_id={$categoryId} locale={$edit_language_locale} product_order=$smarty.get.product_order}
+                                {loop type="googleshopping.product" name="googleshopping_product" visible="true" category_id={$categoryId} locale={$edit_language_locale} product_order=$smarty.get.product_order}
                                 {$SYNC_ENABLE = false}
                                     <tr class="tr-product" data-product="{$ID}" id="tr-product-{$ID}">
                                         <td>{$ID}</td>
