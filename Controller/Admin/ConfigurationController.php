@@ -13,6 +13,7 @@ use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
+use Thelia\Model\ProductCategoryQuery;
 
 class ConfigurationController extends BaseAdminController
 {
@@ -22,10 +23,18 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
+        $notEmptyCategory = ProductCategoryQuery::create()
+            ->filterByDefaultCategory(1)
+            ->select('category_id')
+            ->groupBy('category_id')
+            ->find()
+            ->toArray();
+
         return $this->render(
             "google-shopping/configuration",
             array(
-                "sync_secret" => GoogleShopping::getConfigValue('sync_secret')
+                "sync_secret" => GoogleShopping::getConfigValue('sync_secret'),
+                "not_empty_category" => implode(',', $notEmptyCategory)
             )
         );
     }

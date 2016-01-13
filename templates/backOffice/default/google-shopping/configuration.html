@@ -321,7 +321,7 @@
                                                                 <label for="thelia-category">{intl l="Thelia category"}</label>
                                                                 <select id="thelia-category" class="form-control"
                                                                         name="{$name}">
-                                                                    {loop type="category" name="thelia-category"}
+                                                                    {loop type="category" id=$not_empty_category order="alpha" name="thelia-category"}
                                                                         <option value="{$ID}">{$TITLE}</option>
                                                                     {/loop}
                                                                 </select>
