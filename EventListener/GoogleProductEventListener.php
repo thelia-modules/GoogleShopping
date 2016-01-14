@@ -407,7 +407,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
             $eventArgs['lang'] = $lang;
 
             $googleProductEvent = new GoogleProductEvent($product, null, $googleShoppingService, $eventArgs);
-            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_ADD_PRODUCT, $googleProductEvent);
+            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT, $googleProductEvent);
         }
     }
 
