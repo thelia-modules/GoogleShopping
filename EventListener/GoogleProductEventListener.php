@@ -260,7 +260,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $taxCalculator->load($product, $event->getTargetCountry());
 
         $price = new \Google_Service_ShoppingContent_Price();
-        $productPrice = $productSaleElements->getPromo() === 0 ? $psePrice->getPrice() : $psePrice->getPromoPrice();
+        $productPrice = $productSaleElements->getPromo() == 0 ? $psePrice->getPrice() : $psePrice->getPromoPrice();
         $currencyProductPrice = $productPrice * $currency->getRate();
         $price->setValue($taxCalculator->getTaxedPrice($currencyProductPrice));
 
