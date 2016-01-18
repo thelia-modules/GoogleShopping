@@ -5,22 +5,15 @@
     <fullnamespace>GoogleShopping\GoogleShopping</fullnamespace>
     <descriptive locale="en_US">
         <title>GoogleShopping</title>
-        <!--
-        <subtitle></subtitle>
-        <description></description>
-        <postscriptum></postscriptum>
-        -->
     </descriptive>
     <descriptive locale="fr_FR">
         <title>GoogleShopping</title>
     </descriptive>
-    <!-- <logo></logo> -->
-    <!--<images-folder>images</images-folder>-->
     <languages>
         <language>en_US</language>
         <language>fr_FR</language>
     </languages>
-    <version>0.8</version>
+    <version>0.9</version>
     <author>
         <name>Vincent Lopes-Vicente</name>
         <email>vlopes@openstudio.fr</email>
