@@ -18,7 +18,6 @@ use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Thelia\Install\Database;
-use Thelia\Model\ModuleConfigQuery;
 use Thelia\Model\ModuleQuery;
 use Thelia\Module\BaseModule;
 
@@ -70,7 +69,7 @@ class GoogleShopping extends BaseModule
         }
     }
 
-    public function update($currentVersion, $newVersion, ConnectionInterface $con)
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
     {
         if (file_exists(__DIR__ . "/Config/Update/$newVersion.sql")) {
             $database = new Database($con);
