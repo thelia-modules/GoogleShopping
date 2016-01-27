@@ -52,32 +52,33 @@
             <div class="panel panel-default">
                 <div class="panel-heading js-hash-product-category-{$categoryId}">
                     <h4 class="panel-title">
-                        {intl l="Choose merchant account and country before export :"}
+                        {intl l="Choose configuration before export :"}
                     </h4>
 
                     <div class="row inner-toolbar{if $page_bottom} inner-toolbar-bottom{/if}">
                         <div class="col-md-3 inner-actions">
-                            {loop name="lang_list" type="lang" id=$langId}
-                                <label for="lang">{intl l="Current language of exportation"}</label>
-                                <input id="lang" class="form-control" type="text" readonly value="{$TITLE}">
-                            {/loop}
-                        </div>
-                        <div class="col-md-3 inner-actions">
-                            <label for="select-account">{intl l="Merchant account"}</label>
-                            <select id="select-account" class="form-control" name="{$name}">
-                                <option>
-                                    {intl l="Choose merchant account"}
-                                </option>
-                                {loop type="googleshopping.merchant.account" name="googleshopping.merchant.account"}
-                                    <option value="{$MERCHANT_ID}" {if $MERCHANT_ID === $merchantId}selected{/if} data-country="{$DEFAULT_COUNTRY_ID}" data-currency="{$DEFAULT_CURRENCY_ID}">
-                                        {$MERCHANT_ID}
+                            <label for="select-configuration">{intl l="Configuration"}</label>
+                            <select id="select-configuration" class="form-control" name="{$name}">
+                                {loop type="googleshopping.configuration" name="googleshopping.configuration"}
+                                    <option value="{$ID}" {if $ID === $configId}selected{/if}>
+                                        {$TITLE}
                                     </option>
                                 {/loop}
                             </select>
                         </div>
-                        <div class="col-md-3 inner-actions">
+                        <div class="col-md-2 inner-actions">
+                            <label for="account">{intl l="Merchant account"}</label>
+                            <input id="account" class="form-control" type="text" readonly value="{$merchantId}">
+                        </div>
+                        <div class="col-md-2 inner-actions">
+                            {loop name="lang" type="lang" id=$langId}
+                                <label for="lang">{intl l="Current language of exportation"}</label>
+                                <input id="lang" class="form-control" type="text" readonly value="{$TITLE}">
+                            {/loop}
+                        </div>
+                        <div class="col-md-2 inner-actions">
                             <label for="select-country">{intl l="Target country"}</label>
-                            <select id="select-country" class="form-control" name="{$name}">
+                            <select id="select-country" disabled class="form-control" name="{$name}">
                                 <option>
                                     {intl l="Choose target country"}
                                 </option>
@@ -88,9 +89,9 @@
                                 {/loop}
                             </select>
                         </div>
-                        <div class="col-md-3 inner-actions">
+                        <div class="col-md-2 inner-actions">
                             <label for="select-currency">{intl l="Currency"}</label>
-                            <select id="select-currency" class="form-control" name="{$name}">
+                            <select id="select-currency" disabled class="form-control" name="{$name}">
                                 <option>
                                     {intl l="Choose currency"}
                                 </option>
@@ -249,26 +250,8 @@
         $("#product-category").show();
         batchStatusProducts();
 
-        $("#select-account").change(function (event) {
-            var countryId = $("#select-account option:selected").data("country");
-            var currencyId = $("#select-account option:selected").data("currency");
-            var accountId = $(this).val();
-            $('#select-country option[value="'+countryId+'"]').prop('selected', true);
-            $('#select-currency option[value="'+currencyId+'"]').prop('selected', true);
-
-            $(".product_account").each(function(){
-                $(this).val(accountId);
-            });
-            $(".product_country").each(function(){
-                $(this).val(countryId);
-            });
-            $(".product_currency").each(function(){
-                $(this).val(currencyId);
-            });
-
-            $("#product-category").show();
-
-            batchStatusProducts();
+        $("#select-configuration").change(function (event) {
+            window.location.href = '{url path="/admin/module/GoogleShopping/category/management/%categoryId/" categoryId=$categoryId}'+$(this).val();
         });
 
         $("#select-country").change(function (event) {
@@ -386,13 +369,13 @@
         });
 
         function batchStatusProducts() {
-            var merchantId = $("#select-account option:selected").val();
+            var merchantId = {$merchantId};
             var categoryId = {$categoryId};
             var langId = {$langId};
-            var countryId = $("#select-country option:selected").val();
+            var countryId = {$countryId};
 
             $.ajax({
-                url: '{url path="/admin/module/googleshopping/get/status/"}'+merchantId+'/'+categoryId+'/'+langId+'/'+countryId,
+                url: '{url path="/admin/module/googleshopping/get/status/%merchantId/%categoryId/%langId/%countryId" merchantId=$merchantId categoryId=$categoryId langId=$langId countryId=$countryId}',
                 method: 'GET',
                 data: ''
             }).done(function(data){

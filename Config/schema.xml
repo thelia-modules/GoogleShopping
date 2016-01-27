@@ -13,33 +13,29 @@
         </foreign-key>
     </table>
 
-    <table name="googleshopping_product_synchronisation">
-        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
-        <column name="product_id" type="INTEGER" required="true"/>
-        <column name="target_country" type="VARCHAR" required="true"/>
-        <column name="lang" type="VARCHAR" required="true"/>
-        <column name="sync_enable" type="BOOLEAN"/>
-        <column name="googleshopping_account_id" type="INTEGER" required="true"/>
-        <foreign-key foreignTable="product" name="fk_googleshopping_product_synchronisation_product_id" onDelete="CASCADE" onUpdate="RESTRICT">
-            <reference foreign="id" local="product_id" />
+    <table name="googleshopping_configuration">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <column name="title" size="255" type="VARCHAR" />
+        <column name="merchant_id" type="VARCHAR" size="255" required="true"/>
+        <column name="lang_id" type="INTEGER" />
+        <column name="country_id" type="INTEGER" />
+        <column name="currency_id" type="INTEGER" />
+        <column name="is_default" type="BOOLEAN"/>
+        <column name="sync" type="BOOLEAN"/>
+        <foreign-key foreignTable="lang" name="fk_googleshopping_configuration_lang_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="lang_id" />
         </foreign-key>
-        <foreign-key foreignTable="googleshopping_account" name="fk_googleshopping_prod_sync_googleshopping_account_id" onDelete="CASCADE" onUpdate="RESTRICT">
-            <reference foreign="id" local="googleshopping_account_id" />
+        <foreign-key foreignTable="country" name="fk_googleshopping_configuration_country_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="country_id" />
+        </foreign-key>
+        <foreign-key foreignTable="currency" name="fk_googleshopping_configuration_id" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="currency_id" />
         </foreign-key>
     </table>
 
-    <table name="googleshopping_account">
-        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
-        <column name="merchant_id" type="VARCHAR" size="255" required="true"/>
-        <column name="default_country_id" type="INTEGER" />
-        <column name="default_currency_id" type="INTEGER" />
-        <column name="is_default" type="BOOLEAN"/>
-        <foreign-key foreignTable="country" name="fk_googleshopping_account_country_id" onDelete="CASCADE" onUpdate="RESTRICT">
-            <reference foreign="id" local="default_country_id" />
-        </foreign-key>
-        <foreign-key foreignTable="currency" name="fk_googleshopping_account_currency_id" onDelete="CASCADE" onUpdate="RESTRICT">
-            <reference foreign="id" local="default_currency_id" />
-        </foreign-key>
+    <table name="googleshopping_product_sync_queue">
+        <column name="product_sale_elements_id" type="INTEGER"/>
+        <behavior name="timestampable" />
     </table>
 
     <external-schema filename="local/config/schema.xml" referenceOnly="true" />

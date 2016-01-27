@@ -125,7 +125,7 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         } else {
             $productSaleElementss = $product->getProductSaleElementss();
             foreach ($productSaleElementss as $productSaleElements) {
-                if (null === $productSaleElements->getEanCode()){
+                if (null == $productSaleElements->getEanCode()){
                     return false;
                 }
             }

@@ -9,6 +9,8 @@ use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
 use GoogleShopping\Model\GoogleshoppingAccount;
 use GoogleShopping\Model\GoogleshoppingAccountQuery;
+use GoogleShopping\Model\GoogleshoppingConfiguration;
+use GoogleShopping\Model\GoogleshoppingConfigurationQuery;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\AccessManager;
@@ -114,19 +116,24 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $form = $this->createForm("googleshopping.merchant.account");
+        $form = $this->createForm("googleshopping.configuration");
 
         try {
             $data = $this->validateForm($form, 'POST')->getData();
 
-            $googleShoppingAccount = GoogleshoppingAccountQuery::create()
-                ->filterByMerchantId($data['merchant_id'])
-                ->findOneOrCreate();
+            $googleShoppingConfiguration = new GoogleshoppingConfiguration();
+
+            $googleShoppingConfiguration->setTitle($data['title'])
+                ->setMerchantId($data['merchant_id'])
+                ->setLangId($data['lang_id'])
+                ->setCountryId($data['country_id'])
+                ->setCurrencyId($data['currency_id']);
 
             $isDefault = boolval($data['is_default']);
+            $synchronisation = boolval($data['sync']);
 
             if (true === $isDefault) {
-                $defaultAccounts = GoogleshoppingAccountQuery::create()
+                $defaultAccounts = GoogleshoppingConfigurationQuery::create()
                     ->filterByIsDefault(true)
                     ->find();
                 /** @var GoogleshoppingAccount $defaultAccount */
@@ -136,13 +143,10 @@ class ConfigurationController extends BaseAdminController
                 }
             }
 
-            $googleShoppingAccount
-                ->setDefaultCountryId($data['default_country_id'])
-                ->setDefaultCurrencyId($data['default_currency_id'])
-                ->setIsDefault($isDefault)
+            $googleShoppingConfiguration->setIsDefault($isDefault)
+                ->setSync($synchronisation)
                 ->save();
-
-            return new JsonResponse(["message" => "Account added with success !"], 200);
+            return new JsonResponse(["message" => "Configuration added with success !"], 200);
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
@@ -155,18 +159,19 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $form = $this->createForm("googleshopping.merchant.account");
+        $form = $this->createForm("googleshopping.configuration");
 
         try {
             $data = $this->validateForm($form, 'POST')->getData();
 
-            $googleShoppingAccount = GoogleshoppingAccountQuery::create()
+            $googleShoppingConfiguration = GoogleshoppingConfigurationQuery::create()
                 ->findOneById($id);
 
             $isDefault = boolval($data['is_default']);
+            $synchronisation = boolval($data['sync']);
 
             if (true === $isDefault) {
-                $defaultAccounts = GoogleshoppingAccountQuery::create()
+                $defaultAccounts = GoogleshoppingConfigurationQuery::create()
                     ->filterByIsDefault(true)
                     ->find();
                 /** @var GoogleshoppingAccount $defaultAccount */
@@ -176,15 +181,18 @@ class ConfigurationController extends BaseAdminController
                 }
             }
 
-            if (null !== $googleShoppingAccount) {
-                $googleShoppingAccount->setMerchantId($data['merchant_id'])
-                    ->setDefaultCountryId($data['default_country_id'])
-                    ->setDefaultCurrencyId($data['default_currency_id'])
+            if (null !== $googleShoppingConfiguration) {
+                $googleShoppingConfiguration->setTitle($data['title'])
+                    ->setMerchantId($data['merchant_id'])
+                    ->setLangId($data['lang_id'])
+                    ->setCountryId($data['country_id'])
+                    ->setCurrencyId($data['currency_id'])
                     ->setIsDefault($isDefault)
+                    ->setSync($synchronisation)
                     ->save();
             }
 
-            return new JsonResponse(["message" => "Account updated with success !"], 200);
+            return new JsonResponse(["message" => "Configuration updated with success !"], 200);
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
@@ -197,19 +205,19 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $form = $this->createForm("googleshopping.merchant.account");
+        $form = $this->createForm("googleshopping.configuration");
 
         try {
             $data = $this->validateForm($form, 'POST')->getData();
 
-            $googleShoppingAccount = GoogleshoppingAccountQuery::create()
+            $googleShoppingConfiguration = GoogleshoppingConfigurationQuery::create()
                 ->findOneById($id);
 
-            if (null !== $googleShoppingAccount) {
-                $googleShoppingAccount->delete();
+            if (null !== $googleShoppingConfiguration) {
+                $googleShoppingConfiguration->delete();
             }
 
-            return new JsonResponse(["message" => "Account deleted with success !"], 200);
+            return new JsonResponse(["message" => "Configuration deleted with success !"], 200);
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
