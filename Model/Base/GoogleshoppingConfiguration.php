@@ -4,33 +4,31 @@ namespace GoogleShopping\Model\Base;
 
 use \Exception;
 use \PDO;
-use GoogleShopping\Model\GoogleshoppingAccount as ChildGoogleshoppingAccount;
-use GoogleShopping\Model\GoogleshoppingAccountQuery as ChildGoogleshoppingAccountQuery;
-use GoogleShopping\Model\GoogleshoppingProductSynchronisation as ChildGoogleshoppingProductSynchronisation;
-use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery as ChildGoogleshoppingProductSynchronisationQuery;
-use GoogleShopping\Model\Map\GoogleshoppingAccountTableMap;
+use GoogleShopping\Model\GoogleshoppingConfigurationQuery as ChildGoogleshoppingConfigurationQuery;
+use GoogleShopping\Model\Map\GoogleshoppingConfigurationTableMap;
 use GoogleShopping\Model\Thelia\Model\Country as ChildCountry;
 use GoogleShopping\Model\Thelia\Model\Currency as ChildCurrency;
+use GoogleShopping\Model\Thelia\Model\Lang as ChildLang;
 use GoogleShopping\Model\Thelia\Model\CountryQuery;
 use GoogleShopping\Model\Thelia\Model\CurrencyQuery;
+use GoogleShopping\Model\Thelia\Model\LangQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
-use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 
-abstract class GoogleshoppingAccount implements ActiveRecordInterface
+abstract class GoogleshoppingConfiguration implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\GoogleShopping\\Model\\Map\\GoogleshoppingAccountTableMap';
+    const TABLE_MAP = '\\GoogleShopping\\Model\\Map\\GoogleshoppingConfigurationTableMap';
 
 
     /**
@@ -66,28 +64,51 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     protected $id;
 
     /**
+     * The value for the title field.
+     * @var        string
+     */
+    protected $title;
+
+    /**
      * The value for the merchant_id field.
      * @var        string
      */
     protected $merchant_id;
 
     /**
-     * The value for the default_country_id field.
+     * The value for the lang_id field.
      * @var        int
      */
-    protected $default_country_id;
+    protected $lang_id;
 
     /**
-     * The value for the default_currency_id field.
+     * The value for the country_id field.
      * @var        int
      */
-    protected $default_currency_id;
+    protected $country_id;
+
+    /**
+     * The value for the currency_id field.
+     * @var        int
+     */
+    protected $currency_id;
 
     /**
      * The value for the is_default field.
      * @var        boolean
      */
     protected $is_default;
+
+    /**
+     * The value for the sync field.
+     * @var        boolean
+     */
+    protected $sync;
+
+    /**
+     * @var        Lang
+     */
+    protected $aLang;
 
     /**
      * @var        Country
@@ -100,12 +121,6 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     protected $aCurrency;
 
     /**
-     * @var        ObjectCollection|ChildGoogleshoppingProductSynchronisation[] Collection to store aggregation of ChildGoogleshoppingProductSynchronisation objects.
-     */
-    protected $collGoogleshoppingProductSynchronisations;
-    protected $collGoogleshoppingProductSynchronisationsPartial;
-
-    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
@@ -114,13 +129,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection
-     */
-    protected $googleshoppingProductSynchronisationsScheduledForDeletion = null;
-
-    /**
-     * Initializes internal state of GoogleShopping\Model\Base\GoogleshoppingAccount object.
+     * Initializes internal state of GoogleShopping\Model\Base\GoogleshoppingConfiguration object.
      */
     public function __construct()
     {
@@ -215,9 +224,9 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>GoogleshoppingAccount</code> instance.  If
-     * <code>obj</code> is an instance of <code>GoogleshoppingAccount</code>, delegates to
-     * <code>equals(GoogleshoppingAccount)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>GoogleshoppingConfiguration</code> instance.  If
+     * <code>obj</code> is an instance of <code>GoogleshoppingConfiguration</code>, delegates to
+     * <code>equals(GoogleshoppingConfiguration)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -300,7 +309,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return GoogleshoppingAccount The current object, for fluid interface
+     * @return GoogleshoppingConfiguration The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -332,7 +341,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      *                       or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param string $data The source data to import from
      *
-     * @return GoogleshoppingAccount The current object, for fluid interface
+     * @return GoogleshoppingConfiguration The current object, for fluid interface
      */
     public function importFrom($parser, $data)
     {
@@ -389,6 +398,17 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     }
 
     /**
+     * Get the [title] column value.
+     *
+     * @return   string
+     */
+    public function getTitle()
+    {
+
+        return $this->title;
+    }
+
+    /**
      * Get the [merchant_id] column value.
      *
      * @return   string
@@ -400,25 +420,36 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     }
 
     /**
-     * Get the [default_country_id] column value.
+     * Get the [lang_id] column value.
      *
      * @return   int
      */
-    public function getDefaultCountryId()
+    public function getLangId()
     {
 
-        return $this->default_country_id;
+        return $this->lang_id;
     }
 
     /**
-     * Get the [default_currency_id] column value.
+     * Get the [country_id] column value.
      *
      * @return   int
      */
-    public function getDefaultCurrencyId()
+    public function getCountryId()
     {
 
-        return $this->default_currency_id;
+        return $this->country_id;
+    }
+
+    /**
+     * Get the [currency_id] column value.
+     *
+     * @return   int
+     */
+    public function getCurrencyId()
+    {
+
+        return $this->currency_id;
     }
 
     /**
@@ -433,10 +464,21 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     }
 
     /**
+     * Get the [sync] column value.
+     *
+     * @return   boolean
+     */
+    public function getSync()
+    {
+
+        return $this->sync;
+    }
+
+    /**
      * Set the value of [id] column.
      *
      * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
      */
     public function setId($v)
     {
@@ -446,7 +488,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
         if ($this->id !== $v) {
             $this->id = $v;
-            $this->modifiedColumns[GoogleshoppingAccountTableMap::ID] = true;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::ID] = true;
         }
 
 
@@ -454,10 +496,31 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     } // setId()
 
     /**
+     * Set the value of [title] column.
+     *
+     * @param      string $v new value
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
+     */
+    public function setTitle($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->title !== $v) {
+            $this->title = $v;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::TITLE] = true;
+        }
+
+
+        return $this;
+    } // setTitle()
+
+    /**
      * Set the value of [merchant_id] column.
      *
      * @param      string $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
      */
     public function setMerchantId($v)
     {
@@ -467,7 +530,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
         if ($this->merchant_id !== $v) {
             $this->merchant_id = $v;
-            $this->modifiedColumns[GoogleshoppingAccountTableMap::MERCHANT_ID] = true;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::MERCHANT_ID] = true;
         }
 
 
@@ -475,20 +538,45 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     } // setMerchantId()
 
     /**
-     * Set the value of [default_country_id] column.
+     * Set the value of [lang_id] column.
      *
      * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
      */
-    public function setDefaultCountryId($v)
+    public function setLangId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->default_country_id !== $v) {
-            $this->default_country_id = $v;
-            $this->modifiedColumns[GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID] = true;
+        if ($this->lang_id !== $v) {
+            $this->lang_id = $v;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::LANG_ID] = true;
+        }
+
+        if ($this->aLang !== null && $this->aLang->getId() !== $v) {
+            $this->aLang = null;
+        }
+
+
+        return $this;
+    } // setLangId()
+
+    /**
+     * Set the value of [country_id] column.
+     *
+     * @param      int $v new value
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
+     */
+    public function setCountryId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->country_id !== $v) {
+            $this->country_id = $v;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::COUNTRY_ID] = true;
         }
 
         if ($this->aCountry !== null && $this->aCountry->getId() !== $v) {
@@ -497,23 +585,23 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
 
         return $this;
-    } // setDefaultCountryId()
+    } // setCountryId()
 
     /**
-     * Set the value of [default_currency_id] column.
+     * Set the value of [currency_id] column.
      *
      * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
      */
-    public function setDefaultCurrencyId($v)
+    public function setCurrencyId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->default_currency_id !== $v) {
-            $this->default_currency_id = $v;
-            $this->modifiedColumns[GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID] = true;
+        if ($this->currency_id !== $v) {
+            $this->currency_id = $v;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::CURRENCY_ID] = true;
         }
 
         if ($this->aCurrency !== null && $this->aCurrency->getId() !== $v) {
@@ -522,7 +610,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
 
         return $this;
-    } // setDefaultCurrencyId()
+    } // setCurrencyId()
 
     /**
      * Sets the value of the [is_default] column.
@@ -532,7 +620,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
      * @param      boolean|integer|string $v The new value
-     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
      */
     public function setIsDefault($v)
     {
@@ -546,12 +634,41 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
         if ($this->is_default !== $v) {
             $this->is_default = $v;
-            $this->modifiedColumns[GoogleshoppingAccountTableMap::IS_DEFAULT] = true;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::IS_DEFAULT] = true;
         }
 
 
         return $this;
     } // setIsDefault()
+
+    /**
+     * Sets the value of the [sync] column.
+     * Non-boolean arguments are converted using the following rules:
+     *   * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     *
+     * @param      boolean|integer|string $v The new value
+     * @return   \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
+     */
+    public function setSync($v)
+    {
+        if ($v !== null) {
+            if (is_string($v)) {
+                $v = in_array(strtolower($v), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+            } else {
+                $v = (boolean) $v;
+            }
+        }
+
+        if ($this->sync !== $v) {
+            $this->sync = $v;
+            $this->modifiedColumns[GoogleshoppingConfigurationTableMap::SYNC] = true;
+        }
+
+
+        return $this;
+    } // setSync()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -590,20 +707,29 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         try {
 
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
             $this->id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('MerchantId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('Title', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->title = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('MerchantId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->merchant_id = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('DefaultCountryId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->default_country_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('LangId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->lang_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('DefaultCurrencyId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->default_currency_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('CountryId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->country_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : GoogleshoppingAccountTableMap::translateFieldName('IsDefault', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('CurrencyId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->currency_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('IsDefault', TableMap::TYPE_PHPNAME, $indexType)];
             $this->is_default = (null !== $col) ? (boolean) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : GoogleshoppingConfigurationTableMap::translateFieldName('Sync', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->sync = (null !== $col) ? (boolean) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -612,10 +738,10 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 5; // 5 = GoogleshoppingAccountTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 8; // 8 = GoogleshoppingConfigurationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingAccount object", 0, $e);
+            throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingConfiguration object", 0, $e);
         }
     }
 
@@ -634,10 +760,13 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aCountry !== null && $this->default_country_id !== $this->aCountry->getId()) {
+        if ($this->aLang !== null && $this->lang_id !== $this->aLang->getId()) {
+            $this->aLang = null;
+        }
+        if ($this->aCountry !== null && $this->country_id !== $this->aCountry->getId()) {
             $this->aCountry = null;
         }
-        if ($this->aCurrency !== null && $this->default_currency_id !== $this->aCurrency->getId()) {
+        if ($this->aCurrency !== null && $this->currency_id !== $this->aCurrency->getId()) {
             $this->aCurrency = null;
         }
     } // ensureConsistency
@@ -663,13 +792,13 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingAccountTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingConfigurationTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildGoogleshoppingAccountQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildGoogleshoppingConfigurationQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -679,10 +808,9 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
+            $this->aLang = null;
             $this->aCountry = null;
             $this->aCurrency = null;
-            $this->collGoogleshoppingProductSynchronisations = null;
-
         } // if (deep)
     }
 
@@ -692,8 +820,8 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see GoogleshoppingAccount::setDeleted()
-     * @see GoogleshoppingAccount::isDeleted()
+     * @see GoogleshoppingConfiguration::setDeleted()
+     * @see GoogleshoppingConfiguration::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -702,12 +830,12 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAccountTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingConfigurationTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
         try {
-            $deleteQuery = ChildGoogleshoppingAccountQuery::create()
+            $deleteQuery = ChildGoogleshoppingConfigurationQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -744,7 +872,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingAccountTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingConfigurationTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
@@ -764,7 +892,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                GoogleshoppingAccountTableMap::addInstanceToPool($this);
+                GoogleshoppingConfigurationTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -799,6 +927,13 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
+            if ($this->aLang !== null) {
+                if ($this->aLang->isModified() || $this->aLang->isNew()) {
+                    $affectedRows += $this->aLang->save($con);
+                }
+                $this->setLang($this->aLang);
+            }
+
             if ($this->aCountry !== null) {
                 if ($this->aCountry->isModified() || $this->aCountry->isNew()) {
                     $affectedRows += $this->aCountry->save($con);
@@ -824,23 +959,6 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                 $this->resetModified();
             }
 
-            if ($this->googleshoppingProductSynchronisationsScheduledForDeletion !== null) {
-                if (!$this->googleshoppingProductSynchronisationsScheduledForDeletion->isEmpty()) {
-                    \GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery::create()
-                        ->filterByPrimaryKeys($this->googleshoppingProductSynchronisationsScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->googleshoppingProductSynchronisationsScheduledForDeletion = null;
-                }
-            }
-
-                if ($this->collGoogleshoppingProductSynchronisations !== null) {
-            foreach ($this->collGoogleshoppingProductSynchronisations as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
-            }
-
             $this->alreadyInSave = false;
 
         }
@@ -861,30 +979,39 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[GoogleshoppingAccountTableMap::ID] = true;
+        $this->modifiedColumns[GoogleshoppingConfigurationTableMap::ID] = true;
         if (null !== $this->id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . GoogleshoppingAccountTableMap::ID . ')');
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . GoogleshoppingConfigurationTableMap::ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::ID)) {
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::ID)) {
             $modifiedColumns[':p' . $index++]  = 'ID';
         }
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::MERCHANT_ID)) {
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::TITLE)) {
+            $modifiedColumns[':p' . $index++]  = 'TITLE';
+        }
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::MERCHANT_ID)) {
             $modifiedColumns[':p' . $index++]  = 'MERCHANT_ID';
         }
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'DEFAULT_COUNTRY_ID';
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::LANG_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'LANG_ID';
         }
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'DEFAULT_CURRENCY_ID';
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::COUNTRY_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'COUNTRY_ID';
         }
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::IS_DEFAULT)) {
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::CURRENCY_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'CURRENCY_ID';
+        }
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::IS_DEFAULT)) {
             $modifiedColumns[':p' . $index++]  = 'IS_DEFAULT';
+        }
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::SYNC)) {
+            $modifiedColumns[':p' . $index++]  = 'SYNC';
         }
 
         $sql = sprintf(
-            'INSERT INTO googleshopping_account (%s) VALUES (%s)',
+            'INSERT INTO googleshopping_configuration (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -896,17 +1023,26 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                     case 'ID':
                         $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
                         break;
+                    case 'TITLE':
+                        $stmt->bindValue($identifier, $this->title, PDO::PARAM_STR);
+                        break;
                     case 'MERCHANT_ID':
                         $stmt->bindValue($identifier, $this->merchant_id, PDO::PARAM_STR);
                         break;
-                    case 'DEFAULT_COUNTRY_ID':
-                        $stmt->bindValue($identifier, $this->default_country_id, PDO::PARAM_INT);
+                    case 'LANG_ID':
+                        $stmt->bindValue($identifier, $this->lang_id, PDO::PARAM_INT);
                         break;
-                    case 'DEFAULT_CURRENCY_ID':
-                        $stmt->bindValue($identifier, $this->default_currency_id, PDO::PARAM_INT);
+                    case 'COUNTRY_ID':
+                        $stmt->bindValue($identifier, $this->country_id, PDO::PARAM_INT);
+                        break;
+                    case 'CURRENCY_ID':
+                        $stmt->bindValue($identifier, $this->currency_id, PDO::PARAM_INT);
                         break;
                     case 'IS_DEFAULT':
                         $stmt->bindValue($identifier, (int) $this->is_default, PDO::PARAM_INT);
+                        break;
+                    case 'SYNC':
+                        $stmt->bindValue($identifier, (int) $this->sync, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -954,7 +1090,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = GoogleshoppingAccountTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GoogleshoppingConfigurationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -974,16 +1110,25 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                 return $this->getId();
                 break;
             case 1:
-                return $this->getMerchantId();
+                return $this->getTitle();
                 break;
             case 2:
-                return $this->getDefaultCountryId();
+                return $this->getMerchantId();
                 break;
             case 3:
-                return $this->getDefaultCurrencyId();
+                return $this->getLangId();
                 break;
             case 4:
+                return $this->getCountryId();
+                break;
+            case 5:
+                return $this->getCurrencyId();
+                break;
+            case 6:
                 return $this->getIsDefault();
+                break;
+            case 7:
+                return $this->getSync();
                 break;
             default:
                 return null;
@@ -1008,17 +1153,20 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
-        if (isset($alreadyDumpedObjects['GoogleshoppingAccount'][$this->getPrimaryKey()])) {
+        if (isset($alreadyDumpedObjects['GoogleshoppingConfiguration'][$this->getPrimaryKey()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['GoogleshoppingAccount'][$this->getPrimaryKey()] = true;
-        $keys = GoogleshoppingAccountTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['GoogleshoppingConfiguration'][$this->getPrimaryKey()] = true;
+        $keys = GoogleshoppingConfigurationTableMap::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getId(),
-            $keys[1] => $this->getMerchantId(),
-            $keys[2] => $this->getDefaultCountryId(),
-            $keys[3] => $this->getDefaultCurrencyId(),
-            $keys[4] => $this->getIsDefault(),
+            $keys[1] => $this->getTitle(),
+            $keys[2] => $this->getMerchantId(),
+            $keys[3] => $this->getLangId(),
+            $keys[4] => $this->getCountryId(),
+            $keys[5] => $this->getCurrencyId(),
+            $keys[6] => $this->getIsDefault(),
+            $keys[7] => $this->getSync(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1026,14 +1174,14 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
+            if (null !== $this->aLang) {
+                $result['Lang'] = $this->aLang->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
             if (null !== $this->aCountry) {
                 $result['Country'] = $this->aCountry->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->aCurrency) {
                 $result['Currency'] = $this->aCurrency->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
-            }
-            if (null !== $this->collGoogleshoppingProductSynchronisations) {
-                $result['GoogleshoppingProductSynchronisations'] = $this->collGoogleshoppingProductSynchronisations->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1053,7 +1201,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = GoogleshoppingAccountTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GoogleshoppingConfigurationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1073,16 +1221,25 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
                 $this->setId($value);
                 break;
             case 1:
-                $this->setMerchantId($value);
+                $this->setTitle($value);
                 break;
             case 2:
-                $this->setDefaultCountryId($value);
+                $this->setMerchantId($value);
                 break;
             case 3:
-                $this->setDefaultCurrencyId($value);
+                $this->setLangId($value);
                 break;
             case 4:
+                $this->setCountryId($value);
+                break;
+            case 5:
+                $this->setCurrencyId($value);
+                break;
+            case 6:
                 $this->setIsDefault($value);
+                break;
+            case 7:
+                $this->setSync($value);
                 break;
         } // switch()
     }
@@ -1106,13 +1263,16 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = GoogleshoppingAccountTableMap::getFieldNames($keyType);
+        $keys = GoogleshoppingConfigurationTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setMerchantId($arr[$keys[1]]);
-        if (array_key_exists($keys[2], $arr)) $this->setDefaultCountryId($arr[$keys[2]]);
-        if (array_key_exists($keys[3], $arr)) $this->setDefaultCurrencyId($arr[$keys[3]]);
-        if (array_key_exists($keys[4], $arr)) $this->setIsDefault($arr[$keys[4]]);
+        if (array_key_exists($keys[1], $arr)) $this->setTitle($arr[$keys[1]]);
+        if (array_key_exists($keys[2], $arr)) $this->setMerchantId($arr[$keys[2]]);
+        if (array_key_exists($keys[3], $arr)) $this->setLangId($arr[$keys[3]]);
+        if (array_key_exists($keys[4], $arr)) $this->setCountryId($arr[$keys[4]]);
+        if (array_key_exists($keys[5], $arr)) $this->setCurrencyId($arr[$keys[5]]);
+        if (array_key_exists($keys[6], $arr)) $this->setIsDefault($arr[$keys[6]]);
+        if (array_key_exists($keys[7], $arr)) $this->setSync($arr[$keys[7]]);
     }
 
     /**
@@ -1122,13 +1282,16 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(GoogleshoppingAccountTableMap::DATABASE_NAME);
+        $criteria = new Criteria(GoogleshoppingConfigurationTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::ID)) $criteria->add(GoogleshoppingAccountTableMap::ID, $this->id);
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::MERCHANT_ID)) $criteria->add(GoogleshoppingAccountTableMap::MERCHANT_ID, $this->merchant_id);
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID)) $criteria->add(GoogleshoppingAccountTableMap::DEFAULT_COUNTRY_ID, $this->default_country_id);
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID)) $criteria->add(GoogleshoppingAccountTableMap::DEFAULT_CURRENCY_ID, $this->default_currency_id);
-        if ($this->isColumnModified(GoogleshoppingAccountTableMap::IS_DEFAULT)) $criteria->add(GoogleshoppingAccountTableMap::IS_DEFAULT, $this->is_default);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::ID)) $criteria->add(GoogleshoppingConfigurationTableMap::ID, $this->id);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::TITLE)) $criteria->add(GoogleshoppingConfigurationTableMap::TITLE, $this->title);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::MERCHANT_ID)) $criteria->add(GoogleshoppingConfigurationTableMap::MERCHANT_ID, $this->merchant_id);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::LANG_ID)) $criteria->add(GoogleshoppingConfigurationTableMap::LANG_ID, $this->lang_id);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::COUNTRY_ID)) $criteria->add(GoogleshoppingConfigurationTableMap::COUNTRY_ID, $this->country_id);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::CURRENCY_ID)) $criteria->add(GoogleshoppingConfigurationTableMap::CURRENCY_ID, $this->currency_id);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::IS_DEFAULT)) $criteria->add(GoogleshoppingConfigurationTableMap::IS_DEFAULT, $this->is_default);
+        if ($this->isColumnModified(GoogleshoppingConfigurationTableMap::SYNC)) $criteria->add(GoogleshoppingConfigurationTableMap::SYNC, $this->sync);
 
         return $criteria;
     }
@@ -1143,8 +1306,8 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = new Criteria(GoogleshoppingAccountTableMap::DATABASE_NAME);
-        $criteria->add(GoogleshoppingAccountTableMap::ID, $this->id);
+        $criteria = new Criteria(GoogleshoppingConfigurationTableMap::DATABASE_NAME);
+        $criteria->add(GoogleshoppingConfigurationTableMap::ID, $this->id);
 
         return $criteria;
     }
@@ -1185,31 +1348,20 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \GoogleShopping\Model\GoogleshoppingAccount (or compatible) type.
+     * @param      object $copyObj An object of \GoogleShopping\Model\GoogleshoppingConfiguration (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
+        $copyObj->setTitle($this->getTitle());
         $copyObj->setMerchantId($this->getMerchantId());
-        $copyObj->setDefaultCountryId($this->getDefaultCountryId());
-        $copyObj->setDefaultCurrencyId($this->getDefaultCurrencyId());
+        $copyObj->setLangId($this->getLangId());
+        $copyObj->setCountryId($this->getCountryId());
+        $copyObj->setCurrencyId($this->getCurrencyId());
         $copyObj->setIsDefault($this->getIsDefault());
-
-        if ($deepCopy) {
-            // important: temporarily setNew(false) because this affects the behavior of
-            // the getter/setter methods for fkey referrer objects.
-            $copyObj->setNew(false);
-
-            foreach ($this->getGoogleshoppingProductSynchronisations() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addGoogleshoppingProductSynchronisation($relObj->copy($deepCopy));
-                }
-            }
-
-        } // if ($deepCopy)
-
+        $copyObj->setSync($this->getSync());
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
@@ -1225,7 +1377,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      * objects.
      *
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return                 \GoogleShopping\Model\GoogleshoppingAccount Clone of current object.
+     * @return                 \GoogleShopping\Model\GoogleshoppingConfiguration Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1239,18 +1391,69 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     }
 
     /**
+     * Declares an association between this object and a ChildLang object.
+     *
+     * @param                  ChildLang $v
+     * @return                 \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setLang(ChildLang $v = null)
+    {
+        if ($v === null) {
+            $this->setLangId(NULL);
+        } else {
+            $this->setLangId($v->getId());
+        }
+
+        $this->aLang = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildLang object, it will not be re-added.
+        if ($v !== null) {
+            $v->addGoogleshoppingConfiguration($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildLang object
+     *
+     * @param      ConnectionInterface $con Optional Connection object.
+     * @return                 ChildLang The associated ChildLang object.
+     * @throws PropelException
+     */
+    public function getLang(ConnectionInterface $con = null)
+    {
+        if ($this->aLang === null && ($this->lang_id !== null)) {
+            $this->aLang = LangQuery::create()->findPk($this->lang_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aLang->addGoogleshoppingConfigurations($this);
+             */
+        }
+
+        return $this->aLang;
+    }
+
+    /**
      * Declares an association between this object and a ChildCountry object.
      *
      * @param                  ChildCountry $v
-     * @return                 \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @return                 \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
      * @throws PropelException
      */
     public function setCountry(ChildCountry $v = null)
     {
         if ($v === null) {
-            $this->setDefaultCountryId(NULL);
+            $this->setCountryId(NULL);
         } else {
-            $this->setDefaultCountryId($v->getId());
+            $this->setCountryId($v->getId());
         }
 
         $this->aCountry = $v;
@@ -1258,7 +1461,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildCountry object, it will not be re-added.
         if ($v !== null) {
-            $v->addGoogleshoppingAccount($this);
+            $v->addGoogleshoppingConfiguration($this);
         }
 
 
@@ -1275,14 +1478,14 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function getCountry(ConnectionInterface $con = null)
     {
-        if ($this->aCountry === null && ($this->default_country_id !== null)) {
-            $this->aCountry = CountryQuery::create()->findPk($this->default_country_id, $con);
+        if ($this->aCountry === null && ($this->country_id !== null)) {
+            $this->aCountry = CountryQuery::create()->findPk($this->country_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aCountry->addGoogleshoppingAccounts($this);
+                $this->aCountry->addGoogleshoppingConfigurations($this);
              */
         }
 
@@ -1293,15 +1496,15 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      * Declares an association between this object and a ChildCurrency object.
      *
      * @param                  ChildCurrency $v
-     * @return                 \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
+     * @return                 \GoogleShopping\Model\GoogleshoppingConfiguration The current object (for fluent API support)
      * @throws PropelException
      */
     public function setCurrency(ChildCurrency $v = null)
     {
         if ($v === null) {
-            $this->setDefaultCurrencyId(NULL);
+            $this->setCurrencyId(NULL);
         } else {
-            $this->setDefaultCurrencyId($v->getId());
+            $this->setCurrencyId($v->getId());
         }
 
         $this->aCurrency = $v;
@@ -1309,7 +1512,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildCurrency object, it will not be re-added.
         if ($v !== null) {
-            $v->addGoogleshoppingAccount($this);
+            $v->addGoogleshoppingConfiguration($this);
         }
 
 
@@ -1326,277 +1529,18 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function getCurrency(ConnectionInterface $con = null)
     {
-        if ($this->aCurrency === null && ($this->default_currency_id !== null)) {
-            $this->aCurrency = CurrencyQuery::create()->findPk($this->default_currency_id, $con);
+        if ($this->aCurrency === null && ($this->currency_id !== null)) {
+            $this->aCurrency = CurrencyQuery::create()->findPk($this->currency_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aCurrency->addGoogleshoppingAccounts($this);
+                $this->aCurrency->addGoogleshoppingConfigurations($this);
              */
         }
 
         return $this->aCurrency;
-    }
-
-
-    /**
-     * Initializes a collection based on the name of a relation.
-     * Avoids crafting an 'init[$relationName]s' method name
-     * that wouldn't work when StandardEnglishPluralizer is used.
-     *
-     * @param      string $relationName The name of the relation to initialize
-     * @return void
-     */
-    public function initRelation($relationName)
-    {
-        if ('GoogleshoppingProductSynchronisation' == $relationName) {
-            return $this->initGoogleshoppingProductSynchronisations();
-        }
-    }
-
-    /**
-     * Clears out the collGoogleshoppingProductSynchronisations collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addGoogleshoppingProductSynchronisations()
-     */
-    public function clearGoogleshoppingProductSynchronisations()
-    {
-        $this->collGoogleshoppingProductSynchronisations = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collGoogleshoppingProductSynchronisations collection loaded partially.
-     */
-    public function resetPartialGoogleshoppingProductSynchronisations($v = true)
-    {
-        $this->collGoogleshoppingProductSynchronisationsPartial = $v;
-    }
-
-    /**
-     * Initializes the collGoogleshoppingProductSynchronisations collection.
-     *
-     * By default this just sets the collGoogleshoppingProductSynchronisations collection to an empty array (like clearcollGoogleshoppingProductSynchronisations());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initGoogleshoppingProductSynchronisations($overrideExisting = true)
-    {
-        if (null !== $this->collGoogleshoppingProductSynchronisations && !$overrideExisting) {
-            return;
-        }
-        $this->collGoogleshoppingProductSynchronisations = new ObjectCollection();
-        $this->collGoogleshoppingProductSynchronisations->setModel('\GoogleShopping\Model\GoogleshoppingProductSynchronisation');
-    }
-
-    /**
-     * Gets an array of ChildGoogleshoppingProductSynchronisation objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildGoogleshoppingAccount is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return Collection|ChildGoogleshoppingProductSynchronisation[] List of ChildGoogleshoppingProductSynchronisation objects
-     * @throws PropelException
-     */
-    public function getGoogleshoppingProductSynchronisations($criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collGoogleshoppingProductSynchronisationsPartial && !$this->isNew();
-        if (null === $this->collGoogleshoppingProductSynchronisations || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collGoogleshoppingProductSynchronisations) {
-                // return empty collection
-                $this->initGoogleshoppingProductSynchronisations();
-            } else {
-                $collGoogleshoppingProductSynchronisations = ChildGoogleshoppingProductSynchronisationQuery::create(null, $criteria)
-                    ->filterByGoogleshoppingAccount($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collGoogleshoppingProductSynchronisationsPartial && count($collGoogleshoppingProductSynchronisations)) {
-                        $this->initGoogleshoppingProductSynchronisations(false);
-
-                        foreach ($collGoogleshoppingProductSynchronisations as $obj) {
-                            if (false == $this->collGoogleshoppingProductSynchronisations->contains($obj)) {
-                                $this->collGoogleshoppingProductSynchronisations->append($obj);
-                            }
-                        }
-
-                        $this->collGoogleshoppingProductSynchronisationsPartial = true;
-                    }
-
-                    reset($collGoogleshoppingProductSynchronisations);
-
-                    return $collGoogleshoppingProductSynchronisations;
-                }
-
-                if ($partial && $this->collGoogleshoppingProductSynchronisations) {
-                    foreach ($this->collGoogleshoppingProductSynchronisations as $obj) {
-                        if ($obj->isNew()) {
-                            $collGoogleshoppingProductSynchronisations[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collGoogleshoppingProductSynchronisations = $collGoogleshoppingProductSynchronisations;
-                $this->collGoogleshoppingProductSynchronisationsPartial = false;
-            }
-        }
-
-        return $this->collGoogleshoppingProductSynchronisations;
-    }
-
-    /**
-     * Sets a collection of GoogleshoppingProductSynchronisation objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $googleshoppingProductSynchronisations A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return   ChildGoogleshoppingAccount The current object (for fluent API support)
-     */
-    public function setGoogleshoppingProductSynchronisations(Collection $googleshoppingProductSynchronisations, ConnectionInterface $con = null)
-    {
-        $googleshoppingProductSynchronisationsToDelete = $this->getGoogleshoppingProductSynchronisations(new Criteria(), $con)->diff($googleshoppingProductSynchronisations);
-
-
-        $this->googleshoppingProductSynchronisationsScheduledForDeletion = $googleshoppingProductSynchronisationsToDelete;
-
-        foreach ($googleshoppingProductSynchronisationsToDelete as $googleshoppingProductSynchronisationRemoved) {
-            $googleshoppingProductSynchronisationRemoved->setGoogleshoppingAccount(null);
-        }
-
-        $this->collGoogleshoppingProductSynchronisations = null;
-        foreach ($googleshoppingProductSynchronisations as $googleshoppingProductSynchronisation) {
-            $this->addGoogleshoppingProductSynchronisation($googleshoppingProductSynchronisation);
-        }
-
-        $this->collGoogleshoppingProductSynchronisations = $googleshoppingProductSynchronisations;
-        $this->collGoogleshoppingProductSynchronisationsPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related GoogleshoppingProductSynchronisation objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related GoogleshoppingProductSynchronisation objects.
-     * @throws PropelException
-     */
-    public function countGoogleshoppingProductSynchronisations(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collGoogleshoppingProductSynchronisationsPartial && !$this->isNew();
-        if (null === $this->collGoogleshoppingProductSynchronisations || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collGoogleshoppingProductSynchronisations) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getGoogleshoppingProductSynchronisations());
-            }
-
-            $query = ChildGoogleshoppingProductSynchronisationQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByGoogleshoppingAccount($this)
-                ->count($con);
-        }
-
-        return count($this->collGoogleshoppingProductSynchronisations);
-    }
-
-    /**
-     * Method called to associate a ChildGoogleshoppingProductSynchronisation object to this object
-     * through the ChildGoogleshoppingProductSynchronisation foreign key attribute.
-     *
-     * @param    ChildGoogleshoppingProductSynchronisation $l ChildGoogleshoppingProductSynchronisation
-     * @return   \GoogleShopping\Model\GoogleshoppingAccount The current object (for fluent API support)
-     */
-    public function addGoogleshoppingProductSynchronisation(ChildGoogleshoppingProductSynchronisation $l)
-    {
-        if ($this->collGoogleshoppingProductSynchronisations === null) {
-            $this->initGoogleshoppingProductSynchronisations();
-            $this->collGoogleshoppingProductSynchronisationsPartial = true;
-        }
-
-        if (!in_array($l, $this->collGoogleshoppingProductSynchronisations->getArrayCopy(), true)) { // only add it if the **same** object is not already associated
-            $this->doAddGoogleshoppingProductSynchronisation($l);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param GoogleshoppingProductSynchronisation $googleshoppingProductSynchronisation The googleshoppingProductSynchronisation object to add.
-     */
-    protected function doAddGoogleshoppingProductSynchronisation($googleshoppingProductSynchronisation)
-    {
-        $this->collGoogleshoppingProductSynchronisations[]= $googleshoppingProductSynchronisation;
-        $googleshoppingProductSynchronisation->setGoogleshoppingAccount($this);
-    }
-
-    /**
-     * @param  GoogleshoppingProductSynchronisation $googleshoppingProductSynchronisation The googleshoppingProductSynchronisation object to remove.
-     * @return ChildGoogleshoppingAccount The current object (for fluent API support)
-     */
-    public function removeGoogleshoppingProductSynchronisation($googleshoppingProductSynchronisation)
-    {
-        if ($this->getGoogleshoppingProductSynchronisations()->contains($googleshoppingProductSynchronisation)) {
-            $this->collGoogleshoppingProductSynchronisations->remove($this->collGoogleshoppingProductSynchronisations->search($googleshoppingProductSynchronisation));
-            if (null === $this->googleshoppingProductSynchronisationsScheduledForDeletion) {
-                $this->googleshoppingProductSynchronisationsScheduledForDeletion = clone $this->collGoogleshoppingProductSynchronisations;
-                $this->googleshoppingProductSynchronisationsScheduledForDeletion->clear();
-            }
-            $this->googleshoppingProductSynchronisationsScheduledForDeletion[]= clone $googleshoppingProductSynchronisation;
-            $googleshoppingProductSynchronisation->setGoogleshoppingAccount(null);
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this GoogleshoppingAccount is new, it will return
-     * an empty collection; or if this GoogleshoppingAccount has previously
-     * been saved, it will retrieve related GoogleshoppingProductSynchronisations from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in GoogleshoppingAccount.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return Collection|ChildGoogleshoppingProductSynchronisation[] List of ChildGoogleshoppingProductSynchronisation objects
-     */
-    public function getGoogleshoppingProductSynchronisationsJoinProduct($criteria = null, $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildGoogleshoppingProductSynchronisationQuery::create(null, $criteria);
-        $query->joinWith('Product', $joinBehavior);
-
-        return $this->getGoogleshoppingProductSynchronisations($query, $con);
     }
 
     /**
@@ -1605,10 +1549,13 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     public function clear()
     {
         $this->id = null;
+        $this->title = null;
         $this->merchant_id = null;
-        $this->default_country_id = null;
-        $this->default_currency_id = null;
+        $this->lang_id = null;
+        $this->country_id = null;
+        $this->currency_id = null;
         $this->is_default = null;
+        $this->sync = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1628,14 +1575,9 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->collGoogleshoppingProductSynchronisations) {
-                foreach ($this->collGoogleshoppingProductSynchronisations as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
         } // if ($deep)
 
-        $this->collGoogleshoppingProductSynchronisations = null;
+        $this->aLang = null;
         $this->aCountry = null;
         $this->aCurrency = null;
     }
@@ -1647,7 +1589,7 @@ abstract class GoogleshoppingAccount implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(GoogleshoppingAccountTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(GoogleshoppingConfigurationTableMap::DEFAULT_STRING_FORMAT);
     }
 
     /**

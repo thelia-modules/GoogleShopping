@@ -52,18 +52,22 @@
     </route>
 
     <!--CATALOG-->
-    <route id="googleshopping.catalog.management.category" path="/admin/module/GoogleShopping/category/management/{id}/{langId}" methods="GET">
+    <route id="googleshopping.catalog.management.category" path="/admin/module/GoogleShopping/category/management/{categoryId}" methods="GET">
         <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::categoryManagementView</default>
-        <requirement key="id">\d+</requirement>
-        <requirement key="langId">\d+</requirement>
+        <requirement key="categoryId">\d+</requirement>
+    </route>
+
+    <route id="googleshopping.catalog.management.category.configuration" path="/admin/module/GoogleShopping/category/management/{categoryId}/{configurationId}" methods="GET">
+        <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::categoryManagementView</default>
+        <requirement key="categoryId">\d+</requirement>
     </route>
 
     <route id="googleshopping.sync.catalog" path="/admin/module/googleshopping/sync/catalog" methods="GET">
-        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::syncCatalog</default>
+        <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::syncCatalog</default>
     </route>
 
     <route id="googleshopping.sync.catalog.cron" path="/admin/module/googleshopping/sync/catalog/{secret}" methods="GET">
-        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::syncCatalog</default>
+        <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::syncCatalog</default>
     </route>
 
     <!--PRODUCTS-->

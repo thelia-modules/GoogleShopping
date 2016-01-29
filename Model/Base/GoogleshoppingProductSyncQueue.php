@@ -2,14 +2,14 @@
 
 namespace GoogleShopping\Model\Base;
 
+use \DateTime;
 use \Exception;
 use \PDO;
-use GoogleShopping\Model\GoogleshoppingAccount as ChildGoogleshoppingAccount;
-use GoogleShopping\Model\GoogleshoppingAccountQuery as ChildGoogleshoppingAccountQuery;
-use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery as ChildGoogleshoppingProductSynchronisationQuery;
-use GoogleShopping\Model\Map\GoogleshoppingProductSynchronisationTableMap;
-use GoogleShopping\Model\Thelia\Model\Product as ChildProduct;
-use GoogleShopping\Model\Thelia\Model\ProductQuery;
+use GoogleShopping\Model\GoogleshoppingProductSyncQueue as ChildGoogleshoppingProductSyncQueue;
+use GoogleShopping\Model\GoogleshoppingProductSyncQueueQuery as ChildGoogleshoppingProductSyncQueueQuery;
+use GoogleShopping\Model\Map\GoogleshoppingProductSyncQueueTableMap;
+use GoogleShopping\Model\Thelia\Model\ProductSaleElements as ChildProductSaleElements;
+use GoogleShopping\Model\Thelia\Model\ProductSaleElementsQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -20,13 +20,14 @@ use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Util\PropelDateTime;
 
-abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInterface
+abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\GoogleShopping\\Model\\Map\\GoogleshoppingProductSynchronisationTableMap';
+    const TABLE_MAP = '\\GoogleShopping\\Model\\Map\\GoogleshoppingProductSyncQueueTableMap';
 
 
     /**
@@ -56,50 +57,27 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     protected $virtualColumns = array();
 
     /**
-     * The value for the id field.
+     * The value for the product_sale_elements_id field.
      * @var        int
      */
-    protected $id;
+    protected $product_sale_elements_id;
 
     /**
-     * The value for the product_id field.
-     * @var        int
-     */
-    protected $product_id;
-
-    /**
-     * The value for the target_country field.
+     * The value for the created_at field.
      * @var        string
      */
-    protected $target_country;
+    protected $created_at;
 
     /**
-     * The value for the lang field.
+     * The value for the updated_at field.
      * @var        string
      */
-    protected $lang;
+    protected $updated_at;
 
     /**
-     * The value for the sync_enable field.
-     * @var        boolean
+     * @var        ProductSaleElements
      */
-    protected $sync_enable;
-
-    /**
-     * The value for the googleshopping_account_id field.
-     * @var        int
-     */
-    protected $googleshopping_account_id;
-
-    /**
-     * @var        Product
-     */
-    protected $aProduct;
-
-    /**
-     * @var        GoogleshoppingAccount
-     */
-    protected $aGoogleshoppingAccount;
+    protected $aProductSaleElements;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -110,7 +88,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     protected $alreadyInSave = false;
 
     /**
-     * Initializes internal state of GoogleShopping\Model\Base\GoogleshoppingProductSynchronisation object.
+     * Initializes internal state of GoogleShopping\Model\Base\GoogleshoppingProductSyncQueue object.
      */
     public function __construct()
     {
@@ -205,9 +183,9 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     }
 
     /**
-     * Compares this with another <code>GoogleshoppingProductSynchronisation</code> instance.  If
-     * <code>obj</code> is an instance of <code>GoogleshoppingProductSynchronisation</code>, delegates to
-     * <code>equals(GoogleshoppingProductSynchronisation)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>GoogleshoppingProductSyncQueue</code> instance.  If
+     * <code>obj</code> is an instance of <code>GoogleshoppingProductSyncQueue</code>, delegates to
+     * <code>equals(GoogleshoppingProductSyncQueue)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -290,7 +268,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return GoogleshoppingProductSynchronisation The current object, for fluid interface
+     * @return GoogleshoppingProductSyncQueue The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -322,7 +300,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      *                       or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param string $data The source data to import from
      *
-     * @return GoogleshoppingProductSynchronisation The current object, for fluid interface
+     * @return GoogleshoppingProductSyncQueue The current object, for fluid interface
      */
     public function importFrom($parser, $data)
     {
@@ -368,212 +346,122 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     }
 
     /**
-     * Get the [id] column value.
+     * Get the [product_sale_elements_id] column value.
      *
      * @return   int
      */
-    public function getId()
+    public function getProductSaleElementsId()
     {
 
-        return $this->id;
+        return $this->product_sale_elements_id;
     }
 
     /**
-     * Get the [product_id] column value.
+     * Get the [optionally formatted] temporal [created_at] column value.
      *
-     * @return   int
-     */
-    public function getProductId()
-    {
-
-        return $this->product_id;
-    }
-
-    /**
-     * Get the [target_country] column value.
      *
-     * @return   string
-     */
-    public function getTargetCountry()
-    {
-
-        return $this->target_country;
-    }
-
-    /**
-     * Get the [lang] column value.
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw \DateTime object will be returned.
      *
-     * @return   string
-     */
-    public function getLang()
-    {
-
-        return $this->lang;
-    }
-
-    /**
-     * Get the [sync_enable] column value.
+     * @return mixed Formatted date/time value as string or \DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
-     * @return   boolean
+     * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getSyncEnable()
+    public function getCreatedAt($format = NULL)
     {
-
-        return $this->sync_enable;
+        if ($format === null) {
+            return $this->created_at;
+        } else {
+            return $this->created_at instanceof \DateTime ? $this->created_at->format($format) : null;
+        }
     }
 
     /**
-     * Get the [googleshopping_account_id] column value.
+     * Get the [optionally formatted] temporal [updated_at] column value.
      *
-     * @return   int
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw \DateTime object will be returned.
+     *
+     * @return mixed Formatted date/time value as string or \DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getGoogleshoppingAccountId()
+    public function getUpdatedAt($format = NULL)
     {
-
-        return $this->googleshopping_account_id;
+        if ($format === null) {
+            return $this->updated_at;
+        } else {
+            return $this->updated_at instanceof \DateTime ? $this->updated_at->format($format) : null;
+        }
     }
 
     /**
-     * Set the value of [id] column.
+     * Set the value of [product_sale_elements_id] column.
      *
      * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
+     * @return   \GoogleShopping\Model\GoogleshoppingProductSyncQueue The current object (for fluent API support)
      */
-    public function setId($v)
+    public function setProductSaleElementsId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->id !== $v) {
-            $this->id = $v;
-            $this->modifiedColumns[GoogleshoppingProductSynchronisationTableMap::ID] = true;
+        if ($this->product_sale_elements_id !== $v) {
+            $this->product_sale_elements_id = $v;
+            $this->modifiedColumns[GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID] = true;
+        }
+
+        if ($this->aProductSaleElements !== null && $this->aProductSaleElements->getId() !== $v) {
+            $this->aProductSaleElements = null;
         }
 
 
         return $this;
-    } // setId()
+    } // setProductSaleElementsId()
 
     /**
-     * Set the value of [product_id] column.
+     * Sets the value of [created_at] column to a normalized version of the date/time value specified.
      *
-     * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
+     * @param      mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return   \GoogleShopping\Model\GoogleshoppingProductSyncQueue The current object (for fluent API support)
      */
-    public function setProductId($v)
+    public function setCreatedAt($v)
     {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->product_id !== $v) {
-            $this->product_id = $v;
-            $this->modifiedColumns[GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID] = true;
-        }
-
-        if ($this->aProduct !== null && $this->aProduct->getId() !== $v) {
-            $this->aProduct = null;
-        }
-
-
-        return $this;
-    } // setProductId()
-
-    /**
-     * Set the value of [target_country] column.
-     *
-     * @param      string $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
-     */
-    public function setTargetCountry($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->target_country !== $v) {
-            $this->target_country = $v;
-            $this->modifiedColumns[GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY] = true;
-        }
-
-
-        return $this;
-    } // setTargetCountry()
-
-    /**
-     * Set the value of [lang] column.
-     *
-     * @param      string $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
-     */
-    public function setLang($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->lang !== $v) {
-            $this->lang = $v;
-            $this->modifiedColumns[GoogleshoppingProductSynchronisationTableMap::LANG] = true;
-        }
-
-
-        return $this;
-    } // setLang()
-
-    /**
-     * Sets the value of the [sync_enable] column.
-     * Non-boolean arguments are converted using the following rules:
-     *   * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
-     *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
-     * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
-     *
-     * @param      boolean|integer|string $v The new value
-     * @return   \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
-     */
-    public function setSyncEnable($v)
-    {
-        if ($v !== null) {
-            if (is_string($v)) {
-                $v = in_array(strtolower($v), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
-            } else {
-                $v = (boolean) $v;
+        $dt = PropelDateTime::newInstance($v, null, '\DateTime');
+        if ($this->created_at !== null || $dt !== null) {
+            if ($dt !== $this->created_at) {
+                $this->created_at = $dt;
+                $this->modifiedColumns[GoogleshoppingProductSyncQueueTableMap::CREATED_AT] = true;
             }
-        }
-
-        if ($this->sync_enable !== $v) {
-            $this->sync_enable = $v;
-            $this->modifiedColumns[GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE] = true;
-        }
+        } // if either are not null
 
 
         return $this;
-    } // setSyncEnable()
+    } // setCreatedAt()
 
     /**
-     * Set the value of [googleshopping_account_id] column.
+     * Sets the value of [updated_at] column to a normalized version of the date/time value specified.
      *
-     * @param      int $v new value
-     * @return   \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
+     * @param      mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return   \GoogleShopping\Model\GoogleshoppingProductSyncQueue The current object (for fluent API support)
      */
-    public function setGoogleshoppingAccountId($v)
+    public function setUpdatedAt($v)
     {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->googleshopping_account_id !== $v) {
-            $this->googleshopping_account_id = $v;
-            $this->modifiedColumns[GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID] = true;
-        }
-
-        if ($this->aGoogleshoppingAccount !== null && $this->aGoogleshoppingAccount->getId() !== $v) {
-            $this->aGoogleshoppingAccount = null;
-        }
+        $dt = PropelDateTime::newInstance($v, null, '\DateTime');
+        if ($this->updated_at !== null || $dt !== null) {
+            if ($dt !== $this->updated_at) {
+                $this->updated_at = $dt;
+                $this->modifiedColumns[GoogleshoppingProductSyncQueueTableMap::UPDATED_AT] = true;
+            }
+        } // if either are not null
 
 
         return $this;
-    } // setGoogleshoppingAccountId()
+    } // setUpdatedAt()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -612,23 +500,20 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
         try {
 
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : GoogleshoppingProductSynchronisationTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : GoogleshoppingProductSyncQueueTableMap::translateFieldName('ProductSaleElementsId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->product_sale_elements_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : GoogleshoppingProductSynchronisationTableMap::translateFieldName('ProductId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->product_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : GoogleshoppingProductSyncQueueTableMap::translateFieldName('CreatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->created_at = (null !== $col) ? PropelDateTime::newInstance($col, null, '\DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingProductSynchronisationTableMap::translateFieldName('TargetCountry', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->target_country = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : GoogleshoppingProductSynchronisationTableMap::translateFieldName('Lang', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->lang = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : GoogleshoppingProductSynchronisationTableMap::translateFieldName('SyncEnable', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->sync_enable = (null !== $col) ? (boolean) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : GoogleshoppingProductSynchronisationTableMap::translateFieldName('GoogleshoppingAccountId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->googleshopping_account_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : GoogleshoppingProductSyncQueueTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, '\DateTime') : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -637,10 +522,10 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
                 $this->ensureConsistency();
             }
 
-            return $startcol + 6; // 6 = GoogleshoppingProductSynchronisationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 3; // 3 = GoogleshoppingProductSyncQueueTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingProductSynchronisation object", 0, $e);
+            throw new PropelException("Error populating \GoogleShopping\Model\GoogleshoppingProductSyncQueue object", 0, $e);
         }
     }
 
@@ -659,11 +544,8 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function ensureConsistency()
     {
-        if ($this->aProduct !== null && $this->product_id !== $this->aProduct->getId()) {
-            $this->aProduct = null;
-        }
-        if ($this->aGoogleshoppingAccount !== null && $this->googleshopping_account_id !== $this->aGoogleshoppingAccount->getId()) {
-            $this->aGoogleshoppingAccount = null;
+        if ($this->aProductSaleElements !== null && $this->product_sale_elements_id !== $this->aProductSaleElements->getId()) {
+            $this->aProductSaleElements = null;
         }
     } // ensureConsistency
 
@@ -688,13 +570,13 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildGoogleshoppingProductSynchronisationQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildGoogleshoppingProductSyncQueueQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -704,8 +586,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aProduct = null;
-            $this->aGoogleshoppingAccount = null;
+            $this->aProductSaleElements = null;
         } // if (deep)
     }
 
@@ -715,8 +596,8 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see GoogleshoppingProductSynchronisation::setDeleted()
-     * @see GoogleshoppingProductSynchronisation::isDeleted()
+     * @see GoogleshoppingProductSyncQueue::setDeleted()
+     * @see GoogleshoppingProductSyncQueue::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -725,12 +606,12 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
         try {
-            $deleteQuery = ChildGoogleshoppingProductSynchronisationQuery::create()
+            $deleteQuery = ChildGoogleshoppingProductSyncQueueQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -767,7 +648,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
@@ -776,8 +657,19 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
             $ret = $this->preSave($con);
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
+                // timestampable behavior
+                if (!$this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::CREATED_AT)) {
+                    $this->setCreatedAt(time());
+                }
+                if (!$this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::UPDATED_AT)) {
+                    $this->setUpdatedAt(time());
+                }
             } else {
                 $ret = $ret && $this->preUpdate($con);
+                // timestampable behavior
+                if ($this->isModified() && !$this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::UPDATED_AT)) {
+                    $this->setUpdatedAt(time());
+                }
             }
             if ($ret) {
                 $affectedRows = $this->doSave($con);
@@ -787,7 +679,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                GoogleshoppingProductSynchronisationTableMap::addInstanceToPool($this);
+                GoogleshoppingProductSyncQueueTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -822,18 +714,11 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aProduct !== null) {
-                if ($this->aProduct->isModified() || $this->aProduct->isNew()) {
-                    $affectedRows += $this->aProduct->save($con);
+            if ($this->aProductSaleElements !== null) {
+                if ($this->aProductSaleElements->isModified() || $this->aProductSaleElements->isNew()) {
+                    $affectedRows += $this->aProductSaleElements->save($con);
                 }
-                $this->setProduct($this->aProduct);
-            }
-
-            if ($this->aGoogleshoppingAccount !== null) {
-                if ($this->aGoogleshoppingAccount->isModified() || $this->aGoogleshoppingAccount->isNew()) {
-                    $affectedRows += $this->aGoogleshoppingAccount->save($con);
-                }
-                $this->setGoogleshoppingAccount($this->aGoogleshoppingAccount);
+                $this->setProductSaleElements($this->aProductSaleElements);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -867,33 +752,20 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[GoogleshoppingProductSynchronisationTableMap::ID] = true;
-        if (null !== $this->id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . GoogleshoppingProductSynchronisationTableMap::ID . ')');
-        }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::ID)) {
-            $modifiedColumns[':p' . $index++]  = 'ID';
+        if ($this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'PRODUCT_SALE_ELEMENTS_ID';
         }
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'PRODUCT_ID';
+        if ($this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::CREATED_AT)) {
+            $modifiedColumns[':p' . $index++]  = 'CREATED_AT';
         }
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY)) {
-            $modifiedColumns[':p' . $index++]  = 'TARGET_COUNTRY';
-        }
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::LANG)) {
-            $modifiedColumns[':p' . $index++]  = 'LANG';
-        }
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE)) {
-            $modifiedColumns[':p' . $index++]  = 'SYNC_ENABLE';
-        }
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'GOOGLESHOPPING_ACCOUNT_ID';
+        if ($this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::UPDATED_AT)) {
+            $modifiedColumns[':p' . $index++]  = 'UPDATED_AT';
         }
 
         $sql = sprintf(
-            'INSERT INTO googleshopping_product_synchronisation (%s) VALUES (%s)',
+            'INSERT INTO googleshopping_product_sync_queue (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -902,23 +774,14 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'ID':
-                        $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
+                    case 'PRODUCT_SALE_ELEMENTS_ID':
+                        $stmt->bindValue($identifier, $this->product_sale_elements_id, PDO::PARAM_INT);
                         break;
-                    case 'PRODUCT_ID':
-                        $stmt->bindValue($identifier, $this->product_id, PDO::PARAM_INT);
+                    case 'CREATED_AT':
+                        $stmt->bindValue($identifier, $this->created_at ? $this->created_at->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
                         break;
-                    case 'TARGET_COUNTRY':
-                        $stmt->bindValue($identifier, $this->target_country, PDO::PARAM_STR);
-                        break;
-                    case 'LANG':
-                        $stmt->bindValue($identifier, $this->lang, PDO::PARAM_STR);
-                        break;
-                    case 'SYNC_ENABLE':
-                        $stmt->bindValue($identifier, (int) $this->sync_enable, PDO::PARAM_INT);
-                        break;
-                    case 'GOOGLESHOPPING_ACCOUNT_ID':
-                        $stmt->bindValue($identifier, $this->googleshopping_account_id, PDO::PARAM_INT);
+                    case 'UPDATED_AT':
+                        $stmt->bindValue($identifier, $this->updated_at ? $this->updated_at->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -927,13 +790,6 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
             Propel::log($e->getMessage(), Propel::LOG_ERR);
             throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), 0, $e);
         }
-
-        try {
-            $pk = $con->lastInsertId();
-        } catch (Exception $e) {
-            throw new PropelException('Unable to get autoincrement id.', 0, $e);
-        }
-        $this->setId($pk);
 
         $this->setNew(false);
     }
@@ -966,7 +822,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = GoogleshoppingProductSynchronisationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GoogleshoppingProductSyncQueueTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -983,22 +839,13 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     {
         switch ($pos) {
             case 0:
-                return $this->getId();
+                return $this->getProductSaleElementsId();
                 break;
             case 1:
-                return $this->getProductId();
+                return $this->getCreatedAt();
                 break;
             case 2:
-                return $this->getTargetCountry();
-                break;
-            case 3:
-                return $this->getLang();
-                break;
-            case 4:
-                return $this->getSyncEnable();
-                break;
-            case 5:
-                return $this->getGoogleshoppingAccountId();
+                return $this->getUpdatedAt();
                 break;
             default:
                 return null;
@@ -1023,18 +870,15 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
-        if (isset($alreadyDumpedObjects['GoogleshoppingProductSynchronisation'][$this->getPrimaryKey()])) {
+        if (isset($alreadyDumpedObjects['GoogleshoppingProductSyncQueue'][$this->getPrimaryKey()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['GoogleshoppingProductSynchronisation'][$this->getPrimaryKey()] = true;
-        $keys = GoogleshoppingProductSynchronisationTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['GoogleshoppingProductSyncQueue'][$this->getPrimaryKey()] = true;
+        $keys = GoogleshoppingProductSyncQueueTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getId(),
-            $keys[1] => $this->getProductId(),
-            $keys[2] => $this->getTargetCountry(),
-            $keys[3] => $this->getLang(),
-            $keys[4] => $this->getSyncEnable(),
-            $keys[5] => $this->getGoogleshoppingAccountId(),
+            $keys[0] => $this->getProductSaleElementsId(),
+            $keys[1] => $this->getCreatedAt(),
+            $keys[2] => $this->getUpdatedAt(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1042,11 +886,8 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aProduct) {
-                $result['Product'] = $this->aProduct->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
-            }
-            if (null !== $this->aGoogleshoppingAccount) {
-                $result['GoogleshoppingAccount'] = $this->aGoogleshoppingAccount->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            if (null !== $this->aProductSaleElements) {
+                $result['ProductSaleElements'] = $this->aProductSaleElements->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -1066,7 +907,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = GoogleshoppingProductSynchronisationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = GoogleshoppingProductSyncQueueTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1083,22 +924,13 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     {
         switch ($pos) {
             case 0:
-                $this->setId($value);
+                $this->setProductSaleElementsId($value);
                 break;
             case 1:
-                $this->setProductId($value);
+                $this->setCreatedAt($value);
                 break;
             case 2:
-                $this->setTargetCountry($value);
-                break;
-            case 3:
-                $this->setLang($value);
-                break;
-            case 4:
-                $this->setSyncEnable($value);
-                break;
-            case 5:
-                $this->setGoogleshoppingAccountId($value);
+                $this->setUpdatedAt($value);
                 break;
         } // switch()
     }
@@ -1122,14 +954,11 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = GoogleshoppingProductSynchronisationTableMap::getFieldNames($keyType);
+        $keys = GoogleshoppingProductSyncQueueTableMap::getFieldNames($keyType);
 
-        if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setProductId($arr[$keys[1]]);
-        if (array_key_exists($keys[2], $arr)) $this->setTargetCountry($arr[$keys[2]]);
-        if (array_key_exists($keys[3], $arr)) $this->setLang($arr[$keys[3]]);
-        if (array_key_exists($keys[4], $arr)) $this->setSyncEnable($arr[$keys[4]]);
-        if (array_key_exists($keys[5], $arr)) $this->setGoogleshoppingAccountId($arr[$keys[5]]);
+        if (array_key_exists($keys[0], $arr)) $this->setProductSaleElementsId($arr[$keys[0]]);
+        if (array_key_exists($keys[1], $arr)) $this->setCreatedAt($arr[$keys[1]]);
+        if (array_key_exists($keys[2], $arr)) $this->setUpdatedAt($arr[$keys[2]]);
     }
 
     /**
@@ -1139,14 +968,11 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
+        $criteria = new Criteria(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::ID)) $criteria->add(GoogleshoppingProductSynchronisationTableMap::ID, $this->id);
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID)) $criteria->add(GoogleshoppingProductSynchronisationTableMap::PRODUCT_ID, $this->product_id);
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY)) $criteria->add(GoogleshoppingProductSynchronisationTableMap::TARGET_COUNTRY, $this->target_country);
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::LANG)) $criteria->add(GoogleshoppingProductSynchronisationTableMap::LANG, $this->lang);
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE)) $criteria->add(GoogleshoppingProductSynchronisationTableMap::SYNC_ENABLE, $this->sync_enable);
-        if ($this->isColumnModified(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID)) $criteria->add(GoogleshoppingProductSynchronisationTableMap::GOOGLESHOPPING_ACCOUNT_ID, $this->googleshopping_account_id);
+        if ($this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID)) $criteria->add(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $this->product_sale_elements_id);
+        if ($this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::CREATED_AT)) $criteria->add(GoogleshoppingProductSyncQueueTableMap::CREATED_AT, $this->created_at);
+        if ($this->isColumnModified(GoogleshoppingProductSyncQueueTableMap::UPDATED_AT)) $criteria->add(GoogleshoppingProductSyncQueueTableMap::UPDATED_AT, $this->updated_at);
 
         return $criteria;
     }
@@ -1161,8 +987,8 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function buildPkeyCriteria()
     {
-        $criteria = new Criteria(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
-        $criteria->add(GoogleshoppingProductSynchronisationTableMap::ID, $this->id);
+        $criteria = new Criteria(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
+        $criteria->add(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $this->product_sale_elements_id);
 
         return $criteria;
     }
@@ -1173,18 +999,18 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function getPrimaryKey()
     {
-        return $this->getId();
+        return $this->getProductSaleElementsId();
     }
 
     /**
-     * Generic method to set the primary key (id column).
+     * Generic method to set the primary key (product_sale_elements_id column).
      *
      * @param       int $key Primary key.
      * @return void
      */
     public function setPrimaryKey($key)
     {
-        $this->setId($key);
+        $this->setProductSaleElementsId($key);
     }
 
     /**
@@ -1194,7 +1020,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     public function isPrimaryKeyNull()
     {
 
-        return null === $this->getId();
+        return null === $this->getProductSaleElementsId();
     }
 
     /**
@@ -1203,21 +1029,18 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \GoogleShopping\Model\GoogleshoppingProductSynchronisation (or compatible) type.
+     * @param      object $copyObj An object of \GoogleShopping\Model\GoogleshoppingProductSyncQueue (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setProductId($this->getProductId());
-        $copyObj->setTargetCountry($this->getTargetCountry());
-        $copyObj->setLang($this->getLang());
-        $copyObj->setSyncEnable($this->getSyncEnable());
-        $copyObj->setGoogleshoppingAccountId($this->getGoogleshoppingAccountId());
+        $copyObj->setProductSaleElementsId($this->getProductSaleElementsId());
+        $copyObj->setCreatedAt($this->getCreatedAt());
+        $copyObj->setUpdatedAt($this->getUpdatedAt());
         if ($makeNew) {
             $copyObj->setNew(true);
-            $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1230,7 +1053,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      * objects.
      *
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return                 \GoogleShopping\Model\GoogleshoppingProductSynchronisation Clone of current object.
+     * @return                 \GoogleShopping\Model\GoogleshoppingProductSyncQueue Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1244,26 +1067,25 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
     }
 
     /**
-     * Declares an association between this object and a ChildProduct object.
+     * Declares an association between this object and a ChildProductSaleElements object.
      *
-     * @param                  ChildProduct $v
-     * @return                 \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
+     * @param                  ChildProductSaleElements $v
+     * @return                 \GoogleShopping\Model\GoogleshoppingProductSyncQueue The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setProduct(ChildProduct $v = null)
+    public function setProductSaleElements(ChildProductSaleElements $v = null)
     {
         if ($v === null) {
-            $this->setProductId(NULL);
+            $this->setProductSaleElementsId(NULL);
         } else {
-            $this->setProductId($v->getId());
+            $this->setProductSaleElementsId($v->getId());
         }
 
-        $this->aProduct = $v;
+        $this->aProductSaleElements = $v;
 
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildProduct object, it will not be re-added.
+        // Add binding for other direction of this 1:1 relationship.
         if ($v !== null) {
-            $v->addGoogleshoppingProductSynchronisation($this);
+            $v->setGoogleshoppingProductSyncQueue($this);
         }
 
 
@@ -1272,77 +1094,21 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
 
 
     /**
-     * Get the associated ChildProduct object
+     * Get the associated ChildProductSaleElements object
      *
      * @param      ConnectionInterface $con Optional Connection object.
-     * @return                 ChildProduct The associated ChildProduct object.
+     * @return                 ChildProductSaleElements The associated ChildProductSaleElements object.
      * @throws PropelException
      */
-    public function getProduct(ConnectionInterface $con = null)
+    public function getProductSaleElements(ConnectionInterface $con = null)
     {
-        if ($this->aProduct === null && ($this->product_id !== null)) {
-            $this->aProduct = ProductQuery::create()->findPk($this->product_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aProduct->addGoogleshoppingProductSynchronisations($this);
-             */
+        if ($this->aProductSaleElements === null && ($this->product_sale_elements_id !== null)) {
+            $this->aProductSaleElements = ProductSaleElementsQuery::create()->findPk($this->product_sale_elements_id, $con);
+            // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
+            $this->aProductSaleElements->setGoogleshoppingProductSyncQueue($this);
         }
 
-        return $this->aProduct;
-    }
-
-    /**
-     * Declares an association between this object and a ChildGoogleshoppingAccount object.
-     *
-     * @param                  ChildGoogleshoppingAccount $v
-     * @return                 \GoogleShopping\Model\GoogleshoppingProductSynchronisation The current object (for fluent API support)
-     * @throws PropelException
-     */
-    public function setGoogleshoppingAccount(ChildGoogleshoppingAccount $v = null)
-    {
-        if ($v === null) {
-            $this->setGoogleshoppingAccountId(NULL);
-        } else {
-            $this->setGoogleshoppingAccountId($v->getId());
-        }
-
-        $this->aGoogleshoppingAccount = $v;
-
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildGoogleshoppingAccount object, it will not be re-added.
-        if ($v !== null) {
-            $v->addGoogleshoppingProductSynchronisation($this);
-        }
-
-
-        return $this;
-    }
-
-
-    /**
-     * Get the associated ChildGoogleshoppingAccount object
-     *
-     * @param      ConnectionInterface $con Optional Connection object.
-     * @return                 ChildGoogleshoppingAccount The associated ChildGoogleshoppingAccount object.
-     * @throws PropelException
-     */
-    public function getGoogleshoppingAccount(ConnectionInterface $con = null)
-    {
-        if ($this->aGoogleshoppingAccount === null && ($this->googleshopping_account_id !== null)) {
-            $this->aGoogleshoppingAccount = ChildGoogleshoppingAccountQuery::create()->findPk($this->googleshopping_account_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aGoogleshoppingAccount->addGoogleshoppingProductSynchronisations($this);
-             */
-        }
-
-        return $this->aGoogleshoppingAccount;
+        return $this->aProductSaleElements;
     }
 
     /**
@@ -1350,12 +1116,9 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function clear()
     {
-        $this->id = null;
-        $this->product_id = null;
-        $this->target_country = null;
-        $this->lang = null;
-        $this->sync_enable = null;
-        $this->googleshopping_account_id = null;
+        $this->product_sale_elements_id = null;
+        $this->created_at = null;
+        $this->updated_at = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1377,8 +1140,7 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
         if ($deep) {
         } // if ($deep)
 
-        $this->aProduct = null;
-        $this->aGoogleshoppingAccount = null;
+        $this->aProductSaleElements = null;
     }
 
     /**
@@ -1388,7 +1150,21 @@ abstract class GoogleshoppingProductSynchronisation implements ActiveRecordInter
      */
     public function __toString()
     {
-        return (string) $this->exportTo(GoogleshoppingProductSynchronisationTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(GoogleshoppingProductSyncQueueTableMap::DEFAULT_STRING_FORMAT);
+    }
+
+    // timestampable behavior
+
+    /**
+     * Mark the current object so that the update date doesn't get updated during next save
+     *
+     * @return     ChildGoogleshoppingProductSyncQueue The current object (for fluent API support)
+     */
+    public function keepUpdateDateUnchanged()
+    {
+        $this->modifiedColumns[GoogleshoppingProductSyncQueueTableMap::UPDATED_AT] = true;
+
+        return $this;
     }
 
     /**

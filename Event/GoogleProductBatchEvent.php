@@ -12,14 +12,8 @@ use Thelia\Model\Country;
 use Thelia\Model\Lang;
 use Thelia\Model\ProductSaleElements;
 
-class GoogleProductBatchEvent extends ActionEvent
+class GoogleProductBatchEvent extends GoogleShoppingBaseEvent
 {
-    /** @var  string */
-    protected $merchantId;
-
-    /** @var  \Google_Service_ShoppingContent */
-    protected $googleShoppingService;
-
     protected $method;
 
     protected $entries;
@@ -28,43 +22,6 @@ class GoogleProductBatchEvent extends ActionEvent
     {
         $this->merchantId = $merchantId;
     }
-
-    /**
-     * @return string
-     */
-    public function getMerchantId()
-    {
-        return $this->merchantId;
-    }
-
-    /**
-     * @param string $merchantId
-     * @return GoogleProductBatchEvent
-     */
-    public function setMerchantId($merchantId)
-    {
-        $this->merchantId = $merchantId;
-        return $this;
-    }
-
-    /**
-     * @return \Google_Service_ShoppingContent
-     */
-    public function getGoogleShoppingService()
-    {
-        return $this->googleShoppingService;
-    }
-
-    /**
-     * @param \Google_Service_ShoppingContent $googleShoppingService
-     * @return GoogleProductBatchEvent
-     */
-    public function setGoogleShoppingService($googleShoppingService)
-    {
-        $this->googleShoppingService = $googleShoppingService;
-        return $this;
-    }
-
 
     /**
      * @return Array
@@ -110,6 +67,4 @@ class GoogleProductBatchEvent extends ActionEvent
 
         $this->entries[] = $entry;
     }
-
-
 }

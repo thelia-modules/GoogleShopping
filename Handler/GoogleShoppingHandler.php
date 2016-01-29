@@ -4,19 +4,33 @@
 namespace GoogleShopping\Handler;
 
 use GoogleShopping\GoogleShopping;
+use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
+use GoogleShopping\Model\Map\GoogleshoppingTaxonomyTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\ActiveQuery\Join;
 use Propel\Runtime\Collection\ObjectCollection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Thelia\Action\ProductSaleElement;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\AreaDeliveryModuleQuery;
 use Thelia\Model\AttributeAvQuery;
+use Thelia\Model\CategoryQuery;
 use Thelia\Model\ConfigQuery;
+use Thelia\Model\Country;
+use Thelia\Model\CountryQuery;
+use Thelia\Model\Lang;
+use Thelia\Model\LangQuery;
+use Thelia\Model\Map\ProductCategoryTableMap;
+use Thelia\Model\Map\ProductSaleElementsTableMap;
 use Thelia\Model\Module;
 use Thelia\Model\ModuleQuery;
 use Thelia\Model\OrderPostage;
+use Thelia\Model\Product;
 use Thelia\Model\ProductImage;
+use Thelia\Model\ProductSaleElements;
+use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Module\BaseModule;
 use Thelia\Tools\URL;
 
@@ -75,6 +89,97 @@ class GoogleShoppingHandler
         $client->setAccessToken(GoogleShopping::getConfigValue('oauth_access_token'));
 
         return $client;
+    }
+
+    public function getProduct($merchantId, $googleProductId)
+    {
+        $client = $this->createGoogleClient();
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+        try {
+            $googleProduct = $googleShoppingService->products->get($merchantId, $googleProductId);
+            return $googleProduct;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    //Todo maybe remove this function
+    public function createGoogleProductFromGoogle(\Google_Service_ShoppingContent_Product $googleProduct)
+    {
+        $productInfo = explode(":", $googleProduct->getId());
+        $langCode = $productInfo[1];
+        $countryIsoAlpha2 = $productInfo[2];
+        $pseId = $productInfo[3];
+
+        $lang = LangQuery::create()
+            ->findOneByCode($langCode);
+
+        $country = CountryQuery::create()
+            ->findOneByIsoalpha2($countryIsoAlpha2);
+
+        $query = ProductSaleElementsQuery::create()
+            ->filterById($pseId);
+
+        $productCategoryJoin = new Join();
+        $productCategoryJoin->addExplicitCondition(
+          ProductSaleElementsTableMap::TABLE_NAME,
+            'PRODUCT_ID',
+            null,
+            ProductCategoryTableMap::TABLE_NAME,
+            'PRODUCT_ID',
+            null
+        );
+        $productCategoryJoin->setJoinType(Criteria::JOIN);
+
+        $googleCategoryJoin = new Join();
+        $googleCategoryJoin->addExplicitCondition(
+            ProductCategoryTableMap::TABLE_NAME,
+            'CATEGORY_ID',
+            null,
+            GoogleshoppingTaxonomyTableMap::TABLE_NAME,
+            'THELIA_CATEGORY_ID',
+            'google_category'
+        );
+        $googleCategoryJoin->setJoinType(Criteria::JOIN);
+
+        $query
+            ->addJoinObject($productCategoryJoin, 'product_category_join')
+            ->addJoinCondition('product_category_join',
+                'product_category.default_category = 1')
+            ->addJoinObject($googleCategoryJoin, 'google_category_join')
+            ->addJoinCondition('google_category_join', 'google_category.lang_id = '.$lang->getId());
+        $query->withColumn('category.id', 'category_id')
+            ->withColumn('google_category.id', 'google_category_id');
+
+
+        /** @var ProductSaleElements $productSaleElements */
+        $productSaleElements = $query->findOne();
+
+        //If category is not associated in flux try to take the english association
+        if (null === $productSaleElements->getVirtualColumn('google_category_id')) {
+            $englishLang = LangQuery::create()->findOneByLocale('en_US');
+            $googleCategory = GoogleshoppingTaxonomyQuery::create()
+                ->filterByLangId($englishLang->getId())
+                ->findOneByTheliaCategoryId($productSaleElements->getVirtualColumn('category_id'));
+        }
+
+    }
+
+    public function getGoogleCategory($langId, $theliaCategoryId)
+    {
+        $googleCategory = GoogleshoppingTaxonomyQuery::create()
+            ->filterByLangId($langId)
+            ->findOneByTheliaCategoryId($theliaCategoryId);
+        //If category is not associated in flux try to take the english association
+        if (null === $googleCategory) {
+            $englishLang = LangQuery::create()->findOneByLocale('en_US');
+            $googleCategory = GoogleshoppingTaxonomyQuery::create()
+                ->filterByLangId($englishLang->getId())
+                ->findOneByTheliaCategoryId($theliaCategoryId);
+        }
+
+        return $googleCategory;
     }
 
     public function checkCombination(ObjectCollection $productSaleElements)

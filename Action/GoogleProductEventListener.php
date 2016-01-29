@@ -1,10 +1,11 @@
 <?php
 
 
-namespace GoogleShopping\EventListener;
+namespace GoogleShopping\Action;
 
 use GoogleShopping\Event\GoogleProductBatchEvent;
 use GoogleShopping\Event\GoogleProductEvent;
+use GoogleShopping\Event\GoogleShoppingBaseEvent;
 use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
@@ -20,7 +21,6 @@ use Thelia\Core\Translation\Translator;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\CategoryQuery;
 use Thelia\Model\CountryQuery;
-use Thelia\Model\Currency;
 use Thelia\Model\LangQuery;
 use Thelia\Model\ProductImageQuery;
 use Thelia\Model\ProductPriceQuery;
@@ -61,16 +61,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
             ->findOneById($product->getDefaultCategoryId());
 
         //Try to get associated Google category either in flux locale or english (accepted for all flux language)
-        $googleCategory = GoogleshoppingTaxonomyQuery::create()
-            ->filterByLangId($event->getLang()->getId())
-            ->findOneByTheliaCategoryId($theliaCategory->getId());
-        //If category is not associated in flux try to take the english association
-        if (null === $googleCategory) {
-            $englishLang = LangQuery::create()->findOneByLocale('en_US');
-            $googleCategory = GoogleshoppingTaxonomyQuery::create()
-                ->filterByLangId($englishLang->getId())
-                ->findOneByTheliaCategoryId($theliaCategory->getId());
-        }
+        $googleCategory = $this->googleShoppingHandler->getGoogleCategory($event->getLang()->getId(), $event->getTheliaCategory()->getId());
 
         //Association is mandatory
         if (null === $theliaCategory) {
@@ -122,13 +113,18 @@ class GoogleProductEventListener implements EventSubscriberInterface
         //If a productSaleElements is passed to event only send him
         if ($event->getProductSaleElements() !== null) {
             $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE, $event);
-        //Else dispatch all the pse of the product
+            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
+            //Else dispatch all the pse of the product
         } else {
             /** @var ProductSaleElements $productSaleElement */
             foreach ($productSaleElementss as $productSaleElements) {
                 $event->setProductSaleElements($productSaleElements);
                 $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE, $event);
-                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
+                try {
+                    $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
+                } catch(\Exception $e) {
+
+                }
             }
         }
     }
@@ -186,8 +182,8 @@ class GoogleProductEventListener implements EventSubscriberInterface
                 $sizeCombination = AttributeAvQuery::create()
                     ->joinWithI18n($lang->getLocale())
                     ->useAttributeCombinationQuery()
-                    ->filterByAttributeId($sizeAttributeId)
                     ->filterByAttributeId(explode(',', $sizeAttributeId), Criteria::IN)
+                    ->filterByProductSaleElementsId($productSaleElements->getId())
                     ->endUse()
                     ->findOne();
                 if (null !== $sizeCombination) {
@@ -230,7 +226,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $productLink = $product->getUrl();
         $imageLink = $event->getImagePath();
 
-        if ($lang->getUrl() !== null) {
+        if ($lang->getUrl() != null) {
             $productUrlPath = parse_url($productLink, PHP_URL_PATH);
 
             $imageUrlPath = parse_url($imageLink, PHP_URL_PATH);
@@ -411,6 +407,26 @@ class GoogleProductEventListener implements EventSubscriberInterface
         }
     }
 
+    public function syncAccountProducts(GoogleShoppingBaseEvent $event)
+    {
+        $client = $this->googleShoppingHandler->createGoogleClient();
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+        if ($client->isAccessTokenExpired()) {
+            $client->refreshToken(GoogleShopping::getConfigValue('oauth_refresh_token'));
+            $newToken = $client->getAccessToken();
+            $this->request->getSession()->set('oauth_access_token', $newToken);
+        }
+
+        $results = $googleShoppingService->products->listProducts($event->getMerchantId());
+
+        $products = $results->getResources();
+
+        foreach ($products as $product) {
+
+        }
+    }
+
     public static function getSubscribedEvents()
     {
         return [
@@ -421,7 +437,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
             GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PRODUCT => ["deleteGoogleProduct", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE => ["deleteGooglePse", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC => ["toggleProductSync", 128],
-            GoogleShoppingEvents::GOOGLE_SYNC_CATALOG => ["syncCatalog", 128],
+            GoogleShoppingEvents::GOOGLE_ACCOUNT_SYNC_PRODUCTS => ["syncAccountProducts", 128],
         ];
     }
 }

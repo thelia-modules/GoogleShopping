@@ -8,10 +8,9 @@
         <!-- sample definition
         <loop name="MySuperLoop" class="GoogleShopping\Loop\MySuperLoop" />
         -->
-        <loop name="googleshopping.merchant.account" class="GoogleShopping\Loop\MerchantAccount" />
+        <loop name="googleshopping.configuration" class="GoogleShopping\Loop\Configuration" />
         <loop name="googleshopping.category.associated" class="GoogleShopping\Loop\AssociatedCategory" />
         <loop name="googleshopping.product" class="GoogleShopping\Loop\GoogleShoppingProduct" />
-        <loop name="googleshopping.product.sync" class="GoogleShopping\Loop\ProductSync" />
     </loops>
 
     <forms>
@@ -20,7 +19,7 @@
         -->
         <form name="googleshopping.api.configuration" class="GoogleShopping\Form\ApiConfigurationForm" />
         <form name="googleshopping.attribute.configuration" class="GoogleShopping\Form\AttributeConfigurationForm" />
-        <form name="googleshopping.merchant.account" class="GoogleShopping\Form\MerchantAccountForm" />
+        <form name="googleshopping.configuration" class="GoogleShopping\Form\ConfigurationForm" />
         <form name="googleshopping.taxonomy" class="GoogleShopping\Form\TaxonomyForm" />
     </forms>
 
@@ -33,10 +32,13 @@
             <argument type="service" id="service_container"/>
             <argument type="service" id="request"/>
         </service>
-        <service id="googleshopping.product.listener" class="GoogleShopping\EventListener\GoogleProductEventListener" scope="request">
+        <service id="googleshopping.product.action" class="GoogleShopping\Action\GoogleProductEventListener" scope="request">
             <argument type="service" id="request" />
             <argument type="service" id="thelia.translator"/>
             <argument type="service" id="googleshopping.handler"/>
+            <tag name="kernel.event_subscriber" />
+        </service>
+        <service id="googleshopping.product.listener" class="GoogleShopping\EventListener\ProductEventListener">
             <tag name="kernel.event_subscriber" />
         </service>
     </services>

@@ -103,39 +103,57 @@
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <div class="panel-title">
-                                            <h4>{intl l="Google Merchant accounts"}</h4>
+                                            <h4>{intl l="Google Merchant configurations"}</h4>
                                         </div>
                                     </div>
                                     <div class="panel-body">
-                                        {form name="googleshopping.merchant.account"}
+                                        {form name="googleshopping.configuration"}
                                             <div class="row">
                                                 <form class="ajax-form" method="post" action='{url path="/admin/module/googleshopping/merchant/account/add"}'>
                                                     {form_hidden_fields form=$form}
+                                                    {form_field form=$form field="title"}
+                                                        <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                            <label for="{$label_attr.for}">{$label}</label>
+                                                            <input id="{$label_attr.for}" class="form-control"
+                                                                   name="{$name}" required/>
+                                                        </div>
+                                                    {/form_field}
                                                     {form_field form=$form field="merchant_id"}
-                                                        <div class="form-group col-md-3 {if $error}has-error{/if}">
+                                                        <div class="form-group col-md-2 {if $error}has-error{/if}">
                                                             <label for="{$label_attr.for}">{$label}</label>
                                                             <input id="{$label_attr.for}" class="form-control"
                                                                    name="{$name}" required/>
                                                             <span class="help-block">{intl l="Your google merchant ID, can be found in Google Merchant center, normally the numbers at top right"}</span>
                                                         </div>
                                                     {/form_field}
-                                                    {form_field form=$form field="default_country_id"}
-                                                        <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                    {form_field form=$form field="lang_id"}
+                                                        <div class="form-group col-md-1 {if $error}has-error{/if}">
                                                             <label for="{$label_attr.for}">{$label}</label>
                                                             <select id="{$label_attr.for}" class="form-control"
                                                                     name="{$name}">
-                                                                {loop type="country" name="default_country"}
+                                                                {loop type="lang" name="lang_id"}
                                                                     <option value="{$ID}">{$TITLE}</option>
                                                                 {/loop}
                                                             </select>
                                                         </div>
                                                     {/form_field}
-                                                    {form_field form=$form field="default_currency_id"}
+                                                    {form_field form=$form field="country_id"}
                                                         <div class="form-group col-md-2 {if $error}has-error{/if}">
                                                             <label for="{$label_attr.for}">{$label}</label>
                                                             <select id="{$label_attr.for}" class="form-control"
                                                                     name="{$name}">
-                                                                {loop type="currency" name="default_currency_id"}
+                                                                {loop type="country" name="country_id"}
+                                                                    <option value="{$ID}">{$TITLE}</option>
+                                                                {/loop}
+                                                            </select>
+                                                        </div>
+                                                    {/form_field}
+                                                    {form_field form=$form field="currency_id"}
+                                                        <div class="form-group col-md-1 {if $error}has-error{/if}">
+                                                            <label for="{$label_attr.for}">{$label}</label>
+                                                            <select id="{$label_attr.for}" class="form-control"
+                                                                    name="{$name}">
+                                                                {loop type="currency" name="currency_id"}
                                                                     <option value="{$ID}">{$SYMBOL}</option>
                                                                 {/loop}
                                                             </select>
@@ -150,7 +168,16 @@
                                                             </div>
                                                         </div>
                                                     {/form_field}
-                                                    <div class="form-group col-md-4">
+                                                    {form_field form=$form field="sync"}
+                                                        <div class="form-group col-md-1">
+                                                            <label for="{$label_attr.for}">{$label}</label>
+                                                            <br>
+                                                            <div id="{$label_attr.for}" class="switch-small switch" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
+                                                                <input  name="{$name}" type="checkbox" checked/>
+                                                            </div>
+                                                        </div>
+                                                    {/form_field}
+                                                    <div class="form-group col-md-2">
                                                         <label class="control-label">&nbsp;</label>
                                                         <button class="btn btn-default btn-primary form-control"
                                                                 type="submit">
@@ -161,63 +188,86 @@
                                                 </form>
                                             </div>
                                         {/form}
-                                        {loop type="googleshopping.merchant.account" name="googleshopping.merchant.account"}
-                                            <div id="account_{$MERCHANT_ID}" class="row">
-                                                {form name="googleshopping.merchant.account"}
-
-                                                        <form class="ajax-form" method="post" action='{url path="/admin/module/googleshopping/merchant/account/update/{$ID}"}'>
-                                                            {form_hidden_fields form=$form}
-                                                            {form_field form=$form field="merchant_id"}
-                                                                <div class="form-group col-md-3 {if $error}has-error{/if}">
-                                                                    <input id="{$label_attr.for}" class="form-control"
-                                                                           name="{$name}" value="{$MERCHANT_ID}" required/>
-                                                                </div>
-                                                            {/form_field}
-                                                            {form_field form=$form field="default_country_id"}
-                                                                <div class="form-group col-md-2 {if $error}has-error{/if}">
-                                                                    <select id="{$label_attr.for}" class="form-control"
-                                                                            name="{$name}">
-                                                                        {loop type="country" name="default_country"}
-                                                                            <option value="{$ID}"
-                                                                                    {if $DEFAULT_COUNTRY_ID == $ID}selected{/if} >{$TITLE}</option>
-                                                                        {/loop}
-                                                                    </select>
-                                                                </div>
-                                                            {/form_field}
-                                                            {form_field form=$form field="default_currency_id"}
-                                                                <div class="form-group col-md-2 {if $error}has-error{/if}">
-                                                                    <select id="{$label_attr.for}" class="form-control"
-                                                                            name="{$name}">
-                                                                        {loop type="currency" name="default_currency_id"}
-                                                                            <option value="{$ID}" {if $DEFAULT_CURRENCY_ID == $ID}selected{/if} >{$SYMBOL}</option>
-                                                                        {/loop}
-                                                                    </select>
-                                                                </div>
-                                                            {/form_field}
-                                                            {form_field form=$form field="is_default"}
-                                                                <div class="form-group col-md-1">
-                                                                    <div class="switch-small switch" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
-                                                                        <input name="{$name}" type="checkbox" {if $IS_DEFAULT}checked{/if}/>
-                                                                    </div>
-                                                                </div>
-                                                            {/form_field}
-                                                            <div class="form-group col-md-2">
-                                                                <button class="btn btn-default btn-primary form-control"
-                                                                        type="submit">
-                                                                    <span class="glyphicon glyphicon-check"></span>
-                                                                    {intl l="Update"}
-                                                                </button>
+                                        {loop type="googleshopping.configuration" name="googleshopping.configuration"}
+                                            <div id="account_{$ID}" class="row">
+                                                {form name="googleshopping.configuration"}
+                                                    <form class="ajax-form" method="post" action='{url path="/admin/module/googleshopping/merchant/account/update/{$ID}"}'>
+                                                        {form_hidden_fields form=$form}
+                                                        {form_field form=$form field="title"}
+                                                            <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                                <input id="{$label_attr.for}" class="form-control"
+                                                                       name="{$name}" value="{$TITLE}" required/>
                                                             </div>
-                                                        </form>
+                                                        {/form_field}
+                                                        {form_field form=$form field="merchant_id"}
+                                                            <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                                <input id="{$label_attr.for}" class="form-control"
+                                                                       name="{$name}" value="{$MERCHANT_ID}" required/>
+                                                            </div>
+                                                        {/form_field}
+                                                        {form_field form=$form field="lang_id"}
+                                                            <div class="form-group col-md-1 {if $error}has-error{/if}">
+                                                                <select id="{$label_attr.for}" class="form-control"
+                                                                        name="{$name}">
+                                                                    {loop type="lang" name="lang_id"}
+                                                                        <option value="{$ID}"
+                                                                                {if $LANG_ID == $ID}selected{/if} >{$TITLE}</option>
+                                                                    {/loop}
+                                                                </select>
+                                                            </div>
+                                                        {/form_field}
+                                                        {form_field form=$form field="country_id"}
+                                                            <div class="form-group col-md-2 {if $error}has-error{/if}">
+                                                                <select id="{$label_attr.for}" class="form-control"
+                                                                        name="{$name}">
+                                                                    {loop type="country" name="default_country"}
+                                                                        <option value="{$ID}"
+                                                                                {if $COUNTRY_ID == $ID}selected{/if} >{$TITLE}</option>
+                                                                    {/loop}
+                                                                </select>
+                                                            </div>
+                                                        {/form_field}
+                                                        {form_field form=$form field="currency_id"}
+                                                            <div class="form-group col-md-1 {if $error}has-error{/if}">
+                                                                <select id="{$label_attr.for}" class="form-control"
+                                                                        name="{$name}">
+                                                                    {loop type="currency" name="default_currency_id"}
+                                                                        <option value="{$ID}" {if $CURRENCY_ID == $ID}selected{/if} >{$SYMBOL}</option>
+                                                                    {/loop}
+                                                                </select>
+                                                            </div>
+                                                        {/form_field}
+                                                        {form_field form=$form field="is_default"}
+                                                            <div class="form-group col-md-1">
+                                                                <div class="switch-small switch" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
+                                                                    <input name="{$name}" type="checkbox" {if $IS_DEFAULT}checked{/if}/>
+                                                                </div>
+                                                            </div>
+                                                        {/form_field}
+                                                        {form_field form=$form field="sync"}
+                                                            <div class="form-group col-md-1">
+                                                                <div id="{$label_attr.for}" class="switch-small switch" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
+                                                                    <input  name="{$name}" type="checkbox" {if $SYNC}checked{/if}/>
+                                                                </div>
+                                                            </div>
+                                                        {/form_field}
+                                                        <div class="form-group col-md-1">
+                                                            <button class="btn btn-default btn-primary form-control"
+                                                                    type="submit">
+                                                                <span class="glyphicon glyphicon-check"></span>
+                                                                {intl l="Update"}
+                                                            </button>
+                                                        </div>
+                                                    </form>
                                                 {/form}
-                                                {form name="googleshopping.merchant.account"}
-                                                    <form class="ajax-form" data-delete="account_{$MERCHANT_ID}" method="post" action='{url path="/admin/module/googleshopping/merchant/account/delete/{$ID}"}'>
+                                                {form name="googleshopping.configuration"}
+                                                    <form class="ajax-form" data-delete="account_{$ID}" method="post" action='{url path="/admin/module/googleshopping/merchant/account/delete/{$ID}"}'>
                                                         {form_hidden_fields form=$form}
                                                         {form_field form=$form field="merchant_id"}
                                                                 <input type="hidden"
                                                                        name="{$name}" value="{$MERCHANT_ID}" required/>
                                                         {/form_field}
-                                                        <div class="form-group col-md-2">
+                                                        <div class="form-group col-md-1">
                                                             <button class="btn btn-default btn-danger form-control"
                                                                     type="submit">
                                                                 <span class="glyphicon glyphicon-trash"></span>
@@ -277,9 +327,17 @@
                                     {/form}
 
                                 </div>
-                                <div>
-                                    <div class="alert alert-info col-md-12"
-                                         role="alert">{intl l="Url to call for Cron sync :"} {url path="/admin/module/googleshopping/sync/catalog/"}{$sync_secret}</div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <div class="panel-title">
+                                            <h4>{intl l="Google synchronisation"}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="alert alert-info col-md-12"
+                                             role="alert">{intl l="Url to call for Cron sync :"} {url path="/admin/module/googleshopping/sync/catalog/"}{$sync_secret}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -388,7 +446,7 @@
                                                         </td>
                                                         <td class="text-right">
                                                             <div class="btn-group" role="group">
-                                                                <a class="btn btn-primary" href="{url path="/admin/module/GoogleShopping/category/management/%id/%lang_id" id=$THELIA_CATEGORY_ID lang_id=$edit_language_id}"><span class="glyphicon glyphicon-transfer"></span> {intl l="Manage Catalog"}</a>
+                                                                <a class="btn btn-primary" href="{url path="/admin/module/GoogleShopping/category/management/%id" id=$THELIA_CATEGORY_ID lang_id=$edit_language_id}"><span class="glyphicon glyphicon-transfer"></span> {intl l="Manage Catalog"}</a>
                                                                 <form class="btn-group ajax-form" data-delete="tr_category_{$THELIA_CATEGORY_ID}" method="post" action='{url path="/admin/modules/googleshopping/taxonomy/delete"}'>
                                                                     <input type="hidden" name="category_id" value="{$THELIA_CATEGORY_ID}"/>
                                                                     <input type="hidden" name="lang_id" value="{$edit_language_id}"/>
