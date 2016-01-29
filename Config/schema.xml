@@ -34,7 +34,7 @@
     </table>
 
     <table name="googleshopping_product_sync_queue">
-        <column name="product_sale_elements_id" type="INTEGER"/>
+        <column primaryKey="true" name="product_sale_elements_id" type="INTEGER"/>
         <foreign-key foreignTable="product_sale_elements" name="fk_googleshopping_product_sync_queue_pse" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference foreign="id" local="product_sale_elements_id" />
         </foreign-key>

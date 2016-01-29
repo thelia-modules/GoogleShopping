@@ -3,6 +3,7 @@
 namespace GoogleShopping\Model\Base;
 
 use \Exception;
+use \PDO;
 use GoogleShopping\Model\GoogleshoppingProductSyncQueue as ChildGoogleshoppingProductSyncQueue;
 use GoogleShopping\Model\GoogleshoppingProductSyncQueueQuery as ChildGoogleshoppingProductSyncQueueQuery;
 use GoogleShopping\Model\Map\GoogleshoppingProductSyncQueueTableMap;
@@ -104,13 +105,80 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
      */
     public function findPk($key, $con = null)
     {
-        throw new \LogicException('The ChildGoogleshoppingProductSyncQueue class has no primary key');
+        if ($key === null) {
+            return null;
+        }
+        if ((null !== ($obj = GoogleshoppingProductSyncQueueTableMap::getInstanceFromPool((string) $key))) && !$this->formatter) {
+            // the object is already in the instance pool
+            return $obj;
+        }
+        if ($con === null) {
+            $con = Propel::getServiceContainer()->getReadConnection(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
+        }
+        $this->basePreSelect($con);
+        if ($this->formatter || $this->modelAlias || $this->with || $this->select
+         || $this->selectColumns || $this->asColumns || $this->selectModifiers
+         || $this->map || $this->having || $this->joins) {
+            return $this->findPkComplex($key, $con);
+        } else {
+            return $this->findPkSimple($key, $con);
+        }
+    }
+
+    /**
+     * Find object by primary key using raw SQL to go fast.
+     * Bypass doSelect() and the object formatter by using generated code.
+     *
+     * @param     mixed $key Primary key to use for the query
+     * @param     ConnectionInterface $con A connection object
+     *
+     * @return   ChildGoogleshoppingProductSyncQueue A model object, or null if the key is not found
+     */
+    protected function findPkSimple($key, $con)
+    {
+        $sql = 'SELECT PRODUCT_SALE_ELEMENTS_ID, CREATED_AT, UPDATED_AT FROM googleshopping_product_sync_queue WHERE PRODUCT_SALE_ELEMENTS_ID = :p0';
+        try {
+            $stmt = $con->prepare($sql);
+            $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
+            $stmt->execute();
+        } catch (Exception $e) {
+            Propel::log($e->getMessage(), Propel::LOG_ERR);
+            throw new PropelException(sprintf('Unable to execute SELECT statement [%s]', $sql), 0, $e);
+        }
+        $obj = null;
+        if ($row = $stmt->fetch(\PDO::FETCH_NUM)) {
+            $obj = new ChildGoogleshoppingProductSyncQueue();
+            $obj->hydrate($row);
+            GoogleshoppingProductSyncQueueTableMap::addInstanceToPool($obj, (string) $key);
+        }
+        $stmt->closeCursor();
+
+        return $obj;
+    }
+
+    /**
+     * Find object by primary key.
+     *
+     * @param     mixed $key Primary key to use for the query
+     * @param     ConnectionInterface $con A connection object
+     *
+     * @return ChildGoogleshoppingProductSyncQueue|array|mixed the result, formatted by the current formatter
+     */
+    protected function findPkComplex($key, $con)
+    {
+        // As the query uses a PK condition, no limit(1) is necessary.
+        $criteria = $this->isKeepQuery() ? clone $this : $this;
+        $dataFetcher = $criteria
+            ->filterByPrimaryKey($key)
+            ->doSelect($con);
+
+        return $criteria->getFormatter()->init($criteria)->formatOne($dataFetcher);
     }
 
     /**
      * Find objects by primary key
      * <code>
-     * $objs = $c->findPks(array(array(12, 56), array(832, 123), array(123, 456)), $con);
+     * $objs = $c->findPks(array(12, 56, 832), $con);
      * </code>
      * @param     array $keys Primary keys to use for the query
      * @param     ConnectionInterface $con an optional connection object
@@ -119,7 +187,16 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
      */
     public function findPks($keys, $con = null)
     {
-        throw new \LogicException('The ChildGoogleshoppingProductSyncQueue class has no primary key');
+        if (null === $con) {
+            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
+        }
+        $this->basePreSelect($con);
+        $criteria = $this->isKeepQuery() ? clone $this : $this;
+        $dataFetcher = $criteria
+            ->filterByPrimaryKeys($keys)
+            ->doSelect($con);
+
+        return $criteria->getFormatter()->init($criteria)->format($dataFetcher);
     }
 
     /**
@@ -131,7 +208,8 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
      */
     public function filterByPrimaryKey($key)
     {
-        throw new \LogicException('The ChildGoogleshoppingProductSyncQueue class has no primary key');
+
+        return $this->addUsingAlias(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -143,7 +221,8 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
      */
     public function filterByPrimaryKeys($keys)
     {
-        throw new \LogicException('The ChildGoogleshoppingProductSyncQueue class has no primary key');
+
+        return $this->addUsingAlias(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $keys, Criteria::IN);
     }
 
     /**
@@ -308,7 +387,7 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
      *
      * @return ChildGoogleshoppingProductSyncQueueQuery The current query, for fluid interface
      */
-    public function joinProductSaleElements($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinProductSaleElements($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
         $relationMap = $tableMap->getRelation('ProductSaleElements');
@@ -343,7 +422,7 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
      *
      * @return   \GoogleShopping\Model\Thelia\Model\ProductSaleElementsQuery A secondary query class using the current class as primary query
      */
-    public function useProductSaleElementsQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useProductSaleElementsQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinProductSaleElements($relationAlias, $joinType)
@@ -360,8 +439,7 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
     public function prune($googleshoppingProductSyncQueue = null)
     {
         if ($googleshoppingProductSyncQueue) {
-            throw new \LogicException('ChildGoogleshoppingProductSyncQueue class has no primary key');
-
+            $this->addUsingAlias(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $googleshoppingProductSyncQueue->getProductSaleElementsId(), Criteria::NOT_EQUAL);
         }
 
         return $this;

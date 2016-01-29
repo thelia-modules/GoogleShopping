@@ -17,7 +17,9 @@ use GoogleShopping\Model\GoogleshoppingAccountQuery;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use Propel\Runtime\Connection\ConnectionInterface;
+use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
+use Thelia\Log\Tlog;
 use Thelia\Model\ModuleConfigQuery;
 use Thelia\Model\ModuleQuery;
 use Thelia\Module\BaseModule;
@@ -47,8 +49,44 @@ class GoogleShopping extends BaseModule
         }
     }
 
-    public function update($currentVersion, $newVersion, ConnectionInterface $con)
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
     {
+        $sqlToExecute = [];
+        $finder = new Finder();
+        $sort = function (\SplFileInfo $a, \SplFileInfo $b) {
+            $a = strtolower(substr($a->getRelativePathname(), 0, -4));
+            $b = strtolower(substr($b->getRelativePathname(), 0, -4));
+            return version_compare($a, $b);
+        };
 
+        $files = $finder->name('*.sql')
+            ->in(__DIR__ ."/Config/Update/")
+            ->sort($sort);
+
+        foreach ($files as $file) {
+            if (version_compare($file->getFilename(), $currentVersion, ">")) {
+                $sqlToExecute[$file->getFilename()] = $file->getRealPath();
+            }
+        }
+
+        $database = new Database($con);
+
+        foreach ($sqlToExecute as $version => $sql) {
+            $database->insertSql(null, $sql);
+        }
+    }
+
+    public static function log($msg)
+    {
+        $year = (new \DateTime())->format('Y');
+        $month = (new \DateTime())->format('m');
+        $logger = Tlog::getNewInstance();
+        $logger->setDestinations("\\Thelia\\Log\\Destination\\TlogDestinationFile");
+        $logger->setConfig(
+            "\\Thelia\\Log\\Destination\\TlogDestinationFile",
+            0,
+            THELIA_ROOT . "log" . DS . "googleshopping" . DS . $year . $year.$month.".txt"
+        );
+        $logger->addAlert("MESSAGE => " . print_r($msg, true));
     }
 }

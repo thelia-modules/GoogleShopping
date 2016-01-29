@@ -75,10 +75,10 @@ DROP TABLE IF EXISTS `googleshopping_product_sync_queue`;
 
 CREATE TABLE `googleshopping_product_sync_queue`
 (
-    `product_sale_elements_id` INTEGER,
+    `product_sale_elements_id` INTEGER NOT NULL,
     `created_at` DATETIME,
     `updated_at` DATETIME,
-    INDEX `FI_googleshopping_product_sync_queue_pse` (`product_sale_elements_id`),
+    PRIMARY KEY (`product_sale_elements_id`),
     CONSTRAINT `fk_googleshopping_product_sync_queue_pse`
         FOREIGN KEY (`product_sale_elements_id`)
         REFERENCES `product_sale_elements` (`id`)

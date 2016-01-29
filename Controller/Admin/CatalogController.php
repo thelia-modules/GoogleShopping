@@ -7,6 +7,7 @@ use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
 use GoogleShopping\Model\GoogleshoppingConfiguration;
 use GoogleShopping\Model\GoogleshoppingConfigurationQuery;
+use GoogleShopping\Model\GoogleshoppingProductSyncQueue;
 use GoogleShopping\Model\GoogleshoppingProductSyncQueueQuery;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use GoogleShopping\Model\Map\GoogleshoppingConfigurationTableMap;
@@ -86,6 +87,7 @@ class CatalogController extends BaseGoogleShoppingController
         } elseif (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
         }
+        $syncSuccess = false;
 
         $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
         $client = $googleShoppingHandler->createGoogleClient();
@@ -186,13 +188,24 @@ class CatalogController extends BaseGoogleShoppingController
 
                     $googleProduct->setPrice($price);
                     $googleProduct->setAvailability($availability);
-
-                    $googleShoppingService->products->insert($googleConfiguration->getMerchantId(), $googleProduct);
+                    try {
+                        $googleShoppingService->products->insert($googleConfiguration->getMerchantId(), $googleProduct);
+                        $syncSuccess = true;
+                    } catch (\Exception $e) {
+                        GoogleShopping::log($e->getMessage());
+                    }
                 }
             }
-            $pseSync = GoogleshoppingProductSyncQueueQuery::create()
-                ->findOneByProductSaleElementsId($productSaleElements->getId());
-            $pseSync->delete();
+
+            if ($syncSuccess) {
+                $pseSyncs = GoogleshoppingProductSyncQueueQuery::create()
+                    ->findByProductSaleElementsId($productSaleElements->getId());
+
+                /** @var GoogleshoppingProductSyncQueue $pseSync */
+                foreach ($pseSyncs as $pseSync) {
+                    $pseSync->delete();
+                }
+            }
         }
     }
 }

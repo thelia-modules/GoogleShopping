@@ -136,7 +136,7 @@ class GoogleshoppingProductSyncQueueTableMap extends TableMap
         $this->setPackage('GoogleShopping.Model');
         $this->setUseIdGenerator(false);
         // columns
-        $this->addForeignKey('PRODUCT_SALE_ELEMENTS_ID', 'ProductSaleElementsId', 'INTEGER', 'product_sale_elements', 'ID', false, null, null);
+        $this->addForeignPrimaryKey('PRODUCT_SALE_ELEMENTS_ID', 'ProductSaleElementsId', 'INTEGER' , 'product_sale_elements', 'ID', true, null, null);
         $this->addColumn('CREATED_AT', 'CreatedAt', 'TIMESTAMP', false, null, null);
         $this->addColumn('UPDATED_AT', 'UpdatedAt', 'TIMESTAMP', false, null, null);
     } // initialize()
@@ -175,7 +175,12 @@ class GoogleshoppingProductSyncQueueTableMap extends TableMap
      */
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        return null;
+        // If the PK cannot be derived from the row, return NULL.
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('ProductSaleElementsId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+            return null;
+        }
+
+        return (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('ProductSaleElementsId', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -193,7 +198,11 @@ class GoogleshoppingProductSyncQueueTableMap extends TableMap
     public static function getPrimaryKeyFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
 
-            return '';
+            return (int) $row[
+                            $indexType == TableMap::TYPE_NUM
+                            ? 0 + $offset
+                            : self::translateFieldName('ProductSaleElementsId', TableMap::TYPE_PHPNAME, $indexType)
+                        ];
     }
 
     /**
@@ -345,19 +354,11 @@ class GoogleshoppingProductSyncQueueTableMap extends TableMap
             // rename for clarity
             $criteria = $values;
         } elseif ($values instanceof \GoogleShopping\Model\GoogleshoppingProductSyncQueue) { // it's a model object
-            // create criteria based on pk value
-            $criteria = $values->buildCriteria();
+            // create criteria based on pk values
+            $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
             $criteria = new Criteria(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
-            // primary key is composite; we therefore, expect
-            // the primary key passed to be an array of pkey values
-            if (count($values) == count($values, COUNT_RECURSIVE)) {
-                // array is not multi-dimensional
-                $values = array($values);
-            }
-            foreach ($values as $value) {
-                $criteria->addOr($criterion);
-            }
+            $criteria->add(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, (array) $values, Criteria::IN);
         }
 
         $query = GoogleshoppingProductSyncQueueQuery::create()->mergeWith($criteria);

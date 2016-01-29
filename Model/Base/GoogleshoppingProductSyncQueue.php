@@ -988,32 +988,29 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = new Criteria(GoogleshoppingProductSyncQueueTableMap::DATABASE_NAME);
+        $criteria->add(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $this->product_sale_elements_id);
 
         return $criteria;
     }
 
     /**
-     * Returns NULL since this table doesn't have a primary key.
-     * This method exists only for BC and is deprecated!
-     * @return null
+     * Returns the primary key for this object (row).
+     * @return   int
      */
     public function getPrimaryKey()
     {
-        return null;
+        return $this->getProductSaleElementsId();
     }
 
     /**
-     * Dummy primary key setter.
+     * Generic method to set the primary key (product_sale_elements_id column).
      *
-     * This function only exists to preserve backwards compatibility.  It is no longer
-     * needed or required by the Persistent interface.  It will be removed in next BC-breaking
-     * release of Propel.
-     *
-     * @deprecated
+     * @param       int $key Primary key.
+     * @return void
      */
-    public function setPrimaryKey($pk)
+    public function setPrimaryKey($key)
     {
-        // do nothing, because this object doesn't have any primary keys
+        $this->setProductSaleElementsId($key);
     }
 
     /**
@@ -1023,7 +1020,7 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
     public function isPrimaryKeyNull()
     {
 
-        return ;
+        return null === $this->getProductSaleElementsId();
     }
 
     /**
@@ -1086,10 +1083,9 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
 
         $this->aProductSaleElements = $v;
 
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildProductSaleElements object, it will not be re-added.
+        // Add binding for other direction of this 1:1 relationship.
         if ($v !== null) {
-            $v->addGoogleshoppingProductSyncQueue($this);
+            $v->setGoogleshoppingProductSyncQueue($this);
         }
 
 
@@ -1108,13 +1104,8 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
     {
         if ($this->aProductSaleElements === null && ($this->product_sale_elements_id !== null)) {
             $this->aProductSaleElements = ProductSaleElementsQuery::create()->findPk($this->product_sale_elements_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aProductSaleElements->addGoogleshoppingProductSyncQueues($this);
-             */
+            // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
+            $this->aProductSaleElements->setGoogleshoppingProductSyncQueue($this);
         }
 
         return $this->aProductSaleElements;
