@@ -61,16 +61,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
             ->findOneById($product->getDefaultCategoryId());
 
         //Try to get associated Google category either in flux locale or english (accepted for all flux language)
-        $googleCategory = GoogleshoppingTaxonomyQuery::create()
-            ->filterByLangId($event->getLang()->getId())
-            ->findOneByTheliaCategoryId($theliaCategory->getId());
-        //If category is not associated in flux try to take the english association
-        if (null === $googleCategory) {
-            $englishLang = LangQuery::create()->findOneByLocale('en_US');
-            $googleCategory = GoogleshoppingTaxonomyQuery::create()
-                ->filterByLangId($englishLang->getId())
-                ->findOneByTheliaCategoryId($theliaCategory->getId());
-        }
+        $googleCategory = $this->googleShoppingHandler->getGoogleCategory($event->getLang()->getId(), $event->getTheliaCategory()->getId());
 
         //Association is mandatory
         if (null === $theliaCategory) {

@@ -77,7 +77,13 @@ CREATE TABLE `googleshopping_product_sync_queue`
 (
     `product_sale_elements_id` INTEGER,
     `created_at` DATETIME,
-    `updated_at` DATETIME
+    `updated_at` DATETIME,
+    INDEX `FI_googleshopping_product_sync_queue_pse` (`product_sale_elements_id`),
+    CONSTRAINT `fk_googleshopping_product_sync_queue_pse`
+        FOREIGN KEY (`product_sale_elements_id`)
+        REFERENCES `product_sale_elements` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 # This restores the fkey checks, after having unset them earlier

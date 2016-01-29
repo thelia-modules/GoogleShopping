@@ -29,6 +29,9 @@ class GoogleShopping extends BaseModule
     /** @var string */
     const DOMAIN_NAME = 'googleshopping';
 
+    const GOOGLE_IN_STOCK = 'in stock';
+    const GOOGLE_OUT_OF_STOCK = 'out of stock';
+
     public static function getModuleId()
     {
         return ModuleQuery::create()->findOneByCode("GoogleShopping")->getId();
@@ -42,60 +45,10 @@ class GoogleShopping extends BaseModule
             self::setConfigValue('is_initialized', true);
             $this->setConfigValue("sync_secret", md5(uniqid(rand(), true)));
         }
-
-        try {
-            $gShoppingAccount = GoogleshoppingAccountQuery::create()
-                ->findOne();
-        } catch (\Exception $e) {
-            //Update for multi account (0.6)
-            $merchantId = self::getConfigValue('merchant_id');
-
-            if (null !== $merchantId) {
-                $googleShoppingAccount = new GoogleshoppingAccount();
-                $googleShoppingAccount->setMerchantId($merchantId)
-                    ->save();
-
-                $googleShoppingProducts = GoogleshoppingProductSynchronisationQuery::create()
-                    ->filterByGoogleshoppingAccountId(null)
-                    ->find();
-
-                if (null !== $googleShoppingProducts) {
-                    /** @var GoogleshoppingProductSynchronisation $googleShoppingProduct */
-                    foreach ($googleShoppingProducts as $googleShoppingProduct) {
-                        $googleShoppingProduct->setGoogleshoppingAccountId($googleShoppingAccount->getId())
-                            ->save();
-                    }
-                }
-            }
-        }
     }
 
     public function update($currentVersion, $newVersion, ConnectionInterface $con)
     {
-        if (file_exists(__DIR__ . "/Config/Update/$newVersion.sql")) {
-            $database = new Database($con);
-            $database->insertSql(null, [__DIR__ . "/Config/Update/$newVersion.sql"]);
-        }
 
-        if ($newVersion === "0.6") {
-            $merchantId = self::getConfigValue('merchant_id');
-
-            if (null !== $merchantId) {
-                $googleShoppingAccount = new GoogleshoppingAccount();
-                $googleShoppingAccount->setMerchantId($merchantId)
-                    ->save();
-
-                $googleShoppingProducts = GoogleshoppingProductSynchronisationQuery::create()
-                    ->find();
-
-                if (null !== $googleShoppingProducts) {
-                    /** @var GoogleshoppingProductSynchronisation $googleShoppingProduct */
-                    foreach ($googleShoppingProducts as $googleShoppingProduct) {
-                        $googleShoppingProduct->setGoogleshoppingAccountId($googleShoppingAccount->getId())
-                            ->save();
-                    }
-                }
-            }
-        }
     }
 }

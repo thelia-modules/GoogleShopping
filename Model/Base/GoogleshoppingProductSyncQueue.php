@@ -8,6 +8,8 @@ use \PDO;
 use GoogleShopping\Model\GoogleshoppingProductSyncQueue as ChildGoogleshoppingProductSyncQueue;
 use GoogleShopping\Model\GoogleshoppingProductSyncQueueQuery as ChildGoogleshoppingProductSyncQueueQuery;
 use GoogleShopping\Model\Map\GoogleshoppingProductSyncQueueTableMap;
+use GoogleShopping\Model\Thelia\Model\ProductSaleElements as ChildProductSaleElements;
+use GoogleShopping\Model\Thelia\Model\ProductSaleElementsQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -71,6 +73,11 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
      * @var        string
      */
     protected $updated_at;
+
+    /**
+     * @var        ProductSaleElements
+     */
+    protected $aProductSaleElements;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -406,6 +413,10 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
             $this->modifiedColumns[GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID] = true;
         }
 
+        if ($this->aProductSaleElements !== null && $this->aProductSaleElements->getId() !== $v) {
+            $this->aProductSaleElements = null;
+        }
+
 
         return $this;
     } // setProductSaleElementsId()
@@ -533,6 +544,9 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
+        if ($this->aProductSaleElements !== null && $this->product_sale_elements_id !== $this->aProductSaleElements->getId()) {
+            $this->aProductSaleElements = null;
+        }
     } // ensureConsistency
 
     /**
@@ -572,6 +586,7 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
+            $this->aProductSaleElements = null;
         } // if (deep)
     }
 
@@ -693,6 +708,18 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
         $affectedRows = 0; // initialize var to track total num of affected rows
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
+
+            // We call the save method on the following object(s) if they
+            // were passed to this object by their corresponding set
+            // method.  This object relates to these object(s) by a
+            // foreign key reference.
+
+            if ($this->aProductSaleElements !== null) {
+                if ($this->aProductSaleElements->isModified() || $this->aProductSaleElements->isNew()) {
+                    $affectedRows += $this->aProductSaleElements->save($con);
+                }
+                $this->setProductSaleElements($this->aProductSaleElements);
+            }
 
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
@@ -837,10 +864,11 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
      *                    Defaults to TableMap::TYPE_PHPNAME.
      * @param     boolean $includeLazyLoadColumns (optional) Whether to include lazy loaded columns. Defaults to TRUE.
      * @param     array $alreadyDumpedObjects List of objects to skip to avoid recursion
+     * @param     boolean $includeForeignObjects (optional) Whether to include hydrated related objects. Default to FALSE.
      *
      * @return array an associative array containing the field names (as keys) and field values
      */
-    public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array())
+    public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
         if (isset($alreadyDumpedObjects['GoogleshoppingProductSyncQueue'][$this->getPrimaryKey()])) {
             return '*RECURSION*';
@@ -857,6 +885,11 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
             $result[$key] = $virtualColumn;
         }
 
+        if ($includeForeignObjects) {
+            if (null !== $this->aProductSaleElements) {
+                $result['ProductSaleElements'] = $this->aProductSaleElements->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+        }
 
         return $result;
     }
@@ -1037,6 +1070,57 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
     }
 
     /**
+     * Declares an association between this object and a ChildProductSaleElements object.
+     *
+     * @param                  ChildProductSaleElements $v
+     * @return                 \GoogleShopping\Model\GoogleshoppingProductSyncQueue The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setProductSaleElements(ChildProductSaleElements $v = null)
+    {
+        if ($v === null) {
+            $this->setProductSaleElementsId(NULL);
+        } else {
+            $this->setProductSaleElementsId($v->getId());
+        }
+
+        $this->aProductSaleElements = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildProductSaleElements object, it will not be re-added.
+        if ($v !== null) {
+            $v->addGoogleshoppingProductSyncQueue($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildProductSaleElements object
+     *
+     * @param      ConnectionInterface $con Optional Connection object.
+     * @return                 ChildProductSaleElements The associated ChildProductSaleElements object.
+     * @throws PropelException
+     */
+    public function getProductSaleElements(ConnectionInterface $con = null)
+    {
+        if ($this->aProductSaleElements === null && ($this->product_sale_elements_id !== null)) {
+            $this->aProductSaleElements = ProductSaleElementsQuery::create()->findPk($this->product_sale_elements_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aProductSaleElements->addGoogleshoppingProductSyncQueues($this);
+             */
+        }
+
+        return $this->aProductSaleElements;
+    }
+
+    /**
      * Clears the current object and sets all attributes to their default values
      */
     public function clear()
@@ -1065,6 +1149,7 @@ abstract class GoogleshoppingProductSyncQueue implements ActiveRecordInterface
         if ($deep) {
         } // if ($deep)
 
+        $this->aProductSaleElements = null;
     }
 
     /**

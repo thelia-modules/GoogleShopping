@@ -6,9 +6,13 @@ use \Exception;
 use GoogleShopping\Model\GoogleshoppingProductSyncQueue as ChildGoogleshoppingProductSyncQueue;
 use GoogleShopping\Model\GoogleshoppingProductSyncQueueQuery as ChildGoogleshoppingProductSyncQueueQuery;
 use GoogleShopping\Model\Map\GoogleshoppingProductSyncQueueTableMap;
+use GoogleShopping\Model\Thelia\Model\ProductSaleElements;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
+use Propel\Runtime\ActiveQuery\ModelJoin;
+use Propel\Runtime\Collection\Collection;
+use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 
@@ -28,6 +32,10 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGoogleshoppingProductSyncQueueQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildGoogleshoppingProductSyncQueueQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
  * @method     ChildGoogleshoppingProductSyncQueueQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ *
+ * @method     ChildGoogleshoppingProductSyncQueueQuery leftJoinProductSaleElements($relationAlias = null) Adds a LEFT JOIN clause to the query using the ProductSaleElements relation
+ * @method     ChildGoogleshoppingProductSyncQueueQuery rightJoinProductSaleElements($relationAlias = null) Adds a RIGHT JOIN clause to the query using the ProductSaleElements relation
+ * @method     ChildGoogleshoppingProductSyncQueueQuery innerJoinProductSaleElements($relationAlias = null) Adds a INNER JOIN clause to the query using the ProductSaleElements relation
  *
  * @method     ChildGoogleshoppingProductSyncQueue findOne(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProductSyncQueue matching the query
  * @method     ChildGoogleshoppingProductSyncQueue findOneOrCreate(ConnectionInterface $con = null) Return the first ChildGoogleshoppingProductSyncQueue matching the query, or a new ChildGoogleshoppingProductSyncQueue object populated from the query conditions when no match is found
@@ -148,6 +156,8 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
      * $query->filterByProductSaleElementsId(array('min' => 12)); // WHERE product_sale_elements_id > 12
      * </code>
      *
+     * @see       filterByProductSaleElements()
+     *
      * @param     mixed $productSaleElementsId The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
@@ -263,6 +273,81 @@ abstract class GoogleshoppingProductSyncQueueQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(GoogleshoppingProductSyncQueueTableMap::UPDATED_AT, $updatedAt, $comparison);
+    }
+
+    /**
+     * Filter the query by a related \GoogleShopping\Model\Thelia\Model\ProductSaleElements object
+     *
+     * @param \GoogleShopping\Model\Thelia\Model\ProductSaleElements|ObjectCollection $productSaleElements The related object(s) to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildGoogleshoppingProductSyncQueueQuery The current query, for fluid interface
+     */
+    public function filterByProductSaleElements($productSaleElements, $comparison = null)
+    {
+        if ($productSaleElements instanceof \GoogleShopping\Model\Thelia\Model\ProductSaleElements) {
+            return $this
+                ->addUsingAlias(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $productSaleElements->getId(), $comparison);
+        } elseif ($productSaleElements instanceof ObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(GoogleshoppingProductSyncQueueTableMap::PRODUCT_SALE_ELEMENTS_ID, $productSaleElements->toKeyValue('PrimaryKey', 'Id'), $comparison);
+        } else {
+            throw new PropelException('filterByProductSaleElements() only accepts arguments of type \GoogleShopping\Model\Thelia\Model\ProductSaleElements or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the ProductSaleElements relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return ChildGoogleshoppingProductSyncQueueQuery The current query, for fluid interface
+     */
+    public function joinProductSaleElements($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('ProductSaleElements');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'ProductSaleElements');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the ProductSaleElements relation ProductSaleElements object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \GoogleShopping\Model\Thelia\Model\ProductSaleElementsQuery A secondary query class using the current class as primary query
+     */
+    public function useProductSaleElementsQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinProductSaleElements($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'ProductSaleElements', '\GoogleShopping\Model\Thelia\Model\ProductSaleElementsQuery');
     }
 
     /**

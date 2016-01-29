@@ -136,7 +136,7 @@ class GoogleshoppingProductSyncQueueTableMap extends TableMap
         $this->setPackage('GoogleShopping.Model');
         $this->setUseIdGenerator(false);
         // columns
-        $this->addColumn('PRODUCT_SALE_ELEMENTS_ID', 'ProductSaleElementsId', 'INTEGER', false, null, null);
+        $this->addForeignKey('PRODUCT_SALE_ELEMENTS_ID', 'ProductSaleElementsId', 'INTEGER', 'product_sale_elements', 'ID', false, null, null);
         $this->addColumn('CREATED_AT', 'CreatedAt', 'TIMESTAMP', false, null, null);
         $this->addColumn('UPDATED_AT', 'UpdatedAt', 'TIMESTAMP', false, null, null);
     } // initialize()
@@ -146,6 +146,7 @@ class GoogleshoppingProductSyncQueueTableMap extends TableMap
      */
     public function buildRelations()
     {
+        $this->addRelation('ProductSaleElements', '\\GoogleShopping\\Model\\Thelia\\Model\\ProductSaleElements', RelationMap::MANY_TO_ONE, array('product_sale_elements_id' => 'id', ), 'CASCADE', 'RESTRICT');
     } // buildRelations()
 
     /**

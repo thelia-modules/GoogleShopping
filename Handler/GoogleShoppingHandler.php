@@ -91,6 +91,20 @@ class GoogleShoppingHandler
         return $client;
     }
 
+    public function getProduct($merchantId, $googleProductId)
+    {
+        $client = $this->createGoogleClient();
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+        try {
+            $googleProduct = $googleShoppingService->products->get($merchantId, $googleProductId);
+            return $googleProduct;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    //Todo maybe remove this function
     public function createGoogleProductFromGoogle(\Google_Service_ShoppingContent_Product $googleProduct)
     {
         $productInfo = explode(":", $googleProduct->getId());
@@ -150,8 +164,22 @@ class GoogleShoppingHandler
                 ->findOneByTheliaCategoryId($productSaleElements->getVirtualColumn('category_id'));
         }
 
+    }
 
+    public function getGoogleCategory($langId, $theliaCategoryId)
+    {
+        $googleCategory = GoogleshoppingTaxonomyQuery::create()
+            ->filterByLangId($langId)
+            ->findOneByTheliaCategoryId($theliaCategoryId);
+        //If category is not associated in flux try to take the english association
+        if (null === $googleCategory) {
+            $englishLang = LangQuery::create()->findOneByLocale('en_US');
+            $googleCategory = GoogleshoppingTaxonomyQuery::create()
+                ->filterByLangId($englishLang->getId())
+                ->findOneByTheliaCategoryId($theliaCategoryId);
+        }
 
+        return $googleCategory;
     }
 
     public function checkCombination(ObjectCollection $productSaleElements)
