@@ -72,7 +72,7 @@ class GoogleShopping extends BaseModule
         $database = new Database($con);
 
         foreach ($sqlToExecute as $version => $sql) {
-            $database->insertSql(null, $sql);
+            $database->insertSql(null, [$sql]);
         }
     }
 
