@@ -245,7 +245,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $googleProduct->setLink($productLink); //Link to the product
         $googleProduct->setTitle($product->getTitle());
         $googleProduct->setAvailability($availability); //"in stock", "out of stock" or "preorder"
-        $googleProduct->setDescription($product->getDescription());
+        $googleProduct->setDescription($product->getChapo());
         $googleProduct->setImageLink($imageLink); //Link to the product image
         $googleProduct->setProductType($product->getTitle()); //Product category in store
 
