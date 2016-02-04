@@ -136,7 +136,7 @@ class ConfigurationController extends BaseAdminController
                 $defaultAccounts = GoogleshoppingConfigurationQuery::create()
                     ->filterByIsDefault(true)
                     ->find();
-                /** @var GoogleshoppingAccount $defaultAccount */
+                /** @var GoogleshoppingConfiguration $defaultAccount */
                 foreach ($defaultAccounts as $defaultAccount) {
                     $defaultAccount->setIsDefault(false)
                         ->save();
@@ -174,7 +174,7 @@ class ConfigurationController extends BaseAdminController
                 $defaultAccounts = GoogleshoppingConfigurationQuery::create()
                     ->filterByIsDefault(true)
                     ->find();
-                /** @var GoogleshoppingAccount $defaultAccount */
+                /** @var GoogleshoppingConfiguration $defaultAccount */
                 foreach ($defaultAccounts as $defaultAccount) {
                     $defaultAccount->setIsDefault(false)
                         ->save();
@@ -221,51 +221,6 @@ class ConfigurationController extends BaseAdminController
 
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
-        }
-    }
-
-    public function syncCatalog($secret = null)
-    {
-        if (null !== $secret && GoogleShopping::getConfigValue("sync_secret") !== $secret) {
-            return null;
-        } elseif (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
-            return $response;
-        }
-
-        try {
-            $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_SYNC_CATALOG);
-
-            return $this->generateRedirectFromRoute(
-                "admin.module.configure",
-                array(),
-                array(
-                    'module_code' => 'GoogleShopping',
-                    'current_tab' => 'management',
-                    'google_alert' => "success",
-                    'google_message' =>
-                        $this->getTranslator()->trans(
-                            "Catalog sync with success",
-                            [],
-                            GoogleShopping::DOMAIN_NAME
-                        )
-                )
-            );
-        } catch (\Exception $e) {
-            return $this->generateRedirectFromRoute(
-                "admin.module.configure",
-                array(),
-                array(
-                    'module_code' => 'GoogleShopping',
-                    'current_tab' => 'management',
-                    'google_alert' => "error",
-                    'google_message' =>
-                        $this->getTranslator()->trans(
-                            "Error on Google Shopping synchonisation : %message",
-                            ['message' => $e->getMessage()],
-                            GoogleShopping::DOMAIN_NAME
-                        )
-                )
-            );
         }
     }
 }

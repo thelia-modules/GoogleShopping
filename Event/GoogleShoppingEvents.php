@@ -11,7 +11,5 @@ class GoogleShoppingEvents
     const GOOGLE_PRODUCT_BATCH = "googleshopping.product.batch";
     const GOOGLE_PRODUCT_DELETE_PRODUCT = "googleshopping.product.delete";
     const GOOGLE_PRODUCT_DELETE_PSE = "googleshopping.product.delete.pse";
-    const GOOGLE_PRODUCT_TOGGLE_SYNC = "googleshopping.product.toggle.sync";
     const GOOGLE_SYNC_CATALOG = "googleshopping.catalog.sync";
-    const GOOGLE_ACCOUNT_SYNC_PRODUCTS = "googleshopping.account.sync.products";
 }

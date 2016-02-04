@@ -37,45 +37,6 @@ class ProductController extends BaseGoogleShoppingController
 {
     protected $googleShoppingHandler;
 
-    /** Todo Remove this function replaced by statusBatch()*/
-    public function getGoogleProduct($id)
-    {
-        $query = $this->getRequest()->query;
-        $merchantId = $query->get('account');
-
-        $targetCountry = CountryQuery::create()->findOneById($query->get('country'));
-
-        if ($targetCountry) {
-            $isoAlpha2 = $targetCountry->getIsoalpha2();
-        } else {
-            $isoAlpha2 = Country::getDefaultCountry()->getIsoalpha2();
-        }
-
-        $lang = LangQuery::create()->findOneById($query->get('lang'));
-
-        if ($lang) {
-            $langCode = $lang->getCode();
-        } else {
-            $langCode = Lang::getDefaultLanguage()->getCode();
-        }
-
-        $productSaleElements = ProductSaleElementsQuery::create()->findOneByProductId($id);
-
-        $googleProductId = "online:".$langCode.":".$isoAlpha2.":".$productSaleElements->getId();
-
-        try {
-            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
-
-            $client = $googleShoppingHandler->createGoogleClient();
-            $googleShoppingService = new \Google_Service_ShoppingContent($client);
-            $googleProduct = $googleShoppingService->products->get($merchantId, $googleProductId);
-            $response = ["id" => $googleProduct->getOfferId(), "identifier" => $googleProduct->getIdentifierExists()];
-            return new JsonResponse($response);
-        } catch (\Exception $e) {
-            return new JsonResponse();
-        }
-    }
-
     public function statusBatch($merchantId, $categoryId, $langId, $targetCountryId)
     {
         $products = ProductQuery::create()
@@ -222,11 +183,6 @@ class ProductController extends BaseGoogleShoppingController
         }
     }
 
-    public function batchProducts()
-    {
-
-    }
-
     public function deleteProduct($id)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
@@ -241,6 +197,7 @@ class ProductController extends BaseGoogleShoppingController
             $eventArgs['lang'] = LangQuery::create()->findOneById($request->get("lang"));
             $eventArgs['targetCountry'] = CountryQuery::create()->findOneById($request->get('country'));
             $merchantId = $request->get('account');
+            $locale = $eventArgs['lang']->getLocale();
 
             if (!$eventArgs['targetCountry']) {
                 $eventArgs['targetCountry'] = Country::getDefaultCountry();
@@ -248,7 +205,7 @@ class ProductController extends BaseGoogleShoppingController
 
             //If the authorisation is not set yet or has expired
             if (false === $this->checkGoogleAuth()) {
-                $this->getSession()->set('google_action_url', "/admin/module/googleshopping/add/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
+                $this->getSession()->set('google_action_url', "/admin/module/googleshopping/delete/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
                 return $this->generateRedirect('/googleshopping/oauth2callback');
             }
 
@@ -273,34 +230,6 @@ class ProductController extends BaseGoogleShoppingController
         } catch (\Exception $e) {
             return JsonResponse::create($e->getMessage(), 500);
         }
-    }
-
-    public function toggleProductSync($id)
-    {
-        if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::UPDATE)) {
-            return $response;
-        }
-
-        if ($this->getRequest()->query->get('target_country')) {
-            $targetCountry = CountryQuery::create()->findOneByIsoalpha2($this->getRequest()->get('target_country'));
-        } else {
-            $targetCountry = Country::getDefaultCountry();
-        }
-
-        if ($this->getRequest()->query->get('locale')) {
-            $lang = LangQuery::create()->findOneByLocale($this->getRequest()->query->get('locale'));
-        } else {
-            $lang = Lang::getDefaultLanguage();
-        }
-
-        $product = ProductQuery::create()
-            ->findPk($id);
-
-        $googleProductEvent = new GoogleProductEvent($product);
-        $googleProductEvent->setTargetCountry($targetCountry)
-            ->setLang($lang);
-
-        $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC, $googleProductEvent);
     }
 
     protected function getShippings($country)

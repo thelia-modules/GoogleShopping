@@ -351,62 +351,6 @@ class GoogleProductEventListener implements EventSubscriberInterface
         );
     }
 
-    public function toggleProductSync(GoogleProductEvent $event)
-    {
-        $productSync = GoogleshoppingProductSynchronisationQuery::create()
-            ->filterByProductId($event->getProduct()->getId())
-            ->filterByLang($event->getLang()->getCode())
-            ->filterByTargetCountry($event->getTargetCountry()->getIsoalpha2())
-            ->findOneOrCreate();
-
-        if ($productSync->getSyncEnable() === true) {
-            $productSync->setSyncEnable(false);
-        } else {
-            $productSync->setSyncEnable(true);
-        }
-        $productSync->save();
-    }
-
-    public function syncCatalog(Event $event)
-    {
-        $syncEnableds = GoogleshoppingProductSynchronisationQuery::create()
-            ->filterBySyncEnable(true)
-            ->find();
-
-        $client = $this->googleShoppingHandler->createGoogleClient();
-        $googleShoppingService = new \Google_Service_ShoppingContent($client);
-
-        if ($client->isAccessTokenExpired()) {
-            $client->refreshToken(GoogleShopping::getConfigValue('oauth_refresh_token'));
-            $newToken = $client->getAccessToken();
-            $this->request->getSession()->set('oauth_access_token', $newToken);
-        }
-
-        /** @var GoogleshoppingProductSynchronisation $syncEnable */
-        foreach ($syncEnableds as $syncEnabled) {
-            $product = ProductQuery::create()->findOneById($syncEnabled->getProductId());
-
-            $eventArgs['ignoreGtin'] = false;
-
-            //Check if product has gtin
-            $productSaleElements = ProductSaleElementsQuery::create()
-                ->filterByProductId($product->getId())
-                ->find();
-            $firstPse = $productSaleElements->getFirst();
-            if (null === $firstPse->getEanCode()) {
-                $eventArgs['ignoreGtin'] = true;
-            }
-
-            $country = CountryQuery::create()->findOneByIsoalpha2($syncEnabled->getTargetCountry());
-            $lang = LangQuery::create()->findOneByCode($syncEnabled->getLang());
-            $eventArgs['targetCountry'] = $country;
-            $eventArgs['lang'] = $lang;
-
-            $googleProductEvent = new GoogleProductEvent($product, null, $googleShoppingService, $eventArgs);
-            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT, $googleProductEvent);
-        }
-    }
-
     public function syncAccountProducts(GoogleShoppingBaseEvent $event)
     {
         $client = $this->googleShoppingHandler->createGoogleClient();
@@ -436,8 +380,6 @@ class GoogleProductEventListener implements EventSubscriberInterface
             GoogleShoppingEvents::GOOGLE_PRODUCT_BATCH => ["batchGoogleProduct", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PRODUCT => ["deleteGoogleProduct", 128],
             GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE => ["deleteGooglePse", 128],
-            GoogleShoppingEvents::GOOGLE_PRODUCT_TOGGLE_SYNC => ["toggleProductSync", 128],
-            GoogleShoppingEvents::GOOGLE_ACCOUNT_SYNC_PRODUCTS => ["syncAccountProducts", 128],
         ];
     }
 }
