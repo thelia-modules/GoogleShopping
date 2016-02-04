@@ -168,9 +168,6 @@ class ProductController extends BaseGoogleShoppingController
 
         $request = $this->getRequest()->request;
 
-        $con = Propel::getConnection(GoogleshoppingProductSynchronisationTableMap::DATABASE_NAME);
-        $con->beginTransaction();
-
         try {
 
             $eventArgs = [];
@@ -218,27 +215,9 @@ class ProductController extends BaseGoogleShoppingController
 
             $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT, $googleProductEvent);
 
-            $googleAccountId = GoogleshoppingAccountQuery::create()
-                ->findOneByMerchantId($merchantId);
-
-            //Add auomatically product to sync
-            $productSync = GoogleshoppingProductSynchronisationQuery::create()
-                ->filterByProductId($theliaProduct->getId())
-                ->filterByLang($eventArgs['lang']->getCode())
-                ->filterByTargetCountry($eventArgs['targetCountry']->getIsoalpha2())
-                ->filterByGoogleshoppingAccountId($googleAccountId)
-                ->findOneOrCreate();
-
-            $productSync->setSyncEnable(true)
-                ->save();
-
-            $con->commit();
-
             return JsonResponse::create(["message" => "Success"], 200);
 
         } catch (\Exception $e) {
-            $con->rollBack();
-//            $deleteResponse = $this->deleteProduct($id);
             return JsonResponse::create($e->getMessage(), 500);
         }
     }
