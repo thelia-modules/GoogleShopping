@@ -16,7 +16,7 @@ class AttributeConfigurationForm extends BaseForm
         $this->formBuilder
             ->add("attribute_color", "text", array(
                 'label' => Translator::getInstance()->trans(
-                    'Attributes color ids',
+                    'Attributes color',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
@@ -27,7 +27,7 @@ class AttributeConfigurationForm extends BaseForm
             ))
             ->add("attribute_size", "text", array(
                 'label' => Translator::getInstance()->trans(
-                    'Attributes size ids',
+                    'Attributes size',
                     array(),
                     GoogleShopping::DOMAIN_NAME
                 ),
