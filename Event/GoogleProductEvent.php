@@ -41,9 +41,6 @@ class GoogleProductEvent extends GoogleShoppingBaseEvent
     /** @var  array */
     protected $shippings;
 
-    /** @var  bool */
-    protected $ignoreGtin;
-
     /** @var  int */
     protected $itemGroupId;
 
@@ -174,17 +171,6 @@ class GoogleProductEvent extends GoogleShoppingBaseEvent
     public function setShippings($shipping)
     {
         $this->shippings = $shipping;
-        return $this;
-    }
-
-    public function getIgnoreGtin()
-    {
-        return $this->ignoreGtin;
-    }
-
-    public function setIgnoreGtin($ignoreGtin)
-    {
-        $this->ignoreGtin = $ignoreGtin;
         return $this;
     }
 

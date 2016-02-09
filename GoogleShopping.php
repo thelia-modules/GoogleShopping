@@ -46,6 +46,7 @@ class GoogleShopping extends BaseModule
             $database->insertSql(null, [__DIR__ . "/Config/thelia.sql"]);
             self::setConfigValue('is_initialized', true);
             $this->setConfigValue("sync_secret", md5(uniqid(rand(), true)));
+            $this->setConfigValue("check_gtin", true);
         }
     }
 

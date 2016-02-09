@@ -13,8 +13,8 @@
         <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveApiConfiguration</default>
     </route>
 
-    <route id="googleshopping.attribute.configuration" path="/admin/module/googleshopping/attribute/configuration" methods="POST">
-        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveAttributeConfiguration</default>
+    <route id="googleshopping.misc.configuration" path="/admin/module/googleshopping/misc/configuration" methods="POST">
+        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveMiscConfiguration</default>
     </route>
 
     <!--MERCHANT ACCOUNT-->

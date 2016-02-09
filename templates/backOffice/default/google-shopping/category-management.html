@@ -182,10 +182,8 @@
                                             <a href="{url path="/admin/products/update?product_id=%product_id" product_id=$ID}">{$REF}</a>
                                         </td>
                                         <td id="td-gtin-product-{$ID}">{if $VALID_EAN === false}
-                                                {intl l="Error At least one GTIN is empty."}
+                                                {intl l="Warning : At least one GTIN is empty or invalid."}
                                                 <br/>
-                                                {*<input class="check-gtin" data-id="{$ID}" type="checkbox" name="gtin"/>*}
-                                                {*{intl l="This product don't have GTIN."}*}
                                             {else}
                                                 {intl l="GTIN ok"}
                                             {/if}
@@ -236,8 +234,10 @@
         {/loop}
         </div>
     {/if}
-    <div id="alert" style="position: fixed; top: 0px; z-index: 1000; margin: 0 auto;">
+    <div style="position: fixed; top: 30px; z-index: 1000; margin: 0 auto;">
+        <div id="alert" class="container">
 
+        </div>
     </div>
 {/block}
 
@@ -289,27 +289,6 @@
                 $("#alert").html('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+jqXHR.responseText+'</div>');
                 btn.removeClass('disabled').html(btnHtml);
             });
-        });
-
-        $(".check-all-gtin").click(function (event) {
-            if (this.checked) {
-                $('.check-gtin').each(function () {
-                    this.checked = true;
-                });
-            } else {
-                $('.check-gtin').each(function () {
-                    this.checked = false;
-                });
-            }
-        });
-
-        $(".check-gtin").click(function (event) {
-            var prodId = $(this).data("id");
-            if (this.checked) {
-                $('#gtin-product-' + prodId).val('on')
-            } else {
-                $('#gtin-product-' + prodId).val('off');
-            }
         });
 
         $(".check-all-product").click(function (event) {

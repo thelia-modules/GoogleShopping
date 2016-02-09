@@ -196,7 +196,8 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $brand = $product->getBrand();
         $availability = $productSaleElements->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
-        if ($event->getIgnoreGtin() !== true) {
+        //Check gtin if enable
+        if (GoogleShopping::getConfigValue('check_gtin')) {
             if (null === $productSaleElements->getEanCode()) {
                 throw new \Exception(
                     $this->translator->trans(
@@ -219,8 +220,11 @@ class GoogleProductEventListener implements EventSubscriberInterface
                 );
             }
             $googleProduct->setGtin($productSaleElements->getEanCode()); //A valid GTIN code
+        } elseif (null !== $productSaleElements->getEanCode()) {
+            $googleProduct->setGtin($productSaleElements->getEanCode()); //A valid GTIN code
         } else {
-            $googleProduct->setIdentifierExists(false); //Product don't have GTIN
+            //If gtin check is disable and product don't have gtin say it to google
+            $googleProduct->setIdentifierExists(false);
         }
 
         $productLink = $product->getUrl();

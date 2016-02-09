@@ -78,7 +78,7 @@ class ConfigurationController extends BaseAdminController
         return $this->render('module-configure', array('module_code' => 'GoogleShopping'));
     }
 
-    public function saveAttributeConfiguration()
+    public function saveMiscConfiguration()
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
@@ -86,11 +86,12 @@ class ConfigurationController extends BaseAdminController
 
         $message = null;
 
-        $form = $this->createForm("googleshopping.attribute.configuration");
+        $form = $this->createForm("googleshopping.misc.configuration");
 
         try {
             $data = $this->validateForm($form, 'POST')->getData();
 
+            GoogleShopping::setConfigValue('check_gtin', boolval($data['check_gtin']));
             GoogleShopping::setConfigValue('attribute_color', implode(',',$data['attribute_color']));
             GoogleShopping::setConfigValue('attribute_size', implode(',',$data['attribute_size']));
 
@@ -116,7 +117,7 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $form = $this->createForm("googleshopping.configuration");
+        $form = $this->createForm("googleshopping.merchant.configuration");
 
         try {
             $data = $this->validateForm($form, 'POST')->getData();
@@ -159,7 +160,7 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $form = $this->createForm("googleshopping.configuration");
+        $form = $this->createForm("googleshopping.merchant.configuration");
 
         try {
             $data = $this->validateForm($form, 'POST')->getData();
@@ -205,7 +206,7 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $form = $this->createForm("googleshopping.configuration");
+        $form = $this->createForm("googleshopping.merchant.configuration");
 
         try {
             $data = $this->validateForm($form, 'POST')->getData();

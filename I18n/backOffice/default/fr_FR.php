@@ -20,7 +20,7 @@ return array(
     'Delete association' => 'Supprimer l\'association',
     'Delete checked' => 'Supprimer coché(s)',
     'Edit information in %lng' => 'Modifier les informations en %lng',
-    'Error At least one GTIN is empty.' => 'Erreur : au moins un code EAN est vide',
+    'Warning : At least one GTIN is empty or invalid.' => 'Attention : au moins un code EAN est vide ou invalide.',
     'Error please retry' => 'Erreur, veuillez réessayer',
     'GTIN' => 'EAN',
     'GTIN ok' => 'EAN ok',

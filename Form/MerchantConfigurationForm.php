@@ -8,7 +8,7 @@ use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Symfony\Component\Validator\Constraints;
 
-class ConfigurationForm extends BaseForm
+class MerchantConfigurationForm extends BaseForm
 {
 
     protected function buildForm()
