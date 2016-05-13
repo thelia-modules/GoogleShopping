@@ -22,6 +22,7 @@ use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\CategoryQuery;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\LangQuery;
+use Thelia\Model\Map\ProductImageTableMap;
 use Thelia\Model\ProductImageQuery;
 use Thelia\Model\ProductPriceQuery;
 use Thelia\Model\ProductQuery;
@@ -67,7 +68,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         if (null === $theliaCategory) {
             throw new \Exception(
                 $this->translator->trans(
-                    "Category of product is not associated with a Google category, please fix it in module configurartion",
+                    "Category of product is not associated with a Google category, please fix it in module configuration",
                     [],
                     GoogleShopping::DOMAIN_NAME
                 )
@@ -83,7 +84,11 @@ class GoogleProductEventListener implements EventSubscriberInterface
             ->find();
 
         //Create link for image
-        $productImage = $product->getProductImages()->getFirst();
+        $productImage = ProductImageQuery::create()
+            ->filterByProductId($product->getId())
+            ->orderBy(ProductImageTableMap::POSITION, Criteria::ASC)
+            ->findOne();
+
         $imageEvent = $this->googleShoppingHandler->createProductImageEvent($productImage);
         $event->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imageEvent);
         $imagePath = $imageEvent->getFileUrl();
