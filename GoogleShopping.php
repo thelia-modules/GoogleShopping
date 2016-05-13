@@ -77,7 +77,7 @@ class GoogleShopping extends BaseModule
         }
     }
 
-    public static function log($msg)
+    public static function log($msg, $lvl = null)
     {
         $year = (new \DateTime())->format('Y');
         $month = (new \DateTime())->format('m');
@@ -88,6 +88,10 @@ class GoogleShopping extends BaseModule
             0,
             THELIA_ROOT . "log" . DS . "googleshopping" . DS . $year . $year.$month.".txt"
         );
-        $logger->addAlert("MESSAGE => " . print_r($msg, true));
+        if ($lvl) {
+            $logger->log($lvl, $msg);
+        } else {
+            $logger->addAlert("MESSAGE => " . print_r($msg, true));
+        }
     }
 }

@@ -119,7 +119,7 @@ class GoogleShoppingProduct extends BaseLoop implements PropelSearchLoopInterfac
         }
 
         if (false === $isCombination) {
-            if (null === $defaultPse->getEanCode()){
+            if (null == $defaultPse->getEanCode()){
                 return false;
             }
         } else {
