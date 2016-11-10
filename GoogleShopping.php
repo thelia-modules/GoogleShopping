@@ -34,6 +34,8 @@ class GoogleShopping extends BaseModule
     const GOOGLE_IN_STOCK = 'in stock';
     const GOOGLE_OUT_OF_STOCK = 'out of stock';
 
+    const GOOGLE_EXCLUDED_SHIPPING = 'excluded_shipping_modules';
+
     public static function getModuleId()
     {
         return ModuleQuery::create()->findOneByCode("GoogleShopping")->getId();

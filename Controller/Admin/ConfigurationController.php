@@ -15,6 +15,7 @@ use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
+use Thelia\Model\ModuleQuery;
 use Thelia\Model\ProductCategoryQuery;
 
 class ConfigurationController extends BaseAdminController
@@ -223,5 +224,23 @@ class ConfigurationController extends BaseAdminController
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
         }
+    }
+
+    public function toggleShippingModule($id)
+    {
+        $module = ModuleQuery::create()->findOneById($id);
+
+        $excludedModules = explode(',', GoogleShopping::getConfigValue(GoogleShopping::GOOGLE_EXCLUDED_SHIPPING));
+
+        if (in_array($module->getCode(), $excludedModules)) {
+            $key = array_keys($excludedModules, $module->getCode())[0];
+            unset($excludedModules[$key]);
+        } else {
+            $excludedModules[] = $module->getCode();
+        }
+
+        GoogleShopping::setConfigValue(GoogleShopping::GOOGLE_EXCLUDED_SHIPPING, implode(',', $excludedModules));
+
+        return new JsonResponse();
     }
 }
