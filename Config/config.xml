@@ -35,6 +35,10 @@
         <service id="googleshopping.product.listener" class="GoogleShopping\EventListener\ProductEventListener">
             <tag name="kernel.event_subscriber" />
         </service>
+        <service id="googleshopping.catalog.service" class="GoogleShopping\Service\CatalogService">
+            <argument type="service" id="service_container"/>
+            <argument type="service" id="request_stack" />
+        </service>
     </services>
 
     <hooks>
@@ -46,5 +50,10 @@
             <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
         </hook>
     </hooks>
+
+    <commands>
+        <command class="GoogleShopping\Commands\AddExpiratedGoogleProductsToSyncQueueCommand"/>
+        <command class="GoogleShopping\Commands\SyncCatalogCommand"/>
+    </commands>
 
 </config>
