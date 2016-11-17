@@ -167,6 +167,7 @@ class GoogleShoppingHandler
         $search = ModuleQuery::create()
             ->filterByActivate(1)
             ->filterByType(BaseModule::DELIVERY_MODULE_TYPE, Criteria::EQUAL)
+            ->filterByCode(explode(',', GoogleShopping::getConfigValue(GoogleShopping::GOOGLE_EXCLUDED_SHIPPING)), Criteria::NOT_IN)
             ->find();
 
         if (null === $country) {

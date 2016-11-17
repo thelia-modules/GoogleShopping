@@ -17,6 +17,11 @@
         <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::saveMiscConfiguration</default>
     </route>
 
+    <route id="googleshopping.toggle.shipping.module" path="/admin/module/googleshopping/toggle/shipping-module/{id}">
+        <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::toggleShippingModule</default>
+        <requirement key="id">\d+</requirement>
+    </route>
+
     <!--MERCHANT ACCOUNT-->
     <route id="googleshopping.merchant.account.add" path="/admin/module/googleshopping/merchant/account/add" methods="POST">
         <default key="_controller">GoogleShopping\Controller\Admin\ConfigurationController::addMerchantAccount</default>

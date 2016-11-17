@@ -348,6 +348,64 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <div class="panel-title">
+                                            <h4>{intl l="Exclude Shipping modules"}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="col-md-12">
+                                            <div class="general-block-decorator">
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-condensed table-left-aligned" id="google-shopping-excluded-shipping">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>{intl l='ID'}</th>
+                                                            <th>{intl l='Name'}</th>
+                                                            <th>{intl l='Code'}</th>
+                                                            <th class="text-center">{intl l='Enable/Disable'}</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        {loop type="googleshopping.shipping.modules" name="module.2" module_type=2 backend_context=1 active=true}
+                                                            <tr id="module-{$ID}">
+                                                                <td>{$ID}</td>
+                                                                <td>{$TITLE}</td>
+                                                                <td>{$CODE}</td>
+
+                                                                {if $EXISTS}
+                                                                    <td class="text-center">
+                                                                        <div class="make-switch switch-small" data-id="{$ID}" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
+                                                                            <input type="checkbox" {if !$EXCLUDED}checked{/if}>
+                                                                        </div>
+                                                                    </td>
+                                                                {else}
+                                                                    <td colspan="2" class="text-left">
+                                                                        <span class="label label-warning">Warning</span>
+                                                                        {intl l="This module cannot be started, some files are probably missing."}
+                                                                    </td>
+                                                                {/if}
+                                                            </tr>
+                                                        {/loop}
+                                                        {elseloop rel="module.2"}
+                                                            <tr>
+                                                                <td colspan="8">
+                                                                    <br />
+                                                                    <div class="alert alert-info">
+                                                                        {intl l="No Delivery module found."}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        {/elseloop}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div id="management" class="tab-pane {if $tab eq "management"}active{/if} form-container">

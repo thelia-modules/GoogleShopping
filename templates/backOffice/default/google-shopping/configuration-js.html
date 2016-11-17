@@ -48,5 +48,16 @@
                 btn.removeClass('disabled').html(btnHtml);
             });
         });
+
+        $('#google-shopping-excluded-shipping .make-switch').on('switch-change', function () {
+            var id = $(this).data('id');
+
+            $.ajax({
+                url: '{url path='/admin/module/googleshopping/toggle/shipping-module/'}' + id,
+                type: 'GET'
+            }).done( function () {
+
+            });
+        });
     })
 </script>
