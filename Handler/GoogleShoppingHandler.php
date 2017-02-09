@@ -10,6 +10,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
 use Propel\Runtime\Collection\ObjectCollection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Action\ProductSaleElement;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\HttpFoundation\Request;
@@ -47,12 +48,12 @@ class GoogleShoppingHandler
 
     /**
      * @param ContainerInterface $container
-     * @param Request $request
+     * @param RequestStack $requestStack
      */
-    public function __construct(ContainerInterface $container, Request $request)
+    public function __construct(ContainerInterface $container, RequestStack $requestStack)
     {
         $this->container = $container;
-        $this->request = $request;
+        $this->request = $requestStack->getMasterRequest();;
     }
 
     public function checkGoogleAuth()

@@ -19,6 +19,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Command\ContainerAwareCommand;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Model\Country;
@@ -127,10 +128,10 @@ class AddExpiratedGoogleProductsToSyncQueueCommand extends ContainerAwareCommand
             $entries[] = $entry;
         }
 
-        /** @var Request $request */
-        $request = $this->getContainer()->get('request_stack')->getMasterRequest();
+        /** @var RequestStack $requestStack */
+        $requestStack = $this->getContainer()->get('request_stack');
 
-        $googleShoppingHandler = (new GoogleShoppingHandler($this->getContainer(), $request));
+        $googleShoppingHandler = (new GoogleShoppingHandler($this->getContainer(), $requestStack));
         $client = $googleShoppingHandler->createGoogleClient();
         $googleShoppingService = new \Google_Service_ShoppingContent($client);
 
