@@ -82,7 +82,7 @@ class ProductController extends BaseGoogleShoppingController
             $entries[] = $entry;
         }
 
-        $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
+        $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->container->get('request_stack')));
         $client = $googleShoppingHandler->createGoogleClient();
         $googleShoppingService = new \Google_Service_ShoppingContent($client);
 
@@ -158,7 +158,7 @@ class ProductController extends BaseGoogleShoppingController
             }
 
 
-            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
+            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->container->get('request_stack')));
 
             //Init google client
             $client = $googleShoppingHandler->createGoogleClient();
@@ -209,7 +209,7 @@ class ProductController extends BaseGoogleShoppingController
                 return $this->generateRedirect('/googleshopping/oauth2callback');
             }
 
-            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->getRequest()));
+            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->container->get('request_stack')));
 
             //Init google client
             $client = $googleShoppingHandler->createGoogleClient();
