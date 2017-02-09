@@ -9,6 +9,9 @@
 namespace GoogleShopping\Service;
 
 
+use GoogleShopping\Controller\Admin\ProductController;
+use GoogleShopping\Event\GoogleProductEvent;
+use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
 use GoogleShopping\Model\GoogleshoppingConfiguration;
@@ -24,6 +27,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\CurrencyQuery;
+use Thelia\Model\LangQuery;
 use Thelia\Model\Map\CountryTableMap;
 use Thelia\Model\Map\LangTableMap;
 use Thelia\Model\Map\ProductCategoryTableMap;
@@ -48,7 +52,6 @@ class CatalogService
 
     public function syncCatalog()
     {
-
         $syncSuccess = false;
 
         $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->request));
@@ -132,26 +135,8 @@ class CatalogService
                 $googleProduct = $googleShoppingHandler->getProduct($googleConfiguration->getMerchantId(),
                     $googleProductId);
                 if (false !== $googleProduct) {
-                    $availability = $productSaleElements->getQuantity() > 0 ? GoogleShopping::GOOGLE_IN_STOCK : GoogleShopping::GOOGLE_OUT_OF_STOCK;
-                    $country = CountryQuery::create()->findPk($googleConfiguration->getCountryId());
-                    $currency = CurrencyQuery::create()->findPk($googleConfiguration->getCurrencyId());
-                    //Set price
-                    $psePrice = ProductPriceQuery::create()->findOneByProductSaleElementsId($productSaleElements->getId());
-
-                    $taxCalculator = new Calculator();
-                    $taxCalculator->load($productSaleElements->getProduct(), $country);
-
-                    $price = new \Google_Service_ShoppingContent_Price();
-                    $productPrice = $productSaleElements->getPromo() == 0 ? $psePrice->getPrice() : $psePrice->getPromoPrice();
-                    $currencyProductPrice = $productPrice * $currency->getRate();
-                    $price->setValue($taxCalculator->getTaxedPrice($currencyProductPrice));
-
-                    $price->setCurrency($currency->getCode());
-
-                    $googleProduct->setPrice($price);
-                    $googleProduct->setAvailability($availability);
                     try {
-                        $googleShoppingService->products->insert($googleConfiguration->getMerchantId(), $googleProduct);
+                        $this->updateProduct($googleConfiguration, $productSaleElements);
                         $syncSuccess = true;
                     } catch (\Exception $e) {
                         GoogleShopping::log($e->getMessage());
@@ -171,5 +156,30 @@ class CatalogService
         }
 
         return $syncSuccess;
+    }
+
+    /**
+     * @param ProductSaleElements $productSaleElements
+     * @param GoogleshoppingConfiguration $googleConfiguration
+     */
+    protected function updateProduct($googleConfiguration, $productSaleElements)
+    {
+        $eventArgs = [];
+
+        $eventArgs['lang'] = LangQuery::create()->findOneById($googleConfiguration->getLangId());
+        $eventArgs['targetCountry'] = CountryQuery::create()->findOneById($googleConfiguration->getCountryId());
+
+        $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->request));
+
+        //Init google client
+        $client = $googleShoppingHandler->createGoogleClient();
+        $googleShoppingService = new \Google_Service_ShoppingContent($client);
+
+        $googleProductEvent = new GoogleProductEvent($productSaleElements->getProduct(), $productSaleElements, $googleShoppingService, $eventArgs);
+
+        $googleProductEvent->setMerchantId($googleConfiguration->getMerchantId())
+            ->setCurrency(CurrencyQuery::create()->findOneById($googleConfiguration->getCurrencyId()));
+
+        $this->container->get('event_dispatcher')->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT, $googleProductEvent);
     }
 }
