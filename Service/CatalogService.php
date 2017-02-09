@@ -41,13 +41,13 @@ class CatalogService
 {
     protected $container;
 
-    /** @var Request */
+    /** @var RequestStack */
     protected $request;
 
     public function __construct(Container $container, RequestStack $requestStack)
     {
         $this->container = $container;
-        $this->request = $requestStack->getMasterRequest();
+        $this->request = $requestStack;
     }
 
     public function syncCatalog()

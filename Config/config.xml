@@ -23,9 +23,9 @@
             <argument type="service" id="request" />
             <tag name="thelia.parser.register_plugin" />
         </service>
-        <service id="googleshopping.handler" class="GoogleShopping\Handler\GoogleShoppingHandler" scope="request">
+        <service id="googleshopping.handler" class="GoogleShopping\Handler\GoogleShoppingHandler">
             <argument type="service" id="service_container"/>
-            <argument type="service" id="request"/>
+            <argument type="service" id="request_stack"/>
         </service>
         <service id="googleshopping.product.action" class="GoogleShopping\Action\GoogleProductEventListener" scope="request">
             <argument type="service" id="request" />
