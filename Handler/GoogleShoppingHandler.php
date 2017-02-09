@@ -16,6 +16,7 @@ use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\AreaDeliveryModuleQuery;
 use Thelia\Model\AttributeAvQuery;
+use Thelia\Model\Cart;
 use Thelia\Model\CategoryQuery;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Country;
@@ -189,6 +190,8 @@ class GoogleShoppingHandler
                 continue;
             }
 
+            // Make sure the session has a cart, if it does not "getSessionCart" will create one
+            $this->request->getSession()->getSessionCart($this->container->get('event_dispatcher'));
 
             $moduleInstance = $deliveryModule->getDeliveryModuleInstance($this->container);
 
