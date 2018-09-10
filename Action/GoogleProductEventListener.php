@@ -29,6 +29,7 @@ use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\TaxEngine\Calculator;
+use Thelia\Tools\I18n;
 
 class GoogleProductEventListener implements EventSubscriberInterface
 {
@@ -198,7 +199,13 @@ class GoogleProductEventListener implements EventSubscriberInterface
         }
 
         $product = $event->getProduct();
+        $productTitle = $product->getTitle();
+        /* @todo Add attribute to title */
         $brand = $product->getBrand();
+        //Lang fix
+        if ($brand) {
+            $brand->setLocale($lang->getLocale());
+        }
         $availability = $productSaleElements->getQuantity() > 0 ? 'in stock' : 'out of stock';
 
         //Check gtin if enable
@@ -228,8 +235,14 @@ class GoogleProductEventListener implements EventSubscriberInterface
         } elseif (null !== $productSaleElements->getEanCode()) {
             $googleProduct->setGtin($productSaleElements->getEanCode()); //A valid GTIN code
         } else {
-            //If gtin check is disable and product don't have gtin say it to google
-            $googleProduct->setIdentifierExists(false);
+            //If gtin check is disable
+            if ($brand) {
+                //There is a Brand for this product
+                $googleProduct->setMpn($productSaleElements->getRef());
+            } else {
+                //Product don't have gtin nor brand, say it to google
+                $googleProduct->setIdentifierExists(false);
+            }
         }
 
         $productLink = $product->getUrl();
@@ -252,7 +265,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $googleProduct->setGoogleProductCategory($event->getGoogleCategory()->getGoogleCategory()); //The associated google category from google taxonomy
         $googleProduct->setCondition('new'); // "new", "refurbished" or "used"
         $googleProduct->setLink($productLink); //Link to the product
-        $googleProduct->setTitle($product->getTitle());
+        $googleProduct->setTitle($productTitle);
         $googleProduct->setAvailability($availability); //"in stock", "out of stock" or "preorder"
         $googleProduct->setDescription($product->getChapo());
         $googleProduct->setImageLink($imageLink); //Link to the product image
