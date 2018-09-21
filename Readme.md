@@ -9,13 +9,16 @@ He need lot of improvements, can contains some issues and can have breaking comp
 Summary
 ---
 
-1.  [Description](#description_en_US)
-2.  [Install](#install_en_US)
-3.  [Usage](#usage_en_US)
-4.  [GoogleShopping fields](#google_shopping_fields_en_US)
+1 [Description](#description_en_US)
+
+2 [Install](#install_en_US)
+
+3 [Usage](#usage_en_US)
+
+4 [GoogleShopping fields](#google_shopping_fields_en_US)
 
 
-1.  Description <a name="#description_en_US"></a>
+1.  Description <a name="description_en_US"></a>
     ---
     This module allow you to add product to your Google Shopping account through the api.
 
