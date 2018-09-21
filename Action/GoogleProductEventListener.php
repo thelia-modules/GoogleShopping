@@ -149,21 +149,21 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $lang =  $event->getLang();
         $currency = $event->getCurrency();
 
+        //Use pse associated image if exist instead of product image
+        $pseImage = ProductImageQuery::create()
+            ->useProductSaleElementsProductImageQuery()
+            ->filterByProductSaleElementsId($productSaleElements->getId())
+            ->endUse()
+            ->findOne();
+        if ($pseImage !== null) {
+            $imagePseEvent = $this->googleShoppingHandler->createProductImageEvent($pseImage);
+            $event->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imagePseEvent);
+            $event->setImagePath($imagePseEvent->getFileUrl());
+        }
+
         //If we have multiple pse for one product manage attribute
         if ($itemGroupId !== null) {
             $googleProduct->setItemGroupId($itemGroupId);
-
-            //Use pse associated image if exist instead of product image
-            $pseImage = ProductImageQuery::create()
-                ->useProductSaleElementsProductImageQuery()
-                ->filterByProductSaleElementsId($productSaleElements->getId())
-                ->endUse()
-                ->findOne();
-            if ($pseImage !== null) {
-                $imagePseEvent = $this->googleShoppingHandler->createProductImageEvent($pseImage);
-                $event->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imagePseEvent);
-                $event->setImagePath($imagePseEvent->getFileUrl());
-            }
 
             $colorAttributeId = GoogleShopping::getConfigValue('attribute_color');
             $sizeAttributeId = GoogleShopping::getConfigValue('attribute_size');
