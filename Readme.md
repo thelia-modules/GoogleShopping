@@ -26,7 +26,7 @@ This module allow you to add product to your Google Shopping account through the
 You can install this module with composer:
 
 ```sh
-$ php composer.phar require thelia/google-shopping-module:~1.0
+$ php composer.phar require thelia/google-shopping-module:~0.2
 ```
 
 3. Usage <a name="usage_en_US"></a>
