@@ -10,6 +10,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
 use Propel\Runtime\Collection\ObjectCollection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Action\ProductSaleElement;
 use Thelia\Core\Event\Image\ImageEvent;
@@ -53,7 +54,7 @@ class GoogleShoppingHandler
     public function __construct(ContainerInterface $container, RequestStack $requestStack)
     {
         $this->container = $container;
-        $this->request = $requestStack->getMasterRequest();;
+        $this->request = $requestStack->getMainRequest();
     }
 
     public function checkGoogleAuth()
@@ -162,7 +163,7 @@ class GoogleShoppingHandler
         return false;
     }
 
-    public function getShippings($country)
+    public function getShippings($country, EventDispatcherInterface $dispatcher)
     {
         $translator = Translator::getInstance();
 
@@ -192,7 +193,7 @@ class GoogleShoppingHandler
             }
 
             // Make sure the session has a cart, if it does not "getSessionCart" will create one
-            $this->request->getSession()->getSessionCart($this->container->get('event_dispatcher'));
+            $this->request->getSession()->getSessionCart($dispatcher);
 
             $moduleInstance = $deliveryModule->getDeliveryModuleInstance($this->container);
 

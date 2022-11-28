@@ -4,6 +4,8 @@ namespace GoogleShopping\Controller\Admin;
 
 use GoogleShopping\GoogleShopping;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Tools\URL;
 
 class BaseGoogleShoppingController extends BaseAdminController
@@ -11,7 +13,7 @@ class BaseGoogleShoppingController extends BaseAdminController
     protected $merchant_id;
     protected $service;
 
-    public function setAuthorization()
+    public function setAuthorization(Request $request, Session $session)
     {
         $client = new \Google_Client();
         $client->setAccessType('offline');
@@ -22,14 +24,14 @@ class BaseGoogleShoppingController extends BaseAdminController
         $client->setScopes('https://www.googleapis.com/auth/content');
 
         $oAuthToken = GoogleShopping::getConfigValue('oauth_access_token');
-        $code = $this->getRequest()->query->get('code');
+        $code = $request->query->get('code');
 
         $redirection = '/admin/module/GoogleShopping';
 
         //Manage redirection after auth
-        if ($url = $this->getRequest()->query->get('redirect')) {
+        if ($url = $request->query->get('redirect')) {
             $redirection = $url;
-            $this->getSession()->set('google_action_url', $redirection);
+            $session->set('google_action_url', $redirection);
         }
 
         if (isset($oAuthToken)) {

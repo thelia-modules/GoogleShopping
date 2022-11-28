@@ -11,21 +11,17 @@ use GoogleShopping\GoogleShopping;
 use GoogleShopping\Handler\GoogleShoppingHandler;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
-use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\CategoryQuery;
-use Thelia\Model\CountryQuery;
-use Thelia\Model\LangQuery;
 use Thelia\Model\Map\ProductImageTableMap;
 use Thelia\Model\ProductImageQuery;
 use Thelia\Model\ProductPriceQuery;
-use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\TaxEngine\Calculator;
@@ -54,7 +50,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
      * @param GoogleProductEvent $event
      * @throws \Exception if category association is missing
      */
-    public function createGoogleProduct(GoogleProductEvent $event)
+    public function createGoogleProduct(GoogleProductEvent $event, string $eventName, EventDispatcherInterface $dispatcher)
     {
         $product = $event->getProduct();
 
@@ -90,7 +86,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
             ->findOne();
 
         $imageEvent = $this->googleShoppingHandler->createProductImageEvent($productImage);
-        $event->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imageEvent);
+        $dispatcher->dispatch($imageEvent, TheliaEvents::IMAGE_PROCESS);
         $imagePath = $imageEvent->getFileUrl();
 
 
@@ -108,7 +104,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
             ->setItemGroupId($itemGroupId);
 
         //Find all shipping available and get hist postage
-        $shippings = $this->googleShoppingHandler->getShippings($event->getTargetCountry());
+        $shippings = $this->googleShoppingHandler->getShippings($event->getTargetCountry(), $dispatcher);
         $event->setShippings($shippings);
 
         if ($itemGroupId === null) {
@@ -117,16 +113,16 @@ class GoogleProductEventListener implements EventSubscriberInterface
 
         //If a productSaleElements is passed to event only send him
         if ($event->getProductSaleElements() !== null) {
-            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE, $event);
-            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
+            $dispatcher->dispatch($event, GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE);
+            $dispatcher->dispatch($event, GoogleShoppingEvents::GOOGLE_PRODUCT_SEND);
             //Else dispatch all the pse of the product
         } else {
             /** @var ProductSaleElements $productSaleElement */
             foreach ($productSaleElementss as $productSaleElements) {
                 $event->setProductSaleElements($productSaleElements);
-                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE, $event);
+                $dispatcher->dispatch($event, GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PSE);
                 try {
-                    $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_SEND, $event);
+                    $dispatcher->dispatch($event, GoogleShoppingEvents::GOOGLE_PRODUCT_SEND);
                 } catch(\Exception $e) {
 
                 }
@@ -140,7 +136,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
      * @param GoogleProductEvent $event
      * @throws \Exception if a GTIN is not valid
      */
-    public function createGooglePse(GoogleProductEvent $event)
+    public function createGooglePse(GoogleProductEvent $event, string $eventName, EventDispatcherInterface $dispatcher)
     {
         $googleProduct = new \Google_Service_ShoppingContent_Product();
 
@@ -161,7 +157,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
                 ->findOne();
             if ($pseImage !== null) {
                 $imagePseEvent = $this->googleShoppingHandler->createProductImageEvent($pseImage);
-                $event->getDispatcher()->dispatch(TheliaEvents::IMAGE_PROCESS, $imagePseEvent);
+                $dispatcher->dispatch($imagePseEvent, TheliaEvents::IMAGE_PROCESS);
                 $event->setImagePath($imagePseEvent->getFileUrl());
             }
 
@@ -315,7 +311,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
         $service->products->custombatch($event->getCustomBatchRequest());
     }
 
-    public function deleteGoogleProduct(GoogleProductEvent $event)
+    public function deleteGoogleProduct(GoogleProductEvent $event, string $eventName, EventDispatcherInterface $dispatcher)
     {
         $product = $event->getProduct();
 
@@ -336,7 +332,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
                 $googleProductEvent->setTargetCountry($event->getTargetCountry());
                 $googleProductEvent->setLang($event->getLang());
                 $googleProductEvent->setMerchantId($event->getMerchantId());
-                $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE, $googleProductEvent);
+                $dispatcher->dispatch($googleProductEvent, GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE);
             }
         } else {
             $productSaleElements = $product->getDefaultSaleElements();
@@ -344,7 +340,7 @@ class GoogleProductEventListener implements EventSubscriberInterface
             $googleProductEvent->setTargetCountry($event->getTargetCountry());
             $googleProductEvent->setLang($event->getLang());
             $googleProductEvent->setMerchantId($event->getMerchantId());
-            $event->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE, $googleProductEvent);
+            $dispatcher->dispatch($googleProductEvent, GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PSE);
         }
     }
 

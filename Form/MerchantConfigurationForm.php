@@ -4,6 +4,7 @@
 namespace GoogleShopping\Form;
 
 use GoogleShopping\GoogleShopping;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Symfony\Component\Validator\Constraints;
@@ -14,7 +15,7 @@ class MerchantConfigurationForm extends BaseForm
     protected function buildForm()
     {
         $this->formBuilder
-            ->add("title", "text", array(
+            ->add("title", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Configuration title',
                     array(),
@@ -24,7 +25,7 @@ class MerchantConfigurationForm extends BaseForm
                     'for' => 'title'
                 ),
             ))
-            ->add("merchant_id", "text", array(
+            ->add("merchant_id", TextType::class, array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
                     'GoogleShopping merchant ID',
@@ -38,7 +39,7 @@ class MerchantConfigurationForm extends BaseForm
                     new Constraints\NotBlank(),
                 )
             ))
-            ->add("lang_id", "text", array(
+            ->add("lang_id", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Lang',
                     array(),
@@ -48,7 +49,7 @@ class MerchantConfigurationForm extends BaseForm
                     'for' => 'lang_id'
                 )
             ))
-            ->add("country_id", "text", array(
+            ->add("country_id", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Country',
                     array(),
@@ -58,7 +59,7 @@ class MerchantConfigurationForm extends BaseForm
                     'for' => 'country_id'
                 )
             ))
-            ->add("currency_id", "text", array(
+            ->add("currency_id", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Currency',
                     array(),
@@ -68,7 +69,7 @@ class MerchantConfigurationForm extends BaseForm
                     'for' => 'currency_id'
                 )
             ))
-            ->add("is_default", "text", array(
+            ->add("is_default", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Is default',
                     array(),
@@ -78,7 +79,7 @@ class MerchantConfigurationForm extends BaseForm
                     'for' => 'is_default'
                 )
             ))
-            ->add("sync", "text", array(
+            ->add("sync", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Sync active',
                     array(),
@@ -89,8 +90,8 @@ class MerchantConfigurationForm extends BaseForm
                 )
             ));
     }
-    
-    public function getName()
+
+    public static function getName()
     {
         return "googleshopping_configuration";
     }

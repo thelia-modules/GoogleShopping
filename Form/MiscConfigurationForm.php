@@ -4,6 +4,7 @@
 namespace GoogleShopping\Form;
 
 use GoogleShopping\GoogleShopping;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Symfony\Component\Validator\Constraints;
@@ -14,7 +15,7 @@ class MiscConfigurationForm extends BaseForm
     protected function buildForm()
     {
         $this->formBuilder
-            ->add("check_gtin", "text", array(
+            ->add("check_gtin", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Check GTIN before send :',
                     array(),
@@ -25,7 +26,7 @@ class MiscConfigurationForm extends BaseForm
                     'for' => 'check_gtin'
                 )
             ))
-            ->add("attribute_color", "text", array(
+            ->add("attribute_color", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Attributes color',
                     array(),
@@ -36,7 +37,7 @@ class MiscConfigurationForm extends BaseForm
                     'for' => 'attribute_color'
                 ),
             ))
-            ->add("attribute_size", "text", array(
+            ->add("attribute_size", TextType::class, array(
                 'label' => Translator::getInstance()->trans(
                     'Attributes size',
                     array(),
@@ -48,8 +49,8 @@ class MiscConfigurationForm extends BaseForm
                 )
             ));
     }
-    
-    public function getName()
+
+    public static function getName()
     {
         return "googleshopping_attribute_configuration";
     }

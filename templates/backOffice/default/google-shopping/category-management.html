@@ -9,7 +9,7 @@
 {block name="main-content"}
     {oAuthCheckToken}
     {default_translation_domain domain='googleshopping.bo.default'}
-    {if 'none' === $tokenExist}
+    {if 'none' === $tokenExist|default:null}
         <h4>{intl l="You have to authorise this site on GoogleShopping before adding products :"}</h4>
         <div class="form-group col-md-12">
             <div class="form-group">

@@ -7,6 +7,7 @@
 {block name="page-title"}{intl l='GoogleShopping'}{/block}
 
 {block name="check-auth"}
+    {$module_code = 'GoogleShopping'}
     {check_auth role="ADMIN" module=$module_code access="view" login_tpl="/admin/login"}
 {/block}
 
@@ -378,7 +379,7 @@
                                                                 {if $EXISTS}
                                                                     <td class="text-center">
                                                                         <div class="make-switch switch-small" data-id="{$ID}" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
-                                                                            <input type="checkbox" {if !$EXCLUDED}checked{/if}>
+                                                                            <input type="checkbox" {if !$EXCLUDED|default:false}checked{/if}>
                                                                         </div>
                                                                     </td>
                                                                 {else}
@@ -413,7 +414,7 @@
                                     <div class="panel-heading clearfix">
                                         <h4>{intl l="Choose language"}</h4>
 
-                                        <div class="row inner-toolbar{if $page_bottom} inner-toolbar-bottom{/if}">
+                                        <div class="row inner-toolbar{if $page_bottom|default:false} inner-toolbar-bottom{/if}">
                                             <div class="col-md-3 inner-actions">
                                                 <ul class="nav nav-pills">
                                                     {loop name="lang_list" type="lang"}

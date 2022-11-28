@@ -17,6 +17,7 @@ use GoogleShopping\Model\GoogleshoppingAccountQuery;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use Propel\Runtime\Connection\ConnectionInterface;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
 use Thelia\Log\Tlog;
@@ -41,7 +42,7 @@ class GoogleShopping extends BaseModule
         return ModuleQuery::create()->findOneByCode("GoogleShopping")->getId();
     }
 
-    public function postActivation(ConnectionInterface $con = null)
+    public function postActivation(?ConnectionInterface $con = null): void
     {
         if (!self::getConfigValue('is_initialized', false)) {
             $database = new Database($con);
@@ -52,7 +53,7 @@ class GoogleShopping extends BaseModule
         }
     }
 
-    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
+    public function update($currentVersion, $newVersion, ?ConnectionInterface $con = null): void
     {
         $sqlToExecute = [];
         $finder = new Finder();
@@ -95,5 +96,14 @@ class GoogleShopping extends BaseModule
         } else {
             $logger->addAlert("MESSAGE => " . print_r($msg, true));
         }
+    }
+
+
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+            ->autowire(true)
+            ->autoconfigure(true);
     }
 }

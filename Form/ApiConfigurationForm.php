@@ -4,6 +4,7 @@
 namespace GoogleShopping\Form;
 
 use GoogleShopping\GoogleShopping;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Symfony\Component\Validator\Constraints;
@@ -13,7 +14,7 @@ class ApiConfigurationForm extends BaseForm
     protected function buildForm()
     {
         $this->formBuilder
-            ->add("client_id", "text", array(
+            ->add("client_id", TextType::class, array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
                     'Client identifier',
@@ -28,7 +29,7 @@ class ApiConfigurationForm extends BaseForm
                     new Constraints\NotBlank(),
                 )
             ))
-            ->add("client_secret", "text", array(
+            ->add("client_secret", TextType::class, array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
                     'Client secret token',
@@ -43,7 +44,7 @@ class ApiConfigurationForm extends BaseForm
                     new Constraints\NotBlank(),
                 )
             ))
-            ->add("application_name", "text", array(
+            ->add("application_name", TextType::class, array(
                 'required' => true,
                 'label' => Translator::getInstance()->trans(
                     'Application name',
@@ -59,8 +60,8 @@ class ApiConfigurationForm extends BaseForm
                 )
             ));
     }
-    
-    public function getName()
+
+    public static function getName()
     {
         return "googleshopping_api_configuration";
     }

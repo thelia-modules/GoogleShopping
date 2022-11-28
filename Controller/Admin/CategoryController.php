@@ -7,6 +7,7 @@ use GoogleShopping\GoogleShopping;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
+use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
@@ -36,7 +37,7 @@ class CategoryController extends BaseAdminController
         return new JsonResponse(['cats' => $cats]);
     }
 
-    public function associateTaxonomy()
+    public function associateTaxonomy(Request $request)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
@@ -44,7 +45,7 @@ class CategoryController extends BaseAdminController
 
         $message = null;
 
-        $form = new TaxonomyForm($this->getRequest());
+        $form = $this->createForm(TaxonomyForm::getName());
 
         try {
             $formData = $this->validateForm($form)->getData();
@@ -77,14 +78,14 @@ class CategoryController extends BaseAdminController
         );
     }
 
-    public function deleteTaxonomy()
+    public function deleteTaxonomy(Request $request)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
             return $response;
         }
 
-        $categoryId = $this->getRequest()->request->get('category_id');
-        $langId = $this->getRequest()->request->get('lang_id');
+        $categoryId = $request->request->get('category_id');
+        $langId = $request->request->get('lang_id');
 
         $taxonomy = GoogleshoppingTaxonomyQuery::create()
             ->filterByTheliaCategoryId($categoryId)

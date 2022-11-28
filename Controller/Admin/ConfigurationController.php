@@ -13,8 +13,10 @@ use GoogleShopping\Model\GoogleshoppingConfiguration;
 use GoogleShopping\Model\GoogleshoppingConfigurationQuery;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
+use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
+use Thelia\Core\Translation\Translator;
 use Thelia\Model\ModuleQuery;
 use Thelia\Model\ProductCategoryQuery;
 
@@ -42,7 +44,7 @@ class ConfigurationController extends BaseAdminController
         );
     }
 
-    public function saveApiConfiguration()
+    public function saveApiConfiguration(Request $request, Translator $translator)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
@@ -50,7 +52,7 @@ class ConfigurationController extends BaseAdminController
 
         $message = null;
 
-        $form = new ApiConfigurationForm($this->getRequest());
+        $form = $this->createForm(ApiConfigurationForm::getName());
 
         try {
             $formData = $this->validateForm($form)->getData();
@@ -69,7 +71,7 @@ class ConfigurationController extends BaseAdminController
         }
 
         $this->setupFormErrorContext(
-            $this->getTranslator()->trans("GoogleShopping configuration", [], GoogleShopping::DOMAIN_NAME),
+            $translator->trans("GoogleShopping configuration", [], GoogleShopping::DOMAIN_NAME),
             $message,
             $form,
             $e
@@ -79,7 +81,7 @@ class ConfigurationController extends BaseAdminController
         return $this->render('module-configure', array('module_code' => 'GoogleShopping'));
     }
 
-    public function saveMiscConfiguration()
+    public function saveMiscConfiguration(Translator $translator)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
@@ -103,7 +105,7 @@ class ConfigurationController extends BaseAdminController
         }
 
         $this->setupFormErrorContext(
-            $this->getTranslator()->trans("GoogleShopping configuration", [], GoogleShopping::DOMAIN_NAME),
+            $translator->trans("GoogleShopping configuration", [], GoogleShopping::DOMAIN_NAME),
             $message,
             $form,
             $e
@@ -131,8 +133,8 @@ class ConfigurationController extends BaseAdminController
                 ->setCountryId($data['country_id'])
                 ->setCurrencyId($data['currency_id']);
 
-            $isDefault = boolval($data['is_default']);
-            $synchronisation = boolval($data['sync']);
+            $isDefault = (bool)$data['is_default'];
+            $synchronisation = (bool)$data['sync'];
 
             if (true === $isDefault) {
                 $defaultAccounts = GoogleshoppingConfigurationQuery::create()
@@ -169,8 +171,8 @@ class ConfigurationController extends BaseAdminController
             $googleShoppingConfiguration = GoogleshoppingConfigurationQuery::create()
                 ->findOneById($id);
 
-            $isDefault = boolval($data['is_default']);
-            $synchronisation = boolval($data['sync']);
+            $isDefault = (bool)$data['is_default'];
+            $synchronisation = (bool)$data['sync'];
 
             if (true === $isDefault) {
                 $defaultAccounts = GoogleshoppingConfigurationQuery::create()

@@ -7,11 +7,10 @@ use GoogleShopping\Model\GoogleshoppingAccount;
 use GoogleShopping\Model\GoogleshoppingAccountQuery;
 use GoogleShopping\Model\GoogleshoppingConfiguration;
 use GoogleShopping\Model\GoogleshoppingConfigurationQuery;
-use Thelia\Core\Template\Element\PropelSearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
-use Thelia\Core\Template\Loop\Argument\Argument;
+use Thelia\Core\Template\Element\PropelSearchLoopInterface;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 
 class Configuration extends BaseLoop implements PropelSearchLoopInterface
@@ -23,15 +22,15 @@ class Configuration extends BaseLoop implements PropelSearchLoopInterface
         );
     }
 
-        
+
     public function buildModelCriteria()
     {
         $query = GoogleshoppingConfigurationQuery::create();
 
         return $query;
     }
-    
-    
+
+
     /**
      * @param LoopResult $loopResult
      *

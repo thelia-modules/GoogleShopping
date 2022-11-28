@@ -12,10 +12,15 @@ use GoogleShopping\Model\Map\GoogleshoppingProductSynchronisationTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Propel;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\HttpFoundation\JsonResponse;
+use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
+use Thelia\Core\Translation\Translator;
 use Thelia\Model\AreaDeliveryModuleQuery;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\Country;
@@ -37,7 +42,7 @@ class ProductController extends BaseGoogleShoppingController
 {
     protected $googleShoppingHandler;
 
-    public function statusBatch($merchantId, $categoryId, $langId, $targetCountryId)
+    public function statusBatch($merchantId, $categoryId, $langId, $targetCountryId, RequestStack $requestStack)
     {
         $products = ProductQuery::create()
                 ->useProductCategoryQuery()
@@ -82,7 +87,7 @@ class ProductController extends BaseGoogleShoppingController
             $entries[] = $entry;
         }
 
-        $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->container->get('request_stack')));
+        $googleShoppingHandler = new GoogleShoppingHandler($this->container, $requestStack);
         $client = $googleShoppingHandler->createGoogleClient();
         $googleShoppingService = new \Google_Service_ShoppingContent($client);
 
@@ -121,19 +126,19 @@ class ProductController extends BaseGoogleShoppingController
         return new JsonResponse($responseArray);
     }
 
-    public function addProduct($id)
+    public function addProduct($id, Request $request, RequestStack $requestStack, EventDispatcherInterface $dispatcher)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::CREATE)) {
             return $response;
         }
 
-        $request = $this->getRequest()->request;
+        $request = $request->request;
 
         try {
 
             $eventArgs = [];
             //Get local and lang by admin config flag selected
-            $eventArgs['ignoreGtin'] = $request->get('gtin') === "on" ? true : false;
+            $eventArgs['ignoreGtin'] = $request->get('gtin') === "on";
             $eventArgs['lang'] = LangQuery::create()->findOneById($request->get("lang"));
             $eventArgs['targetCountry'] = CountryQuery::create()->findOneById($request->get('country'));
             $merchantId = $request->get('account');
@@ -158,7 +163,7 @@ class ProductController extends BaseGoogleShoppingController
             }
 
 
-            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->container->get('request_stack')));
+            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $requestStack));
 
             //Init google client
             $client = $googleShoppingHandler->createGoogleClient();
@@ -174,7 +179,7 @@ class ProductController extends BaseGoogleShoppingController
             $googleProductEvent->setMerchantId($merchantId)
                 ->setCurrency($currency);
 
-            $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT, $googleProductEvent);
+            $dispatcher->dispatch($googleProductEvent, GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT);
 
             return JsonResponse::create(["message" => "Success"], 200);
 
@@ -183,14 +188,14 @@ class ProductController extends BaseGoogleShoppingController
         }
     }
 
-    public function deleteProduct($id)
+    public function deleteProduct($id, Request $request, Session $session, RequestStack $requestStack, EventDispatcherInterface $dispatcher)
     {
         if (null !== $response = $this->checkAuth(array(AdminResources::MODULE), array('GoogleShopping'), AccessManager::DELETE)) {
             return $response;
         }
 
         try {
-            $request = $this->getRequest()->request;
+            $request = $request->request;
 
             $eventArgs = [];
             //Get local and lang by admin config flag selected
@@ -205,11 +210,11 @@ class ProductController extends BaseGoogleShoppingController
 
             //If the authorisation is not set yet or has expired
             if (false === $this->checkGoogleAuth()) {
-                $this->getSession()->set('google_action_url', "/admin/module/googleshopping/delete/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
+                $$session->set('google_action_url', "/admin/module/googleshopping/delete/$id?locale=$locale&gtin=".$eventArgs['ignoreGtin']);
                 return $this->generateRedirect('/googleshopping/oauth2callback');
             }
 
-            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $this->container->get('request_stack')));
+            $googleShoppingHandler = (new GoogleShoppingHandler($this->container, $requestStack));
 
             //Init google client
             $client = $googleShoppingHandler->createGoogleClient();
@@ -224,7 +229,7 @@ class ProductController extends BaseGoogleShoppingController
             $googleProductEvent = new GoogleProductEvent($theliaProduct, null, $googleShoppingService, $eventArgs);
             $googleProductEvent->setMerchantId($merchantId);
 
-            $this->getDispatcher()->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PRODUCT, $googleProductEvent);
+            $dispatcher->dispatch($googleProductEvent, GoogleShoppingEvents::GOOGLE_PRODUCT_DELETE_PRODUCT);
             return JsonResponse::create(["message" => "Success"], 200);
 
         } catch (\Exception $e) {
@@ -232,7 +237,7 @@ class ProductController extends BaseGoogleShoppingController
         }
     }
 
-    protected function getShippings($country)
+    protected function getShippings($country, Translator $translator)
     {
         $search = ModuleQuery::create()
             ->filterByActivate(1)
@@ -240,7 +245,7 @@ class ProductController extends BaseGoogleShoppingController
         ->find();
 
         if (null === $country) {
-                throw new \Exception($this->getTranslator()->trans(
+                throw new \Exception($translator->trans(
                     'Target country not defined for GoogleShopping',
                     [],
                     GoogleShopping::DOMAIN_NAME

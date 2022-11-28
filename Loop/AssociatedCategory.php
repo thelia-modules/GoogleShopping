@@ -2,13 +2,10 @@
 
 namespace GoogleShopping\Loop;
 
-use GoogleShopping\Model\GoogleshoppingTaxonomy;
-use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use GoogleShopping\Model\Map\GoogleshoppingTaxonomyTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
 use Thelia\Core\Template\Element\BaseI18nLoop;
-use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
 use Thelia\Core\Template\Element\PropelSearchLoopInterface;
@@ -16,7 +13,6 @@ use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Model\Category;
 use Thelia\Model\CategoryQuery;
-use Thelia\Model\LangQuery;
 use Thelia\Model\Map\CategoryTableMap;
 
 class AssociatedCategory extends BaseI18nLoop implements PropelSearchLoopInterface

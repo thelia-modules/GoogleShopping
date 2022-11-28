@@ -58,7 +58,7 @@
 
     <!--CATALOG-->
     <route id="googleshopping.catalog.management.category" path="/admin/module/GoogleShopping/category/management/{categoryId}" methods="GET">
-        <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::categoryManagementView</default>
+        <default key="_controller">GoogleShopping\Controller\Admin\CatalogController::categoryManagementViewCategory</default>
         <requirement key="categoryId">\d+</requirement>
     </route>
 

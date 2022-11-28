@@ -38,6 +38,6 @@ class ShippingModulesListener implements EventSubscriberInterface
     {
         $excludedModules = explode(',', GoogleShopping::getConfigValue(GoogleShopping::GOOGLE_EXCLUDED_SHIPPING));
 
-        return in_array($code, $excludedModules) ? true : false ;
+        return in_array($code, $excludedModules);
     }
 }

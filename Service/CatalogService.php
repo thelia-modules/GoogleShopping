@@ -9,7 +9,6 @@
 namespace GoogleShopping\Service;
 
 
-use GoogleShopping\Controller\Admin\ProductController;
 use GoogleShopping\Event\GoogleProductEvent;
 use GoogleShopping\Event\GoogleShoppingEvents;
 use GoogleShopping\GoogleShopping;
@@ -22,9 +21,8 @@ use GoogleShopping\Model\Map\GoogleshoppingConfigurationTableMap;
 use GoogleShopping\Model\Map\GoogleshoppingProductSyncQueueTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
-use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Thelia\Core\HttpFoundation\Request;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\CurrencyQuery;
 use Thelia\Model\LangQuery;
@@ -32,10 +30,8 @@ use Thelia\Model\Map\CountryTableMap;
 use Thelia\Model\Map\LangTableMap;
 use Thelia\Model\Map\ProductCategoryTableMap;
 use Thelia\Model\Map\ProductSaleElementsTableMap;
-use Thelia\Model\ProductPriceQuery;
 use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsQuery;
-use Thelia\TaxEngine\Calculator;
 
 class CatalogService
 {
@@ -44,7 +40,7 @@ class CatalogService
     /** @var RequestStack */
     protected $request;
 
-    public function __construct(Container $container, RequestStack $requestStack)
+    public function __construct(ContainerInterface $container, RequestStack $requestStack)
     {
         $this->container = $container;
         $this->request = $requestStack;
@@ -180,6 +176,6 @@ class CatalogService
         $googleProductEvent->setMerchantId($googleConfiguration->getMerchantId())
             ->setCurrency(CurrencyQuery::create()->findOneById($googleConfiguration->getCurrencyId()));
 
-        $this->container->get('event_dispatcher')->dispatch(GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT, $googleProductEvent);
+        $this->container->get('event_dispatcher')->dispatch($googleProductEvent, GoogleShoppingEvents::GOOGLE_PRODUCT_CREATE_PRODUCT);
     }
 }

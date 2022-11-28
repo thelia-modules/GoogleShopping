@@ -7,7 +7,6 @@ use GoogleShopping\Model\GoogleshoppingProductSynchronisation;
 use GoogleShopping\Model\GoogleshoppingProductSynchronisationQuery;
 use GoogleShopping\Model\GoogleshoppingTaxonomyQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\Collection\ObjectCollection;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
@@ -15,10 +14,8 @@ use Thelia\Core\Template\Element\PropelSearchLoopInterface;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Model\AttributeAvQuery;
-use Thelia\Model\CategoryQuery;
 use Thelia\Model\Product;
 use Thelia\Model\ProductQuery;
-use Thelia\Model\ProductSaleElements;
 use Thelia\Type;
 use Thelia\Type\TypeCollection;
 

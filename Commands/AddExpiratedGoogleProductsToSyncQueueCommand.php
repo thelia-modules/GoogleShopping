@@ -46,8 +46,8 @@ class AddExpiratedGoogleProductsToSyncQueueCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         //GET PRODUCTS FROM GOOGLE SHOPPING CATEGORY
-        $categoryJoin = new Join(ProductTableMap::ID, ProductCategoryTableMap::PRODUCT_ID, Criteria::INNER_JOIN);
-        $googleShoppingTaxonomyJoin = new Join(ProductCategoryTableMap::CATEGORY_ID, GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID, Criteria::INNER_JOIN);
+        $categoryJoin = new Join(ProductTableMap::ID, ProductCategoryTableMap::COL_PRODUCT_ID, Criteria::INNER_JOIN);
+        $googleShoppingTaxonomyJoin = new Join(ProductCategoryTableMap::COL_CATEGORY_ID, GoogleshoppingTaxonomyTableMap::THELIA_CATEGORY_ID, Criteria::INNER_JOIN);
 
         $products = ProductQuery::create()
             ->addJoinObject($categoryJoin)

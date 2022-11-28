@@ -18,33 +18,6 @@
         <form name="googleshopping.taxonomy" class="GoogleShopping\Form\TaxonomyForm" />
     </forms>
 
-    <services>
-        <service id="googleshopping.oauth.smarty.plugin" class="GoogleShopping\Smarty\Plugins\GoogleOauth" scope="request">
-            <argument type="service" id="request" />
-            <tag name="thelia.parser.register_plugin" />
-        </service>
-        <service id="googleshopping.handler" class="GoogleShopping\Handler\GoogleShoppingHandler">
-            <argument type="service" id="service_container"/>
-            <argument type="service" id="request_stack"/>
-        </service>
-        <service id="googleshopping.product.action" class="GoogleShopping\Action\GoogleProductEventListener" scope="request">
-            <argument type="service" id="request" />
-            <argument type="service" id="thelia.translator"/>
-            <argument type="service" id="googleshopping.handler"/>
-            <tag name="kernel.event_subscriber" />
-        </service>
-        <service id="googleshopping.product.listener" class="GoogleShopping\EventListener\ProductEventListener">
-            <tag name="kernel.event_subscriber" />
-        </service>
-        <service id="googleshopping.catalog.service" class="GoogleShopping\Service\CatalogService">
-            <argument type="service" id="service_container"/>
-            <argument type="service" id="request_stack" />
-        </service>
-        <service id="shipping.module.extends" class="GoogleShopping\EventListener\ShippingModulesListener" scope="request">
-            <tag name="kernel.event_subscriber" />
-        </service>
-    </services>
-
     <hooks>
         <hook id="googleshopping.edit.category" class="GoogleShopping\Hook\CategoryEditHook" scope="request">
             <tag name="hook.event_listener" event="category.tab-content" type="back" method="onCategoryTabContent" />
@@ -54,10 +27,4 @@
             <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
         </hook>
     </hooks>
-
-    <commands>
-        <command class="GoogleShopping\Commands\AddExpiratedGoogleProductsToSyncQueueCommand"/>
-        <command class="GoogleShopping\Commands\SyncCatalogCommand"/>
-    </commands>
-
 </config>
